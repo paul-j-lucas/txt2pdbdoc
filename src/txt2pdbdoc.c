@@ -2,7 +2,7 @@
 **      Text to Doc converter for Palm Pilots
 **      txt2pdbdoc.c
 **
-**      Copyright (C) 1998  Paul J. Lucas
+**      Copyright (C) 1998-2015  Paul J. Lucas
 **
 **      This program is free software; you can redistribute it and/or modify
 **      it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 */
 
 // local
+#include "config.h"
 #include "palm.h"
 
 // standard
@@ -29,21 +30,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* types */
-#ifdef  bool
-#undef  bool
-#endif
-#define bool    int
-
-#ifdef  false
-#undef  false
-#endif
-#define false   0
-
-#ifdef  true
-#undef  true
-#endif
-#define true    1
+// define a "bool" type
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+# ifndef HAVE__BOOL
+#   ifdef __cplusplus
+typedef bool _Bool;
+#   else
+#     define _Bool signed char
+#   endif /* __cplusplus */
+# endif /* HAVE__BOOL */
+# define bool   _Bool
+# define false  0
+# define true   1
+# define __bool_true_false_are_defined 1
+#endif /* HAVE_STDBOOL_H */
 
 // constants
 #define BUFFER_SIZE   6000              /* big enough for uncompressed record */
@@ -67,19 +69,23 @@ enum {
 };
 
 // macros
+
+#define BLOCK(...)          do { __VA_ARGS__ } while (0)
+#define PRINT_ERR(...)      fprintf( stderr, __VA_ARGS__ )
+
 #define NEW_BUFFER(b) (b)->data = malloc( (b)->len = BUFFER_SIZE )
 
 #define GET_Word(f,n) \
-  { if ( fread( &n, 2, 1, f ) != 1 ) read_error(); n = ntohs(n); }
+  BLOCK( if ( fread( &n, 2, 1, f ) != 1 ) read_error(); n = ntohs(n); )
 
 #define GET_DWord(f,n) \
-  { if ( fread( &n, 4, 1, f ) != 1 ) read_error(); n = ntohl(n); }
+  BLOCK( if ( fread( &n, 4, 1, f ) != 1 ) read_error(); n = ntohl(n); )
 
 #define PUT_Word(f,n) \
-  { Word t = htons(n); if ( fwrite( &t, 2, 1, f ) != 1 ) write_error(); }
+  BLOCK( Word t = htons(n); if ( fwrite( &t, 2, 1, f ) != 1 ) write_error(); )
 
 #define PUT_DWord(f,n) \
-  { DWord t = htonl(n); if ( fwrite( &t, 4, 1, f ) != 1 ) write_error(); }
+  BLOCK( DWord t = htonl(n); if ( fwrite( &t, 4, 1, f ) != 1 ) write_error(); )
 
 #define SEEK_REC_ENTRY(f,i) \
   fseek( f, DatabaseHdrSize + RecordEntrySize * (i), SEEK_SET )
@@ -110,10 +116,10 @@ typedef struct {
 
 char const* me;                         // executable name
 
-bool    binary_opt    = true;
-bool    compress_opt    = true;
-bool    no_check_doc_opt  = false;
-bool    verbose_opt   = false;
+bool    opt_binary = true;
+bool    opt_compress = true;
+bool    no_check_doc_opt = false;
+bool    opt_verbose = false;
 
 void    compress( buffer* );
 void    decode( char const*, char const* );
@@ -143,7 +149,7 @@ void    write_error();
  *
  *  argc  The number of arguments.
  *
- *  argv  A vector of the arguments; argv[argc] is null.  Aside from
+ *  argv  A vector of the arguments; argv[argc] is NULL.  Aside from
  *    the options below, the arguments are the names of the files.
  *
  * SEE ALSO
@@ -153,26 +159,26 @@ void    write_error();
  *
  *****************************************************************************/
 {
-  extern char*  optarg;
-  extern int  optind, opterr;
+  extern char  *optarg;
+  extern int    optind, opterr;
 
   bool        decode_opt = false;
   char const  opts[] = "bcdDvV";        // command line options
   int         opt;                      // option being processed
 
-  me = strrchr( argv[0], '/' );   /* determine base name... */
-  me = me ? me + 1 : argv[0];   /* ...of executable */
+  me = strrchr( argv[0], '/' );         // determine base name...
+  me = me ? me + 1 : argv[0];           // ...of executable
 
   /********** Process command-line options *****************************/
 
   opterr = 1;
   while ( (opt = getopt( argc, argv, opts )) != EOF ) {
     switch ( opt ) {
-      case 'b': binary_opt = false;                 break;
-      case 'c': compress_opt = false;               break;
+      case 'b': opt_binary = false;                 break;
+      case 'c': opt_compress = false;               break;
       case 'd': decode_opt = true;                  break;
       case 'D': no_check_doc_opt = true;            break;
-      case 'v': verbose_opt = true;                 break;
+      case 'v': opt_verbose = true;                 break;
       case 'V': printf( PACKAGE " " VERSION "\n" ); exit( Exit_Success );
       default : usage();
     } // switch
@@ -190,23 +196,13 @@ void    write_error();
   exit( Exit_Success );
 }
 
-/*****************************************************************************
+/**
+ * Replaces the given buffer with a compressed version of itself.  I don't
+ * understand this algorithm.  I just cleaned up the code.
  *
- * SYNOPSIS
+ * @param b The buffer to be compressed.
  */
-  void compress( buffer *b )
-/*
- * DESCRIPTION
- *
- *  Replace the given buffer with a compressed version of itself.  I don't
- *  understand this algorithm.  I just cleaned up the code.
- *
- * PARAMETERS
- *
- *  b The buffer to be compressed.
- *
- *****************************************************************************/
-{
+void compress( buffer *b ) {
   int i, j;
   bool space = false;
 
@@ -234,7 +230,7 @@ void    write_error();
     p = mem_find( p_prev, tail - p_prev, head, tail - head );
 
     // on a mismatch or end of buffer, issued codes
-    if ( !p || p == head || tail - head > ( 1 << COUNT_BITS ) + 2 ||
+    if ( !p || p == head || tail - head > (1 << COUNT_BITS) + 2 ||
          tail == end ) {
       // issued the codes
       // first, check for short runs
@@ -245,7 +241,7 @@ void    write_error();
         unsigned compound = (dist << COUNT_BITS) + tail - head - 4;
 
         if ( dist >= ( 1 << DISP_BITS ) || tail - head - 4 > 7 )
-          fprintf( stderr, "%s: error: dist overflow\n", me );
+          PRINT_ERR( "%s: error: dist overflow\n", me );
 
         // for longer runs, issue a run-code
         // issue space char if required
@@ -295,32 +291,21 @@ void    write_error();
   b->len = j;
 }
 
-/*****************************************************************************
+/**
+ * Decodes the source Doc file to a text file.
  *
- * SYNOPSIS
+ * @param src_file_name The name of the Doc file.
+ * @param dest_file_name The name of the text file.  If NULL, text is sent to
+ * standard output.
  */
-  void decode( char const *src_file_name, char const *dest_file_name )
-/*
- * DESCRIPTION
- *
- *  Decode the source Doc file to a text file.
- *
- * PARAMETERS
- *
- *  src_file_name The name of the Doc file.
- *
- *  dest_file_name  The name of the text file.  If null, text is sent to
- *      standard output.
- *
- *****************************************************************************/
-{
-  buffer    buf;
-  int   compression;
-  DWord   file_size, offset, rec_size;
+void decode( char const *src_file_name, char const *dest_file_name ) {
+  buffer          buf;
+  int             compression;
+  DWord           file_size, offset, rec_size;
   FILE    *fin, *fout;
   DatabaseHdrType header;
-  int   num_records, rec_num;
-  doc_record0 rec0;
+  int             num_records, rec_num;
+  doc_record0     rec0;
 
   /********** open files, read header, ensure source is a Doc file *****/
 
@@ -332,7 +317,7 @@ void    write_error();
        strncmp( header.type,    DOC_TYPE,    sizeof header.type ) ||
        strncmp( header.creator, DOC_CREATOR, sizeof header.creator )
   ) ) {
-    fprintf( stderr, "%s: %s is not a Doc file\n", me, src_file_name );
+    PRINT_ERR( "%s: %s is not a Doc file\n", me, src_file_name );
     exit( Exit_Not_Doc_File );
   }
 
@@ -343,14 +328,14 @@ void    write_error();
   /********** read record 0 ********************************************/
 
   SEEK_REC_ENTRY( fin, 0 );
-  GET_DWord( fin, offset );   /* get offset of rec 0 */
+  GET_DWord( fin, offset );             // get offset of rec 0
   fseek( fin, offset, SEEK_SET );
   if ( fread( &rec0, sizeof rec0, 1, fin ) != 1 )
     read_error();
 
   compression = ntohs( rec0.version );
   if ( compression != COMPRESSED && compression != UNCOMPRESSED ) {
-    fprintf( stderr,
+    PRINT_ERR(
       "%s: error: unknown file compression type: %d\n",
       me, compression
     );
@@ -362,8 +347,8 @@ void    write_error();
   fseek( fin, 0, SEEK_END );
   file_size = ftell( fin );
 
-  if ( verbose_opt )
-    fprintf( stderr, "%s: decoding \"%s\":", me, header.name );
+  if ( opt_verbose )
+    PRINT_ERR( "%s: decoding \"%s\":", me, header.name );
 
   NEW_BUFFER( &buf );
   for ( rec_num = 1; rec_num <= num_records; ++rec_num ) {
@@ -373,7 +358,7 @@ void    write_error();
     SEEK_REC_ENTRY( fin, rec_num );
     GET_DWord( fin, offset );
 
-    /* read the next record offset to compute the record size */
+    // read the next record offset to compute the record size
     if ( rec_num < num_records ) {
       SEEK_REC_ENTRY( fin, rec_num + 1 );
       GET_DWord( fin, next_offset );
@@ -381,7 +366,7 @@ void    write_error();
       next_offset = file_size;
     rec_size = next_offset - offset;
 
-    /* read the record */
+    // read the record
     fseek( fin, offset, SEEK_SET );
     buf.len = fread( buf.data, 1, rec_size, fin );
     if ( buf.len != rec_size )
@@ -392,40 +377,26 @@ void    write_error();
 
     if ( fwrite( buf.data, buf.len, 1, fout ) != 1 )
       write_error();
-    if ( verbose_opt )
-      fprintf( stderr, " %d", num_records - rec_num );
+    if ( opt_verbose )
+      PRINT_ERR( " %d", num_records - rec_num );
   } // for
-  if ( verbose_opt )
+  if ( opt_verbose )
     putc( '\n', stderr );
 
   fclose( fin );
   fclose( fout );
 }
 
-/*****************************************************************************
+/**
+ * Encodes the source text file into a Doc file.
  *
- * SYNOPSIS
+ * @param document_name The name of the document as it is to appear in the
+ * Documents List view of a Doc reader application on the Pilot.
+ * @param src_file_name The name of the text file.
+ * @param dest_file_name  The name of the Doc file.
  */
-  void encode( char const *document_name,
-    char const *src_file_name, char const *dest_file_name
-  )
-/*
- * DESCRIPTION
- *
- *  Encode the source text file into a Doc file.
- *
- * PARAMETERS
- *
- *  document_name The name of the document as it is to appear in the
- *      Documents List view of a Doc reader application on
- *      the Pilot.
- *
- *  src_file_name The name of the text file.
- *
- *  dest_file_name  The name of the Doc file.
- *
- *****************************************************************************/
-{
+void encode( char const *document_name, char const *src_file_name,
+             char const *dest_file_name ) {
   DWord   date;
   FILE    *fin, *fout;
   DWord   file_size;
@@ -446,54 +417,53 @@ void    write_error();
   if ( (long)num_records * RECORD_SIZE_MAX < file_size )
     ++num_records;
 
-  /********** create and write header **********************************/
+  ////////// create and write header //////////////////////////////////////////
 
   bzero( header.name, sizeof header.name );
   strncpy( header.name, document_name, sizeof header.name - 1 );
   if ( strlen( document_name ) > sizeof header.name - 1 )
     strncpy( header.name + sizeof header.name - 4, "...", 3 );
-  header.attributes     = 0;
-  header.version        = 0;
+  header.attributes                       = 0;
+  header.version                          = 0;
   date = htonl( palm_date() );
   memcpy( &header.creationDate,   &date, 4 );
   date = htonl( palm_date() );
   memcpy( &header.modificationDate, &date, 4 );
-  header.lastBackupDate     = 0;
-  header.modificationNumber   = 0;
-  header.appInfoID      = 0;
-  header.sortInfoID     = 0;
+  header.lastBackupDate                 = 0;
+  header.modificationNumber             = 0;
+  header.appInfoID                      = 0;
+  header.sortInfoID                     = 0;
   strncpy( header.type,    DOC_TYPE,    sizeof header.type );
   strncpy( header.creator, DOC_CREATOR, sizeof header.creator );
-  header.uniqueIDSeed     = 0;
+  header.uniqueIDSeed                 = 0;
   header.recordList.nextRecordListID  = 0;
-  header.recordList.numRecords    = htons( num_records + 1 );
-            /* +1 for rec 0 */
+  header.recordList.numRecords        = htons( num_records + 1 /* rec 0 */ )
   fseek( fin, 0, SEEK_SET );
   if ( fwrite( &header, DatabaseHdrSize, 1, fout ) != 1 )
     write_error();
 
   /********** write record offsets *************************************/
 
-  num_offsets = num_records + 1;    /* +1 for rec 0 */
+  num_offsets = num_records + 1;        // +1 for rec 0
   offset = DatabaseHdrSize + RecordEntrySize * num_offsets;
-  index = 0x40 << 24 | 0x6F8000;    /* dirty + unique ID */
+  index = 0x40 << 24 | 0x6F8000;        // dirty + unique ID
 
-  PUT_DWord( fout, offset );    /* offset for rec 0 */
+  PUT_DWord( fout, offset );            // offset for rec 0
   PUT_DWord( fout, index++ );
 
   while( --num_offsets ) {
-    PUT_DWord( fout, 0 );   /* placeholder */
+    PUT_DWord( fout, 0 );               // placeholder
     PUT_DWord( fout, index++ );
   }
 
   /********** write record 0 *******************************************/
 
-  rec0.version    = htons( compress_opt + 1 );
-  rec0.reserved1    = 0;
-  rec0.doc_size   = htonl( file_size );
-  rec0.num_records  = htons( num_records );
-  rec0.rec_size   = htons( RECORD_SIZE_MAX );
-  rec0.reserved2    = 0;
+  rec0.version     = htons( opt_compress + 1 );
+  rec0.reserved1   = 0;
+  rec0.doc_size    = htonl( file_size );
+  rec0.num_records = htons( num_records );
+  rec0.rec_size    = htons( RECORD_SIZE_MAX );
+  rec0.reserved2   = 0;
 
   if ( fwrite( &rec0, sizeof rec0, 1, fout ) != 1 )
     write_error();
@@ -515,20 +485,20 @@ void    write_error();
       read_error();
     buf.len = bytes_read;
 
-    if ( binary_opt )
+    if ( opt_binary )
       remove_binary( &buf );
-    if ( compress_opt )
+    if ( opt_compress )
       compress( &buf );
 
     fseek( fout, offset, SEEK_SET );
     if ( fwrite( buf.data, buf.len, 1, fout ) != 1 )
       write_error();
 
-    if ( !verbose_opt )
+    if ( !opt_verbose )
       continue;
 
-    if ( compress_opt ) {
-      fprintf( stderr,
+    if ( opt_compress ) {
+      PRINT_ERR(
         "  record %2d: %5d bytes -> %5d (%2d%%)\n",
         rec_num, bytes_read, buf.len,
         (int)( 100.0 * buf.len / bytes_read )
@@ -536,11 +506,11 @@ void    write_error();
       total_before += bytes_read;
       total_after  += buf.len;
     } else
-      fprintf( stderr, " %d", num_records - rec_num + 1 );
+      PRINT_ERR( " %d", num_records - rec_num + 1 );
   } // for
-  if ( verbose_opt )
-    if ( compress_opt )
-      fprintf( stderr, "\
+  if ( opt_verbose )
+    if ( opt_compress )
+      PRINT_ERR( "\
                                   -----\n\
           total compression: %2d%%\n",
         (int)( 100.0 * total_after / total_before )
@@ -552,32 +522,20 @@ void    write_error();
   fclose( fout );
 }
 
-/*****************************************************************************
+/**
+ * Puts a byte into a buffer.
  *
- * SYNOPSIS
+ * @param b The buffer to be affected.
+ * @param c The byte.
+ * @param space Is it a space?
  */
-  void put_byte( register buffer *b, Byte c, bool *space )
-/*
- * DESCRIPTION
- *
- *  Put a byte into a buffer.
- *
- * PARAMETERS
- *
- *  b The buffer to be affected.
- *
- *  c The byte.
- *
- *  space Is it a space?
- *
- *****************************************************************************/
-{
+void put_byte( buffer *b, Byte c, bool *space ) {
   if ( *space ) {
     *space = false;
-    /*
-    ** There is an outstanding space char: see if we can squeeze it
-    ** in with an ASCII char.
-    */
+    //
+    // There is an outstanding space char: see if we can squeeze it in with an
+    // ASCII char.
+    //
     if ( c >= 0x40 && c <= 0x7F ) {
       b->data[ b->len++ ] = c ^ 0x80;
       return;
@@ -594,23 +552,13 @@ void    write_error();
   b->data[ b->len++ ] = c;
 }
 
-/*****************************************************************************
+/**
+ * Replaces the given buffer with one that has had ASCII characters (0-8)
+ * removed and carriage-returns and form-feeds converted to newlines.
  *
- * SYNOPSIS
+ * @param b The buffer to be affected.
  */
-  void remove_binary( register buffer *b )
-/*
- * DESCRIPTION
- *
- *  Replace the given buffer with one that has had ASCII characters (0-8)
- *  removed and carriage-returns and form-feeds converted to newlines.
- *
- * PARAMETERS
- *
- *  b The buffer to be affected.
- *
- *****************************************************************************/
-{
+void remove_binary( buffer *b ) {
   Byte *const new_data = malloc( b->len );
   int i, j;
 
@@ -635,27 +583,17 @@ void    write_error();
   b->len = j;
 }
 
-/*****************************************************************************
+/**
+ * Replaces the given buffer with an uncompressed version of itself.
  *
- * SYNOPSIS
+ * @param b The buffer to be uncompressed.
  */
-  void uncompress( register buffer *b )
-/*
- * DESCRIPTION
- *
- *  Replace the given buffer with an uncompressed version of itself.
- *
- * PARAMETERS
- *
- *  b The buffer to be uncompressed.
- *
- *****************************************************************************/
-{
+void uncompress( buffer *b ) {
   Byte *const new_data = malloc( BUFFER_SIZE );
   int i, j;
 
   for ( i = j = 0; i < b->len; ) {
-    register unsigned c = b->data[ i++ ];
+    unsigned c = b->data[ i++ ];
 
     if ( c >= 1 && c <= 8 )
       while ( c-- )                     // copy 'c' bytes
@@ -668,13 +606,13 @@ void    write_error();
       new_data[ j++ ] = ' ', new_data[ j++ ] = c ^ 0x80;
 
     else {                              // 80-BF = sequences
-      register int di, n;
+      int di, n;
       c = (c << 8) + b->data[ i++ ];
       di = (c & 0x3FFF) >> COUNT_BITS;
       for ( n = (c & ((1 << COUNT_BITS) - 1)) + 3; n--; ++j )
         new_data[ j ] = new_data[ j - di ];
     }
-  }
+  } // for
   free( b->data );
   b->data = new_data;
   b->len = j;
@@ -687,35 +625,34 @@ void    write_error();
  *****************************************************************************/
 
 /* replacement for strstr() that deals with 0's in the data */
-Byte* mem_find( register Byte *t, int t_len, register Byte *m, int m_len ) {
-  register int i;
-  for ( i = t_len - m_len + 1; i > 0; --i, ++t )
+Byte* mem_find( Byte *t, int t_len, Byte *m, int m_len ) {
+  for ( int i = t_len - m_len + 1; i > 0; --i, ++t )
     if ( *t == *m && !memcmp( t, m, m_len ) )
       return t;
-  return 0;
+  return NULL;
 }
 
 FILE* open_src_file( char const *file_name ) {
   FILE *f = fopen( file_name, "rb" );
   if ( f ) return f;
-  fprintf( stderr, "%s: can not open %s for input\n", me, file_name );
+  PRINT_ERR( "%s: can not open %s for input\n", me, file_name );
   exit( Exit_No_Open_Source );
 }
 
 FILE* open_dest_file( char const *file_name ) {
   FILE *f = fopen( file_name, "wb" );
   if ( f ) return f;
-  fprintf( stderr, "%s: can not open %s for output\n", me, file_name );
+  PRINT_ERR( "%s: can not open %s for output\n", me, file_name );
   exit( Exit_No_Open_Dest );
 }
 
 void read_error() {
-  fprintf( stderr, "%s: reading failed\n", me );
+  PRINT_ERR( "%s: reading failed\n", me );
   exit( Exit_No_Read );
 }
 
 void usage() {
-  fprintf( stderr,
+  PRINT_ERR(
   "usage: %s [-c] [-b] [-v] document_name file.txt file.pdb\n"
   "       %s  -d  [-D] [-v] file.pdb [file.txt]\n"
   "       %s  -V\n\n"
@@ -731,7 +668,7 @@ void usage() {
 }
 
 void write_error() {
-  fprintf( stderr, "%s: writing failed\n", me );
+  PRINT_ERR( "%s: writing failed\n", me );
   exit( Exit_No_Write );
 }
 /* vim:set et sw=2 ts=2: */

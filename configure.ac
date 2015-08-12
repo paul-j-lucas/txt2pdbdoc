@@ -43,6 +43,9 @@ AC_HEADER_STDBOOL
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
 
 # Checks for library functions.
 AC_FUNC_REALLOC

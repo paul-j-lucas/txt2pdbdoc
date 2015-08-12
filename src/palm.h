@@ -23,6 +23,7 @@
 #define palm_H
 
 // standard
+#include <stdint.h>
 #include <time.h>
 
 /*****************************************************************************
@@ -47,23 +48,14 @@ typedef uint32_t  DWord;
 # define palm_date() 0
 #endif
 
-/*****************************************************************************
+/**
+ * Every record has one of these headers.
  *
- * SYNOPSIS
+ * See also:
+ *    Christopher Bey and Kathleen Dupre.  "Palm File Format Specification,"
+ *    Document Number 3008-003, Palm, Inc., May 16, 2000.
  */
-  struct RecordEntryType
-/*
- * DESCRIPTION
- *
- *  Every record has one of these headers.
- *
- * SEE ALSO
- *
- *  Christopher Bey and Kathleen Dupre.  "Palm File Format Specification,"
- *  Document Number 3008-003, Palm, Inc., May 16, 2000.
- *
- *****************************************************************************/
-{
+struct RecordEntryType {
   DWord localChunkID;                   // offset to where record starts
   struct {
     unsigned delete   : 1;
@@ -72,7 +64,7 @@ typedef uint32_t  DWord;
     unsigned secret   : 1;
     unsigned category : 4;
   } attributes;
-  Byte  uniqueID[3];
+  Byte uniqueID[3];
 };
 typedef struct RecordEntryType RecordEntryType;
 
@@ -82,22 +74,14 @@ typedef struct RecordEntryType RecordEntryType;
 */
 #define RecordEntrySize   8
 
-/*****************************************************************************
+/**
+ * This is a PDB database header as currently defined by Palm, Inc.
  *
- * SYNOPSIS
+ * See also:
+ *    Christopher Bey and Kathleen Dupre.  "Palm File Format Specification,"
+ *    Document Number 3008-003, Palm, Inc., May 16, 2000.
  */
-  struct RecordListType   /* 6 bytes total */
-/*
- * DESCRIPTION
- *
- *  This is a PDB database header as currently defined by Palm, Inc.
- *
- * SEE ALSO
- *
- *  Ibid.
- *
- *****************************************************************************/
-{
+struct RecordListType {                 // 6 bytes total
   DWord nextRecordListID;
   Word  numRecords;
 };
@@ -105,15 +89,10 @@ typedef struct RecordListType RecordListType;
 
 #define RecordListSize    6
 
-/*****************************************************************************
- *
- * SYNOPSIS
+/**
+ * This is a PDB database header as currently defined by Palm, Inc.
  */
 struct DatabaseHdrType {                // 78 bytes total
-/*
- *  This is a PDB database header as currently defined by Palm, Inc.
- *
- *****************************************************************************/
   char    name[ dmDBNameLength ];
   Word    attributes;
   Word    version;
@@ -126,11 +105,11 @@ struct DatabaseHdrType {                // 78 bytes total
   char    type[4];
   char    creator[4];
   DWord   uniqueIDSeed;
-  RecordListType  recordList;
+  RecordListType recordList;
 };
 typedef struct DatabaseHdrType DatabaseHdrType;
 
 #define DatabaseHdrSize   78
 
-#endif  /* palm_H */
+#endif /* palm_H */
 /* vim:set et sw=2 ts=2: */
