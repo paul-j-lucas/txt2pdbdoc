@@ -1,0 +1,170 @@
+.\"
+.\"	Doc Text to HTML file converter for Palm Pilots
+.\"	html2pdbtxt.1
+.\"
+.\"	Copyright (C) 1998  Paul J. Lucas
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\" 
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\" 
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\" ---------------------------------------------------------------------------
+.\" define code-start macro
+.de cS
+.sp
+.nf
+.RS 5
+.ft CW
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i
+..
+.\" define code-end macro
+.de cE
+.ft 1
+.RE
+.fi
+.sp
+..
+.\" ---------------------------------------------------------------------------
+.tr ~
+.TH \f3html2pdbtxt\fP 1 "June 15, 2001" "html2pdbtxt"
+.SH NAME
+html2pdbtxt \- HTML to Doc Text converter for Palm Pilots
+.SH SYNOPSIS
+.B html2pdbtxt
+[
+.BI \-b chars
+]
+[
+.BI \-t title
+]
+[
+.BI \-u URL
+]
+.I file.html
+[
+.I file.txt
+]
+.br
+.B html2pdbtxt \-v
+.SH DESCRIPTION
+.B html2pdbtxt
+converts HTML to text suitable for conversion to a
+.BR Doc (4)
+file via
+.BR txt2pdbdoc (1).
+If no text filename is given, the generated text is sent to standard output.
+.SS HTML Tags
+The following HTML tags (and corresponding ending tags) are recognized:
+\f(CWADDRESS\fP,
+\f(CWA~NAME\fP,
+\f(CWBLOCKQUOTE\fP,
+\f(CWBR\fP,
+\f(CWCENTER\fP,
+\f(CWDIV\fP,
+\f(CWDL\fP,
+\f(CWDT\fP,
+\f(CWH1\fP, \f(CWH2\fP, \f(CWH3\fP, \f(CWH4\fP, \f(CWH5\fP, \f(CWH6\fP,
+\f(CWOL\fP,
+\f(CWOPTION\fP,
+\f(CWPRE\fP,
+\f(CWP\fP,
+\f(CWSELECT\fP,
+\f(CWSCRIPT\fP,
+\f(CWSTYLE\fP,
+\f(CWTABLE\fP,
+\f(CWTITLE\fP,
+\f(CWUL\fP.
+In all cases, the most ``reasonable'' thing is done given the constraints
+of the
+.BR Doc (4)
+format which is essentially plain text.
+\f(CWALT\fP attributes (typically found in \g(CWIMG\fP tags)
+have their text extracted and placed between brackets
+\f(CW[\fPlike this\f(CW]\fP.
+All other HTML tags are stripped.
+.SS Character Entities
+Both HTML character and numeric (decimal and hexadecimal) entity references
+are converted to their byte value
+according to the ISO 8859-1 (Latin 1) character set
+so they appear properly on the Pilot.
+For example, ``r&eacute;sum&#233;'' becomes ``resume''
+with accented letter 'e's.
+.SS Document Title
+Unless specified with the
+.B \-t
+option, the HTML file is scanned for \f(CW<TITLE>\fP ... \f(CW</TITLE>\fP tags
+and, if found, the title is extracted and put on line 1 of the generated file.
+.SS Bookmarks
+Bookmarks are placed into the generated file
+wherever \f(CW<A~NAME="...">\fP tags are found in the HTML file.
+.SH OPTIONS
+.TP 10
+.BI \-b chars
+Specify the character sequence that is to serve as the bookmark indicator.
+The default is \f(CW(*)\fP.
+(See the CAVEATS.)
+.TP
+.BI \-t title
+Specify the title of the document that is to appear on line 1
+of the generated file overriding any title found inside the HTML file
+between \f(CW<TITLE>\fP ... \f(CW</TITLE>\fP tags.
+.TP
+.BI \-u url
+Specify the URL the HTML file supposedly came from
+and put it on the line after the title, if any, in the generated file.
+.TP
+.B \-v
+Print the version number to standard output and exit.
+.SH EXAMPLE
+To convert an HTML file to Doc:
+.cS
+html2pdbtxt -u http://www.wonderland.org/ alice.html alice.txt
+txt2pdbdoc `head -1 alice.txt` alice.txt alice.pdb
+.cE
+.SH CAVEATS
+.TP 4
+1.
+Some Doc readers have a ``feature'' whereby,
+during the scan for bookmarks phase,
+they recognize the bookmark sequence of characters
+.B anywhere
+in the text and not just at the beginning of a line.
+.TP
+2.
+Some Doc readers do not allow the bookmark sequence to contain the \f(CW>\fP
+character since they interpret that as the sequence delimiter, e.g.,
+\f(CW<->>\fP will be interpreted as the sequence being merely \f(CW-\fP.
+.TP
+3.
+Ordered lists (via the \f(CWOL\fP tag) are treated as unordered lists
+(like the \f(CWUL\fP tag) because it would greatly complicate the code
+since it would have to be parsed
+rather than simple substitutions being performed.
+.SH SEE ALSO
+.BR pdbtxt2html (1),
+.BR txt2pdbdoc (1),
+.BR doc (4)
+.PP
+International Standards Organization.
+``ISO 8859-1: Information Processing
+-- 8-bit single-byte coded graphic character sets
+-- Part 1: Latin alphabet No. 1.''
+1987.
+.PP
+World Wide Web Consortium.
+``Character entity references in HTML 4.0.''
+.I HTML 4.0 Specification,
+http://www.w3.org/
+.SH AUTHOR
+Paul J. Lucas
+.RI < pauljlucas@mac.com >

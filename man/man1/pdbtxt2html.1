@@ -1,0 +1,116 @@
+.\"
+.\"	Doc Text to HTML file converter for Palm Pilots
+.\"	pdbtxt2html.1
+.\"
+.\"	Copyright (C) 1998  Paul J. Lucas
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\" 
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\" 
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\" ---------------------------------------------------------------------------
+.\" define code-start macro
+.de cS
+.sp
+.nf
+.RS 5
+.ft CW
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i
+..
+.\" define code-end macro
+.de cE
+.ft 1
+.RE
+.fi
+.sp
+..
+.\" ---------------------------------------------------------------------------
+.TH \f3pdbtxt2html\fP 1 "November 3, 1998" "txt2pdbdoc"
+.SH NAME
+pdbtxt2html \- Doc Text to HTML converter for Palm Pilots
+.SH SYNOPSIS
+.B pdbtxt2html
+[
+.B \-t
+]
+.I file.txt
+[
+.I file.html
+]
+.br
+.B pdbtxt2html \-v
+.SH DESCRIPTION
+.B pdbtxt2html
+converts text converted from a
+.BR Doc (4)
+file via
+.BR txt2pdbdoc (1)
+to HTML.
+If no HTML filename is given, the generated HTML is sent to standard output.
+.SS Document Title
+The first line of the file is used for the HTML document title.
+.SS Bookmarks
+The last line of the file is examined and, if it contains a string enclosed
+between \f(CW<\f1 and \f(CW>\f1, that is taken to be the bookmark marker.
+The entire file is then scanned looking for lines beginning with it
+(ignoring leading whitespace).
+These lines are converted to HTML headings.
+.PP
+The number of whitespace characters after the first bookmark marker
+is used for heading level 1.
+The level of subsequent headings is set to the number of whitespace
+characters between the bookmark marker and the bookmark text
+minus the number for the first bookmark plus one.
+.SS Embedded URLs
+Valid URLs (according to RFC 1630) embedded in the text
+are turned into hyperlinks.
+The
+\f(CWftp\f1,
+\f(CWgopher\f1,
+\f(CWhttp\f1,
+\f(CWhttps\f1,
+\f(CWmailto\f1,
+\f(CWnews\f1,
+\f(CWtelnet\f1,
+and
+\f(CWwais\f1
+URLs are recognized.
+.SH OPTIONS
+.TP 5
+.B \-t
+Compile a table of contents
+and insert it between the first heading and the body.
+.TP
+.B \-v
+Print the version number to standard output and exit.
+.SH EXAMPLE
+To convert a Doc file to HTML:
+.cS
+txt2pdbdoc alice.pdb alice.txt
+pdbtxt2html alice.txt alice.html
+.cE
+.SH SEE ALSO
+.BR html2pdbtxt (1),
+.BR txt2pdbdoc (1),
+.BR doc (4)
+.PP
+Tim Berners Lee.
+.I Universal Resource Identifiers in WWW,
+Network Working Group of the Internet Engineering Task Force,
+June 1994.
+.RS 5
+http://info.internet.isi.edu/in-notes/rfc/files/rfc1630.txt
+.RE
+.SH AUTHOR
+Paul J. Lucas
+.RI < pauljlucas@mac.com >

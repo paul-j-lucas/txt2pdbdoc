@@ -1,0 +1,108 @@
+.\"
+.\"	Text-to-Doc converter for Palm Pilots
+.\"	doc.4
+.\"
+.\"	Copyright (C) 1998  Paul J. Lucas
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\" 
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\" 
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\" ---------------------------------------------------------------------------
+.\" define code-start macro
+.de cS
+.sp
+.nf
+.RS 5
+.ft CW
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i
+..
+.\" define code-end macro
+.de cE
+.ft 1
+.RE
+.fi
+.sp
+..
+.\" ---------------------------------------------------------------------------
+.TH \f3DOC\f1 4 "August 18, 1998" "txt2pdbdoc"
+.SH NAME
+Doc (Pilot standard text document) file format
+.SH SYNOPSIS
+.nf
+.ft CW
+.ta 5 12 26
+struct doc_record0 {	/* 16 bytes total */
+	Word	version;	/* 1 = plain text, 2 = compressed text */
+	Word	reserved1;
+	DWord	doc_size;	/* uncompressed size in bytes */
+	Word	num_recs;	/* not counting itself */
+	Word	rec_size;	/* in bytes: usually 4096 (4K) */
+	DWord	reserved2;
+};
+.ft 1
+.fi
+.SH DESCRIPTION
+The
+.B Doc
+file format is the standard text document format
+used by all models of the Palm Pilot.
+A
+.B Doc
+file is a
+.BR pdb (4)
+file: this manual page describes only those aspects specific to
+.B Doc
+files.
+.PP
+A
+.B Doc
+file consists of 0 to \f(CWnum_recs\f1 records;
+record 0 is the header for the document.
+(This header is distinct from the
+.BR pdb (4)
+header.)
+The remaining records contain text,
+either plain or compressed depending upon \f(CWversion\f1.
+.SS Word Sizes
+In the synopsis above, the types ``\f(CWWord\f1'' and ``\f(CWDWord\f1''
+are used just as in the Pilot headers.
+The type ``\f(CWWord\f1'' is 16 bits;
+the type ``\f(CWDWord\f1'' is 32 bits.
+Both are in big-endian format.
+.SS Compression Format
+A character ``\f(CWc\f1'' in a compressed record is in one of four classes:
+.TP 10
+\f(CW01-08\f1
+Copy ``c'' bytes
+.TP
+\f(CW00,09-7F\f1
+Self
+.TP
+\f(CW80-BF\f1
+Sequence
+.TP
+\f(CWC0-FF\f1
+A space plus the ASCII character ``\f(CWc ^ 0x80\f1''
+.RE
+.SH SEE ALSO
+.BR txt2pdbdoc (1)
+.PP
+Christopher Bey and Kathleen Dupre.
+.IR "Palm File Format Specification" ,
+Document Number 3008-003,
+Palm, Inc.,
+May 16, 2000.
+.SH AUTHOR
+Paul J. Lucas
+.RI < pauljlucas@mac.com >

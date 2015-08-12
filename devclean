@@ -1,0 +1,33 @@
+#! /bin/sh
+##
+#       devclean -- remove all auto-generated files
+#
+#       Copyright (C) 2015  Paul J. Lucas
+#
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the Licence, or
+#       (at your option) any later version.
+#
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#
+#       You should have received a copy of the GNU General Public License
+#       along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+
+# Uncomment to debug
+#set -x
+
+find . -name .gitignore | while read ignore_file
+do
+  ignore_dir=`dirname $ignore_file`
+  rm -f $ignore_dir/*~
+  while read ignore_pattern
+  do find $ignore_dir -name "$ignore_pattern" -exec rm -fr {} \; -prune
+  done < $ignore_file
+done
+
+# vim:set et sw=2 ts=2:

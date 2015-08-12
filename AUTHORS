@@ -1,0 +1,11 @@
+Authors of txt2pdbdoc (formerly unixdoc)
+
+Paul J. Lucas: performed major clean-up of the text-to-Doc code;
+converted it from C++ to C since C++ isn't really needed for this code
+and having it in C increases portability; wrote documentation.
+
+Christopher Heschong: original author for HTML-to-text conversion.
+
+Harold Bamford: fixed portability problem with sizeof struct's.
+
+Rick Bram & Florent Pillet: Original authors.

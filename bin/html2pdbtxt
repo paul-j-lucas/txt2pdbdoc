@@ -1,0 +1,272 @@
+#! /usr/bin/perl
+##
+#	txt2pdpdoc -- HTML to Doc Text converter for Palm Pilots
+#	html2pdbtxt
+#
+#	Copyright (C) 1998  Paul J. Lucas
+#	based on convert.pl by Christopher Heschong <chris@screwdriver.net>
+#
+#	This program is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation; either version 2 of the License, or
+#	(at your option) any later version.
+# 
+#	This program is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+# 
+#	You should have received a copy of the GNU General Public License
+#	along with this program; if not, write to the Free Software
+#	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+##
+
+$HR = "\x97" x 22;			# \x97 = emdash on Pilot
+
+########## You shouldn't have to change anything below this line. #############
+
+use File::Basename;
+use Getopt::Std;
+
+$me = basename( $0 );
+$VERSION = '1.3.1';
+
+sub usage {
+	die "usage: $me [-b chars] [-t title] [-u URL] file.html [ file.txt ]\n       $me -v\n";
+}
+
+getopts( 'b:t:u:v' ) or usage;
+
+###############################################################################
+#	Input checks
+###############################################################################
+
+if ( $opt_v ) {
+	print "$me version $VERSION\n";
+	exit 0;
+}
+
+$bookmark = $opt_b ? $opt_b : '(*)';
+die "$me: bookmark can not contain > character\n" if $bookmark =~ />/;
+
+usage unless $#ARGV + 1 >= 1;
+( $html_file, $txt_file ) = @ARGV;
+
+open( INPUT, $html_file ) or die "$me: can not open $html_file for input\n";
+$_ = join( '', <INPUT> );		# slurp up all of HTML
+close( INPUT );
+
+if ( $txt_file ) {
+	open( OUTPUT, ">$txt_file" ) or
+		die "$me: can not open $txt_file for output\n";
+	select OUTPUT;
+}
+
+###############################################################################
+#	Subroutines
+###############################################################################
+
+sub encode {
+	( $_ = $_[0] ) =~ s/./sprintf("%02X",ord($&))/egs;
+	return "%PRE%$_%/PRE%";
+}
+sub decode {
+	( $_ = $_[0] ) =~ s/[A-F0-9]{2}/pack('C',hex($&))/eg;
+	return "\n$_\n";
+}
+
+###############################################################################
+#	Do it!
+###############################################################################
+
+s!<PRE>(.+?)</PRE>!encode($1)!egs;	# "freeze" <PRE> blocks
+s!\s+! !g;				# turn HTML into one big long string
+
+unless ( $title = $opt_t ) {
+	$title = $1 if /<TITLE>\s*([^\s].*[^\s])\s*<\/TITLE>/i;
+}
+
+##
+# Convert various tags
+##
+s!<BLOCKQUOTE.*?>!\n\n\t!gi;
+s!</?(?:BR|CENTER|DIV|OPTION|SELECT|TABLE).*?>!\n!gi;
+s!</?(?:ADDRESS|BLOCKQUOTE|DL|DT|H[1-6]|OL|P|UL).*?>!\n\n!gi;
+s!<DD>!\n\t!gi;
+s!<HR.*?>!\n$HR\n!gio;
+s!<LI>!\n\x95 !gi;			# \x95 = bullet character on Pilot
+s!<(SCRIPT|STYLE|TITLE).*?>.*?</\1>!!gi;
+s!<TD.*?>! !gi;
+s!<TR.*?>!\n!gi;
+s!<.*?ALT="([^"]+?)".*?>![$1]!gi;	# extract text from ALT attributes
+
+# Create bookmarks at <A NAME ...> tags
+$bookmarks = s!<A\s+NAME.*?>\s*!\n$bookmark!gio;
+
+s!<.*?>!!g;				# strip all other HTML tags
+
+##
+# Clean up whitespace
+##
+s! +! !gm;				# collapse spaces
+s!^ +!!gm;				# strip leading spaces
+s!	 !	!g;			# tab-space -> tab
+s!^[ 	]+$!!gm;			# strip lines of whitespace
+s!^\n{2,}!\n!gm;			# collapse newlines
+s!\s*%PRE%(.*?)%/PRE%\s*!decode($1)!egs; # "thaw" <PRE> blocks
+s! +$!!gm;				# strip trailing spaces
+
+# Convert numeric entity references
+s!&#(\d+);!pack( 'c', $1 )!eg;
+s!&#X([\dA-F]+);!pack( 'c', hex($1) )!eg;
+
+# Convert character entity references
+%char_entity = (
+	'quot',		'"',
+	'amp',		'&',
+	'lt',		'<',
+	'gt',		'>',
+	'emsp',		"\x80", # em space (HTML 2.0)
+	'sbquo',	"\x82", # single low-9 (bottom) quotation mark
+	'fnof',		"\x83", # Florin or Guilder (currency)
+	'bdquo',	"\x84", # double low-9 (bottom) quotation mark
+	'hellip',	"\x85", # horizontal ellipsis
+	'dagger',	"\x86", # dagger
+	'Dagger',	"\x87", # double dagger
+	'circ',		"\x88", # modifier letter circumflex accent
+	'permil',	"\x89", # per mill sign
+	'Scaron',	"\x8A", # latin capital letter S with caron
+	'lsaquo',	"\x8B", # left single angle quotation mark
+	'OElig',	"\x8C", # latin capital ligature OE
+	'diams',	"\x8D", # diamond suit
+	'clubs',	"\x8E", # club suit
+	'hearts',	"\x8F", # heart suit
+	'spades',	"\x90", # spade suit
+	'lsquo',	"\x91", # left single quotation mark
+	'rsquo',	"\x92", # right single quotation mark
+	'ldquo',	"\x93", # left double quotation mark
+	'rdquo',	"\x94", # right double quotation mark
+	'endash',	"\x96", # dash the width of ensp (Lynx)
+	'ndash',	"\x96", # dash the width of ensp (HTML 2.0)
+	'emdash',	"\x97", # dash the width of emsp (Lynx)
+	'mdash',	"\x97", # dash the width of emsp (HTML 2.0)
+	'tilde',	"\x98", # small tilde
+	'trade',	"\x99", # trademark sign (HTML 2.0)
+	'scaron',	"\x9A", # latin small letter s with caron
+	'rsaquo',	"\x8B", # right single angle quotation mark
+	'oelig',	"\x9C", # latin small ligature oe
+	'Yuml',		"\x9F", # latin capital letter Y with diaeresis
+	'ensp',		"\xA0", # en space (HTML 2.0)
+	'thinsp',	"\xA0", # thin space (Lynx)
+	'nbsp',		"\xA0", # non breaking space
+	'iexcl',	"\xA1", # inverted exclamation mark
+	'cent',		"\xA2", # cent (currency)
+	'pound',	"\xA3", # pound sterling (currency)
+	'curren',	"\xA4", # general currency sign (currency)
+	'yen',		"\xA5", # yen (currency)
+	'brkbar',	"\xA6", # broken vertical bar (Lynx)
+	'brvbar',	"\xA6", # broken vertical bar
+	'sect',		"\xA7", # section sign
+	'die',		"\xA8", # spacing dieresis (Lynx)
+	'uml',		"\xA8", # spacing dieresis
+	'copy',		"\xA9", # copyright sign
+	'ordf',		"\xAA", # feminine ordinal indicator
+	'laquo',	"\xAB", # angle quotation mark, left
+	'not',		"\xAC", # negation sign
+	'shy',		"\xAD", # soft hyphen
+	'reg',		"\xAE", # circled R registered sign
+	'hibar',	"\xAF", # spacing macron (Lynx)
+	'macr',		"\xAF", # spacing macron
+	'deg',		"\xB0", # degree sign
+	'plusmn',	"\xB1", # plus-or-minus sign
+	'sup2',		"\xB2", # superscript 2
+	'sup3',		"\xB3", # superscript 3
+	'acute',	"\xB4", # spacing acute
+	'micro',	"\xB5", # micro sign
+	'para',		"\xB6", # paragraph sign
+	'middot',	"\xB7", # middle dot
+	'cedil',	"\xB8", # spacing cedilla
+	'sup1',		"\xB9", # superscript 1
+	'ordm',		"\xBA", # masculine ordinal indicator
+	'raquo',	"\xBB", # angle quotation mark, right
+	'frac12',	"\xBC", # fraction 1/2
+	'frac14',	"\xBD", # fraction 1/4
+	'frac34',	"\xBE", # fraction 3/4
+	'iquest',	"\xBF", # inverted question mark
+	'Agrave',	"\xC0", # capital A, grave accent
+	'Aacute',	"\xC1", # capital A, acute accent
+	'Acirc',	"\xC2", # capital A, circumflex accent
+	'Atilde',	"\xC3", # capital A, tilde
+	'Auml',		"\xC4", # capital A, dieresis or umlaut mark
+	'Aring',	"\xC5", # capital A, ring
+	'AElig',	"\xC6", # capital AE diphthong (ligature)
+	'Ccedil',	"\xC7", # capital C, cedilla
+	'Egrave',	"\xC8", # capital E, grave accent
+	'Eacute',	"\xC9", # capital E, acute accent
+	'Ecirc',	"\xCA", # capital E, circumflex accent
+	'Euml',		"\xCB", # capital E, dieresis or umlaut mark
+	'Igrave',	"\xCC", # capital I, grave accent
+	'Iacute',	"\xCD", # capital I, acute accent
+	'Icirc',	"\xCE", # capital I, circumflex accent
+	'Iuml',		"\xCF", # capital I, dieresis or umlaut mark
+	'Dstrok',	"\xD0", # capital Eth, Icelandic (Lynx)
+	'ETH',		"\xD0", # capital Eth, Icelandic
+	'Ntilde',	"\xD1", # capital N, tilde
+	'Ograve',	"\xD2", # capital O, grave accent
+	'Oacute',	"\xD3", # capital O, acute accent
+	'Ocirc',	"\xD4", # capital O, circumflex accent
+	'Otilde',	"\xD5", # capital O, tilde
+	'Ouml',		"\xD6", # capital O, dieresis or umlaut mark
+	'times',	"\xD7", # multiplication sign
+	'Oslash',	"\xD8", # capital O, slash
+	'Ugrave',	"\xD9", # capital U, grave accent
+	'Uacute',	"\xDA", # capital U, acute accent
+	'Ucirc',	"\xDB", # capital U, circumflex accent
+	'Uuml',		"\xDC", # capital U, dieresis or umlaut mark
+	'Yacute',	"\xDD", # capital Y, acute accent
+	'THORN',	"\xDE", # capital THORN, Icelandic
+	'szlig',	"\xDF", # small sharp s, German (sz ligature)
+	'agrave',	"\xE0", # small a, grave accent
+	'aacute',	"\xE1", # small a, acute accent
+	'acirc',	"\xE2", # small a, circumflex accent
+	'atilde',	"\xE3", # small a, tilde
+	'auml',		"\xE4", # small a, dieresis or umlaut mark
+	'aring',	"\xE5", # small a, ring
+	'aelig',	"\xE6", # small ae diphthong (ligature)
+	'ccedil',	"\xE7", # small c, cedilla
+	'egrave',	"\xE8", # small e, grave accent
+	'eacute',	"\xE9", # small e, acute accent
+	'ecirc',	"\xEA", # small e, circumflex accent
+	'euml',		"\xEB", # small e, dieresis or umlaut mark
+	'igrave',	"\xEC", # small i, grave accent
+	'iacute',	"\xED", # small i, acute accent
+	'icirc',	"\xEE", # small i, circumflex accent
+	'iuml',		"\xEF", # small i, dieresis or umlaut mark
+	'dstrok',	"\xF0", # small eth, Icelandic (Lynx)
+	'eth',		"\xF0", # small eth, Icelandic
+	'ntilde',	"\xF1", # small n, tilde
+	'ograve',	"\xF2", # small o, grave accent
+	'oacute',	"\xF3", # small o, acute accent
+	'ocirc',	"\xF4", # small o, circumflex accent
+	'otilde',	"\xF5", # small o, tilde
+	'ouml',		"\xF6", # small o, dieresis or umlaut mark
+	'divide',	"\xF7", # division sign
+	'oslash',	"\xF8", # small o, slash
+	'ugrave',	"\xF9", # small u, grave accent
+	'uacute',	"\xFA", # small u, acute accent
+	'ucirc',	"\xFB", # small u, circumflex accent
+	'uuml',		"\xFC", # small u, dieresis or umlaut mark
+	'yacute',	"\xFD", # small y, acute accent
+	'thorn',	"\xFE", # small thorn, Icelandic
+	'yuml',		"\xFF", # small y, dieresis or umlaut mark
+);
+s/&(\w+);/exists $char_entity{ $1 } ? $char_entity{ $1 } : ' '/eg;
+
+##
+# Output Doc text
+##
+print "$title\n" if $title;
+print "$opt_u\n" if $opt_u;
+print "$HR\n" if $title || $opt_u;
+print "$_\n";
+print "<$bookmark>\n" if $bookmarks;

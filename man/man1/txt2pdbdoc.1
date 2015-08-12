@@ -1,0 +1,160 @@
+.\"
+.\"	Text to Doc file converter for Palm Pilots
+.\"	txt2pdbdoc.1
+.\"
+.\"	Copyright (C) 1998  Paul J. Lucas
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\" 
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\" 
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\" ---------------------------------------------------------------------------
+.\" define code-start macro
+.de cS
+.sp
+.nf
+.RS 5
+.ft CW
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i
+..
+.\" define code-end macro
+.de cE
+.ft 1
+.RE
+.fi
+.sp
+..
+.\" ---------------------------------------------------------------------------
+.TH \f3txt2pdbdoc\fP 1 "December 3, 2003" "txt2pdbdoc"
+.SH NAME
+txt2pdbdoc \- Text to Doc file converter for Palm Pilots
+.SH SYNOPSIS
+.B txt2pdbdoc
+.RB [ \-b ]
+.RB [ \-c ]
+.RB [ \-v ]
+.I document-name
+.I file.txt
+.I file.pdb
+.br
+.B txt2pdbdoc
+.B \-d
+.RB [ \-D ]
+.RB [ \-v ]
+.I file.pdb
+[
+.I file.txt
+]
+.br
+.B txt2pdbdoc
+.B \-V
+.SH DESCRIPTION
+.B txt2pdbdoc
+converts a plain text file to a
+.BR Doc (4)
+file in PDB (Pilot Database) format
+used by all models of the Palm Pilot.
+(It can also convert a Doc file to plain text.)
+Resultant PDB files can be downloaded directly to a Pilot during a HotSync.
+.P
+The
+.I document-name
+is used in the Document List view of a Doc reader application on the Pilot.
+.SH OPTIONS
+.TP 5
+.B \-b
+Ordinarily, characters with an ASCII code less than 9 are removed
+and both carriage-returns and form-feeds are converted to newlines.
+This option suppresses that behavior.
+.TP
+.B \-c
+Ordinarily, text is compressed.
+This option suppresses compression.
+.TP
+.B \-d
+Decode the given Doc file to text
+either to a file or to standard output if no file is specified.
+.TP
+.B \-D
+Do not check the file type/creator of the file to decode.
+This option should be specified
+.B only
+if you know for
+.B sure
+that the file is in fact some sort of Doc file.
+Attempting to decode non-Doc files
+will result in undefined behavior
+and quite possibly crash.
+.TP
+.B \-v
+Verbose mode.
+For encoding, print progress and compression statistics per 4K of text
+to standard error as well as overall statistics when completed;
+for decoding, print progress in a ``countdown'' style.
+.TP
+.B \-V
+Print the version number of
+.B txt2pdbdoc
+to standard output and exit.
+.SH EXAMPLE
+To convert a text file to Doc file:
+.cS
+txt2pdbdoc 'Through the Looking Glass' alice.txt alice.pdb
+.cE
+.SH EXIT STATUS
+Exits with one of the values given below:
+.PP
+.RS 5
+.PD 0
+.TP 5
+0
+Success.
+.TP
+1
+Error in command-line options or use.
+.TP
+2
+Unable to open source file.
+.TP
+3
+Unable to open destination file.
+.TP
+4
+Unable to read file.
+.TP
+5
+Unable to write file.
+.TP
+6
+File is not a Doc file.
+.TP
+7
+Doc file uses unknown compression type.
+.PD
+.RE
+.SH CAVEATS
+.TP 4
+1.
+Document names are limited to 31 characters in PDB format.
+Longer names are truncated but have the 29-31st characters replaced
+by ``\f(CW...\fP'' to indicate truncation.
+.TP
+2.
+The command isn't called ``txt2doc'' to avoid confusion about possibly having
+anything to do with Microsoft Word documents that use the \f(CW.doc\f1
+extension.
+.SH SEE ALSO
+.BR doc (4)
+.SH AUTHOR
+Paul J. Lucas
+.RI < pauljlucas@mac.com >
