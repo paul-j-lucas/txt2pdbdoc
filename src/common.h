@@ -39,15 +39,34 @@
 #define EXIT_NOT_DOC_FILE         20
 #define EXIT_UNKNOWN_COMPRESSION  21
 
+#define BUFFER_SIZE   6000              /* big enough for uncompressed record */
+
+#define DOC_CREATOR   "REAd"
+#define DOC_TYPE      "TEXt"
+
+#define NEW_BUFFER(b) (b)->data = MALLOC( Byte, (b)->len = BUFFER_SIZE )
+
+#define SEEK_REC_ENTRY(F,I) \
+  FSEEK_FN( (F), DatabaseHdrSize + RecordEntrySize * (I), SEEK_SET )
+
 struct buffer {
   Byte   *data;
   size_t  len;
 };
 typedef struct buffer buffer_t;
 
-#define BUFFER_SIZE   6000              /* big enough for uncompressed record */
-
-#define NEW_BUFFER(b) (b)->data = MALLOC( Byte, (b)->len = BUFFER_SIZE )
+/**
+ * Record 0 of a Doc file contains information about the document as a whole.
+ */
+struct doc_record0 {                    // 16 bytes total
+  Word  version;                        // 1 = plain text, 2 = compressed
+  Word  reserved1;
+  DWord doc_size;                       // in bytes, when uncompressed
+  Word  num_records;                    // PDB header numRecords - 1
+  Word  rec_size;                       // usually RECORD_SIZE_MAX
+  DWord reserved2;
+};
+typedef struct doc_record0 doc_record0_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 

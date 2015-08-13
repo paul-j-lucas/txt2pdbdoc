@@ -1,0 +1,156 @@
+/*
+**      txt2pdbdoc -- Text to Doc converter for Palm Pilots
+**      decode.c
+**
+**      Copyright (C) 1998-2015  Paul J. Lucas
+**
+**      This program is free software; you can redistribute it and/or modify
+**      it under the terms of the GNU General Public License as published by
+**      the Free Software Foundation; either version 2 of the License, or
+**      (at your option) any later version.
+** 
+**      This program is distributed in the hope that it will be useful,
+**      but WITHOUT ANY WARRANTY; without even the implied warranty of
+**      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**      GNU General Public License for more details.
+** 
+**      You should have received a copy of the GNU General Public License
+**      along with this program; if not, write to the Free Software
+**      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+// local
+#include "common.h"
+#include "options.h"
+#include "palm.h"
+#include "util.h"
+
+// standard
+#include <assert.h>
+#include <sys/types.h>                  /* for FreeBSD */
+#include <netinet/in.h>                 /* for htonl, etc */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+// constants
+#define COMPRESSED    2
+#define DOC_CREATOR   "REAd"
+#define DOC_TYPE      "TEXt"
+#define UNCOMPRESSED  1
+
+// macros
+
+#define GET_Word(F,N) \
+  BLOCK( FREAD( &N, 2, 1, (F) ); N = ntohs(N); )
+
+#define GET_DWord(F,N) \
+  BLOCK( FREAD( &N, 4, 1, (F) ); N = ntohl(N); )
+
+#define PUT_Word(F,N) \
+  BLOCK( Word const temp = htons(N); FWRITE( &temp, 2, 1, (F) ); )
+
+#define PUT_DWord(F,N) \
+  BLOCK( DWord const temp = htonl(N); FWRITE( &temp, 4, 1, (F) ); )
+
+#define SEEK_REC_ENTRY(F,I) \
+  FSEEK_FN( (F), DatabaseHdrSize + RecordEntrySize * (I), SEEK_SET )
+
+///////////////////////////////////////////////////////////////////////////////
+
+extern void uncompress( buffer_t* );
+
+/**
+ * Decodes the source Doc file to a text file.
+ *
+ * @param src_file_name The name of the Doc file.
+ * @param dest_file_name The name of the text file.  If NULL, text is sent to
+ * standard output.
+ */
+void decode( char const *src_file_name, char const *dest_file_name ) {
+
+  /********** open files, read header, ensure source is a Doc file *****/
+
+  FILE *const fin = check_fopen( src_file_name, "rb" );
+
+  DatabaseHdrType header;
+  FREAD( &header, DatabaseHdrSize, 1, fin );
+  if ( !opt_no_check_doc && (
+       strncmp( header.type,    DOC_TYPE,    sizeof header.type ) ||
+       strncmp( header.creator, DOC_CREATOR, sizeof header.creator )
+  ) ) {
+    PRINT_ERR( "%s: %s is not a Doc file\n", me, src_file_name );
+    exit( EXIT_NOT_DOC_FILE );
+  }
+
+  int const num_records = ntohs( header.recordList.numRecords ) - 1; /* w/o rec 0 */
+
+  FILE *const fout = dest_file_name ?
+    check_fopen( dest_file_name, "wb" ) : stdout;
+
+  /********** read record 0 ********************************************/
+
+  SEEK_REC_ENTRY( fin, 0 );
+  DWord offset;
+  GET_DWord( fin, offset );             // get offset of rec 0
+  FSEEK( fin, offset, SEEK_SET );
+
+  doc_record0_t rec0;
+  FREAD( &rec0, sizeof rec0, 1, fin );
+
+  int const compression = ntohs( rec0.version );
+  if ( compression != COMPRESSED && compression != UNCOMPRESSED ) {
+    PRINT_ERR(
+      "%s: error: unknown file compression type: %d\n",
+      me, compression
+    );
+    exit( EXIT_UNKNOWN_COMPRESSION );
+  }
+
+  /********* read Doc file record-by-record ****************************/
+
+  FSEEK( fin, 0, SEEK_END );
+  DWord const file_size = ftell( fin );
+
+  if ( opt_verbose )
+    PRINT_ERR( "%s: decoding \"%s\":", me, header.name );
+
+  buffer_t buf;
+  NEW_BUFFER( &buf );
+  for ( int rec_num = 1; rec_num <= num_records; ++rec_num ) {
+    DWord next_offset;
+
+    /* read the record offset */
+    SEEK_REC_ENTRY( fin, rec_num );
+    GET_DWord( fin, offset );
+
+    // read the next record offset to compute the record size
+    if ( rec_num < num_records ) {
+      SEEK_REC_ENTRY( fin, rec_num + 1 );
+      GET_DWord( fin, next_offset );
+    } else
+      next_offset = file_size;
+    DWord const rec_size = next_offset - offset;
+
+    // read the record
+    FSEEK( fin, offset, SEEK_SET );
+    FREAD( buf.data, 1, rec_size, fin );
+    buf.len = rec_size;
+
+    if ( compression == COMPRESSED )
+      uncompress( &buf );
+
+    FWRITE( buf.data, buf.len, 1, fout );
+    if ( opt_verbose )
+      PRINT_ERR( " %d", num_records - rec_num );
+  } // for
+  if ( opt_verbose )
+    putc( '\n', stderr );
+
+  fclose( fin );
+  fclose( fout );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/* vim:set et sw=2 ts=2: */

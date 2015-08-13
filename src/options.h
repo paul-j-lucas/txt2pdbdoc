@@ -1,6 +1,6 @@
 /*
 **      txt2pdbdoc -- Text to Doc converter for Palm Pilots
-**      txt2pdbdoc.c
+**      options.h
 **
 **      Copyright (C) 1998-2015  Paul J. Lucas
 **
@@ -19,28 +19,27 @@
 **      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef txt2pdbdoc_options_H
+#define txt2pdbdoc_options_H
+
 // local
-#include "common.h"
-#include "options.h"
+#include "util.h"
 
-// standard
-#include <stdlib.h>                     /* for exit() */
+////////// extern variables ///////////////////////////////////////////////////
 
-extern void decode( char const*, char const* );
-extern void encode( char const*, char const*, char const* );
+extern char const* me;                  // executable name
 
-///////////////////////////////////////////////////////////////////////////////
+extern bool opt_binary;
+extern bool opt_compress;
+extern bool opt_decode;
+extern bool opt_no_check_doc;
+extern bool opt_verbose;
 
-int main( int argc, char *argv[] ) {
-  process_options( argc, argv );
+////////// extern functions ///////////////////////////////////////////////////
 
-  if ( opt_decode )
-    decode( argv[0], argc == 2 ? argv[1] : 0 );
-  else
-    encode( argv[0], argv[1], argv[2] );
-
-  exit( EXIT_SUCCESS );
-}
+void process_options( int argc, char *argv[] );
 
 ///////////////////////////////////////////////////////////////////////////////
+
+#endif /* txt2pdbdoc_options_H */
 /* vim:set et sw=2 ts=2: */
