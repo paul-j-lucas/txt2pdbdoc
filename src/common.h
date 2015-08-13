@@ -22,6 +22,9 @@
 #ifndef txt2pdbdoc_H
 #define txt2pdbdoc_H
 
+// local
+#include "palm.h"
+
 // standard
 #include <stdlib.h>                     /* for EXIT_SUCCESS */
 
@@ -35,6 +38,16 @@
 #define EXIT_SEEK_ERROR           13    /* error seeking */
 #define EXIT_NOT_DOC_FILE         20
 #define EXIT_UNKNOWN_COMPRESSION  21
+
+struct buffer {
+  Byte   *data;
+  size_t  len;
+};
+typedef struct buffer buffer_t;
+
+#define BUFFER_SIZE   6000              /* big enough for uncompressed record */
+
+#define NEW_BUFFER(b) (b)->data = MALLOC( Byte, (b)->len = BUFFER_SIZE )
 
 ///////////////////////////////////////////////////////////////////////////////
 
