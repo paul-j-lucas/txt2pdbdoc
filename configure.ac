@@ -20,7 +20,7 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-AC_INIT([txt2pdbdoc], [1.5], [paul@lucasmail.org],,[https://github.com/paul-j-lucas/txt2pdbdoc])
+AC_INIT([txt2pdbdoc], [1.6], [paul@lucasmail.org],,[https://github.com/paul-j-lucas/txt2pdbdoc])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
@@ -31,10 +31,9 @@ AC_PROG_INSTALL
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([ctype.h])
 AC_CHECK_HEADERS([errno.h])
-AC_CHECK_HEADERS([limits.h])
 AC_CHECK_HEADERS([netinet/in.h])
+AC_CHECK_HEADERS([stddef.h])
 AC_CHECK_HEADERS([stdlib.h])
 AC_CHECK_HEADERS([time.h])
 AC_CHECK_HEADERS([unistd.h])
@@ -50,7 +49,7 @@ AC_TYPE_UINT32_T
 # Checks for library functions.
 AC_FUNC_FSEEKO
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([perror strerror strndup])
+AC_CHECK_FUNCS([perror strerror])
 
 # Miscellaneous.
 AC_LANG(C)
