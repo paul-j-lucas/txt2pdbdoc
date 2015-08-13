@@ -21,6 +21,7 @@
 
 // local
 #include "config.h"
+#include "common.h"
 #include "palm.h"
 #include "util.h"
 
@@ -81,8 +82,8 @@ typedef struct doc_record0 doc_record0_t;
  *****************************************************************************/
 
 struct buffer {
-  Byte    *data;
-  unsigned len;
+  Byte   *data;
+  size_t  len;
 };
 typedef struct buffer buffer_t;
 
@@ -143,7 +144,7 @@ int main( int argc, char *argv[] ) {
  * @param b The buffer to be compressed.
  */
 void compress( buffer_t *b ) {
-  int i, j;
+  size_t i, j;
   bool space = false;
 
   Byte *buf_orig;
@@ -152,7 +153,7 @@ void compress( buffer_t *b ) {
   Byte *head;                           // current test string
 
   p = p_prev = head = buf_orig = b->data;
-  Byte *const tail = head + 1;          // 1 past the current test buffer
+  Byte *tail = head + 1;                // 1 past the current test buffer
   Byte *const end = b->data + b->len;   // 1 past the end of the input buffer
 
   NEW_BUFFER( b );
@@ -240,7 +241,7 @@ void decode( char const *src_file_name, char const *dest_file_name ) {
 
   /********** open files, read header, ensure source is a Doc file *****/
 
-  FILE *const fin = open_src_file( src_file_name );
+  FILE *const fin = check_fopen( src_file_name, "rb" );
 
   DatabaseHdrType header;
   FREAD( &header, DatabaseHdrSize, 1, fin );
@@ -337,13 +338,12 @@ void encode( char const *document_name, char const *src_file_name,
   DWord         date;
   doc_record0_t   rec0;
   buffer_t        buf;
-  int           rec_num;
   DWord         num_offsets, offset;
   unsigned long index;
   int           total_before, total_after;
 
-  File *const fin  = check_fopen( src_file_name, "rb" );
-  File *const fout = check_fopen( dest_file_name, "wb" );
+  FILE *const fin  = check_fopen( src_file_name, "rb" );
+  FILE *const fout = check_fopen( dest_file_name, "wb" );
 
   FSEEK( fin, 0, SEEK_END );
   DWord file_size = ftell( fin );
@@ -372,7 +372,7 @@ void encode( char const *document_name, char const *src_file_name,
   strncpy( header.creator, DOC_CREATOR, sizeof header.creator );
   header.uniqueIDSeed                 = 0;
   header.recordList.nextRecordListID  = 0;
-  header.recordList.numRecords        = htons( num_records + 1 /* rec 0 */ )
+  header.recordList.numRecords        = htons( num_records + 1 /* rec 0 */ );
   FSEEK( fin, 0, SEEK_SET );
   FWRITE( &header, DatabaseHdrSize, 1, fout );
 
@@ -405,12 +405,12 @@ void encode( char const *document_name, char const *src_file_name,
 
   NEW_BUFFER( &buf );
   total_before = total_after = 0;
-  for ( rec_num = 1; rec_num <= num_records; ++rec_num ) {
+  for ( int rec_num = 1; rec_num <= num_records; ++rec_num ) {
     offset = ftell( fout );
     SEEK_REC_ENTRY( fout, rec_num );
     PUT_DWord( fout, offset );
 
-    int bytes_read;
+    size_t bytes_read;
     if ( !(bytes_read = fread( buf.data, RECORD_SIZE_MAX, 1, fin )) )
       break;
     if ( ferror( fin ) )
@@ -430,7 +430,7 @@ void encode( char const *document_name, char const *src_file_name,
 
     if ( opt_compress ) {
       PRINT_ERR(
-        "  record %2d: %5d bytes -> %5d (%2d%%)\n",
+        "  record %2d: %5zu bytes -> %5zu (%2d%%)\n",
         rec_num, bytes_read, buf.len,
         (int)( 100.0 * buf.len / bytes_read )
       );
@@ -439,15 +439,14 @@ void encode( char const *document_name, char const *src_file_name,
     } else
       PRINT_ERR( " %d", num_records - rec_num + 1 );
   } // for
-  if ( opt_verbose )
+  if ( opt_verbose ) {
     if ( opt_compress )
-      PRINT_ERR( "\
-                                  -----\n\
-          total compression: %2d%%\n",
+      PRINT_ERR( "\n-----\ntotal compression: %2d%%\n",
         (int)( 100.0 * total_after / total_before )
       );
     else
       putc( '\n', stderr );
+  }
 
   fclose( fin );
   fclose( fout );
@@ -480,7 +479,7 @@ void put_byte( buffer_t *b, Byte c, bool *space ) {
     return;
   }
 
-  if ( c >= 1 && c <= 8 || c >= 0x80 )
+  if ( (c >= 1 && c <= 8) || c >= 0x80 )
     b->data[ b->len++ ] = '\1';
 
   b->data[ b->len++ ] = c;
@@ -496,7 +495,7 @@ void remove_binary( buffer_t *b ) {
   assert( b );
 
   Byte *const new_data = MALLOC( Byte, b->len );
-  int i, j;
+  size_t i, j;
 
   for ( i = j = 0; i < b->len; ++i ) {
     if ( b->data[ i ] < 9 )             // discard really low ASCII
@@ -528,7 +527,7 @@ void uncompress( buffer_t *b ) {
   assert( b );
 
   Byte *const new_data = MALLOC( Byte, BUFFER_SIZE );
-  int i, j;
+  size_t i, j;
 
   for ( i = j = 0; i < b->len; ) {
     unsigned c = b->data[ i++ ];

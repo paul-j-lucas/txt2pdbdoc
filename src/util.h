@@ -27,10 +27,12 @@
 
 // standard
 #include <sys/types.h>                  /* for FreeBSD */
-#include <stdint.h>
-#include <stdio.h>
+#include <errno.h>
+#include <stddef.h>                     /* for size_t */
+#include <stdint.h>                     /* for uint8_t */
+#include <stdio.h>                      /* for FILE */
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>                     /* for strerror() */
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -60,8 +62,9 @@ typedef bool _Bool;
 #define BLOCK(...)          do { __VA_ARGS__ } while (0)
 #define PERROR_EXIT(STATUS) BLOCK( perror( me ); exit( EXIT_##STATUS ); )
 #define PRINT_ERR(...)      fprintf( stderr, __VA_ARGS__ )
+#define STRERROR            strerror( errno )
 
-#define FFREAD(PTR,SIZE,N,STREAM) \
+#define FREAD(PTR,SIZE,N,STREAM) \
   BLOCK( if ( fread( (PTR), (SIZE), (N), (STREAM) ) < (N) ) PERROR_EXIT( READ_ERROR ); )
 
 #define FSEEK(STREAM,OFFSET,WHENCE) \
@@ -71,6 +74,9 @@ typedef bool _Bool;
   BLOCK( if ( fwrite( (PTR), (SIZE), (N), (STREAM) ) < (N) ) PERROR_EXIT( WRITE_ERROR ); )
 
 #define MALLOC(TYPE,N)      (TYPE*)check_realloc( NULL, sizeof(TYPE) * (N) )
+
+#define PMESSAGE_EXIT(STATUS,FORMAT,...) \
+  BLOCK( PRINT_ERR( "%s: " FORMAT, me, __VA_ARGS__ ); exit( EXIT_##STATUS ); )
 
 extern char const* me;                  // executable name from argv[0]
 
@@ -82,10 +88,9 @@ extern char const* me;                  // executable name from argv[0]
  *
  * @param path The full path of the file to open.
  * @param mode The mode to use.
- * @param offset The number of bytes to skip, if any.
  * @return Returns the corresponding \c FILE.
  */
-FILE* check_fopen( char const *path, char const *mode, off_t offset );
+FILE* check_fopen( char const *path, char const *mode );
 
 /**
  * Calls \c realloc(3) and checks for failure.

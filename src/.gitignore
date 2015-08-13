@@ -1,0 +1,4 @@
+*.dSYM
+txt2pdbdoc
+config.h
+stamp-h1

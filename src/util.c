@@ -29,15 +29,13 @@
 
 ////////// extern functions ///////////////////////////////////////////////////
 
-FILE* check_fopen( char const *path, char const *mode, off_t offset ) {
+FILE* check_fopen( char const *path, char const *mode ) {
   assert( path );
   FILE *const file = fopen( path, mode );
   if ( !file )
     PMESSAGE_EXIT( OPEN_ERROR,
       "\"%s\": can not open: %s\n", path, STRERROR
     );
-  if ( offset )
-    FSEEK( file, offset, SEEK_SET );
   return file;
 }
 
@@ -65,6 +63,4 @@ uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len ) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-#endif /* txt2pdbdoc_util_H */
 /* vim:set et sw=2 ts=2: */

@@ -28,7 +28,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #define EXIT_USAGE                1     /* command-line usage error */
-#define EXIT_OF_OF_MEMORY         2
+#define EXIT_OUT_OF_MEMORY        2
 #define EXIT_OPEN_ERROR           10    /* error opening file */
 #define EXIT_READ_ERROR           11    /* error reading */
 #define EXIT_WRITE_ERROR          12    /* error writing */
