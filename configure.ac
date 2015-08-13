@@ -70,7 +70,7 @@ AC_CONFIG_FILES([
   src/Makefile
   man/Makefile
   man/man1/Makefile
-  man/man5/Makefile
+  man/man4/Makefile
 ])
 AC_OUTPUT
 
