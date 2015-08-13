@@ -20,6 +20,6 @@
 
 bin_PROGRAMS = txt2pdbdoc
 
-txt2pdbdoc_SOURCES = txt2pdbdoc.c
+txt2pdbdoc_SOURCES = txt2pdbdoc.c util.c
 
 # vim:set noet sw=8 ts=8:

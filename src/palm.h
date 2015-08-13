@@ -1,8 +1,8 @@
 /*
-**      Text to Doc converter for Palm Pilots
+**      txt2pdbdoc -- Text to Doc converter for Palm Pilots
 **      palm.h
 **
-**      Copyright (C) 1998  Paul J. Lucas
+**      Copyright (C) 1998-2015  Paul J. Lucas
 **
 **      This program is free software; you can redistribute it and/or modify
 **      it under the terms of the GNU General Public License as published by
@@ -19,19 +19,17 @@
 **      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef palm_H
-#define palm_H
+#ifndef txt2pdbdoc_palm_H
+#define txt2pdbdoc_palm_H
 
 // standard
 #include <stdint.h>
 #include <time.h>
 
-/*****************************************************************************
- *
- *  Define integral type Byte, Word, and DWord to match those on the
- *  Pilot being 8, 16, and 32 bits, respectively.
- *
- *****************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+
+// Define integral type Byte, Word, and DWord to match those on the Pilot being
+// 8, 16, and 32 bits, respectively.
 
 typedef uint8_t   Byte;
 typedef uint16_t  Word;
@@ -111,5 +109,7 @@ typedef struct DatabaseHdrType DatabaseHdrType;
 
 #define DatabaseHdrSize   78
 
-#endif /* palm_H */
+///////////////////////////////////////////////////////////////////////////////
+
+#endif /* txt2pdbdoc_palm_H */
 /* vim:set et sw=2 ts=2: */

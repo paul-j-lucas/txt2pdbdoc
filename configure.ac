@@ -48,6 +48,7 @@ AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 
 # Checks for library functions.
+AC_FUNC_FSEEKO
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([perror strerror strndup])
 
@@ -67,7 +68,6 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
   Makefile
   src/Makefile
-  test/Makefile
   man/Makefile
   man/man1/Makefile
   man/man5/Makefile
