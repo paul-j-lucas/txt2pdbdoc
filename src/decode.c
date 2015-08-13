@@ -28,7 +28,7 @@
 // standard
 #include <assert.h>
 #include <sys/types.h>                  /* for FreeBSD */
-#include <netinet/in.h>                 /* for htonl, etc */
+#include <netinet/in.h>                 /* for nthol, etc */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,30 +36,14 @@
 
 // constants
 #define COMPRESSED    2
-#define DOC_CREATOR   "REAd"
-#define DOC_TYPE      "TEXt"
 #define UNCOMPRESSED  1
 
-// macros
-
-#define GET_Word(F,N) \
-  BLOCK( FREAD( &N, 2, 1, (F) ); N = ntohs(N); )
-
 #define GET_DWord(F,N) \
-  BLOCK( FREAD( &N, 4, 1, (F) ); N = ntohl(N); )
-
-#define PUT_Word(F,N) \
-  BLOCK( Word const temp = htons(N); FWRITE( &temp, 2, 1, (F) ); )
-
-#define PUT_DWord(F,N) \
-  BLOCK( DWord const temp = htonl(N); FWRITE( &temp, 4, 1, (F) ); )
-
-#define SEEK_REC_ENTRY(F,I) \
-  FSEEK_FN( (F), DatabaseHdrSize + RecordEntrySize * (I), SEEK_SET )
-
-///////////////////////////////////////////////////////////////////////////////
+  BLOCK( FREAD( (N), sizeof( DWord ), 1, (F) ); *(N) = ntohl( *(N) ); )
 
 extern void uncompress( buffer_t* );
+
+////////// extern functions ///////////////////////////////////////////////////
 
 /**
  * Decodes the source Doc file to a text file.
@@ -78,8 +62,7 @@ void decode( char const *src_file_name, char const *dest_file_name ) {
   FREAD( &header, DatabaseHdrSize, 1, fin );
   if ( !opt_no_check_doc && (
        strncmp( header.type,    DOC_TYPE,    sizeof header.type ) ||
-       strncmp( header.creator, DOC_CREATOR, sizeof header.creator )
-  ) ) {
+       strncmp( header.creator, DOC_CREATOR, sizeof header.creator ) ) ) {
     PRINT_ERR( "%s: %s is not a Doc file\n", me, src_file_name );
     exit( EXIT_NOT_DOC_FILE );
   }
@@ -91,9 +74,9 @@ void decode( char const *src_file_name, char const *dest_file_name ) {
 
   /********** read record 0 ********************************************/
 
-  SEEK_REC_ENTRY( fin, 0 );
+  SEEK_REC( fin, 0 );
   DWord offset;
-  GET_DWord( fin, offset );             // get offset of rec 0
+  GET_DWord( fin, &offset );            // get offset of rec 0
   FSEEK( fin, offset, SEEK_SET );
 
   doc_record0_t rec0;
@@ -119,18 +102,19 @@ void decode( char const *src_file_name, char const *dest_file_name ) {
   buffer_t buf;
   NEW_BUFFER( &buf );
   for ( int rec_num = 1; rec_num <= num_records; ++rec_num ) {
-    DWord next_offset;
 
-    /* read the record offset */
-    SEEK_REC_ENTRY( fin, rec_num );
-    GET_DWord( fin, offset );
+    // read the record offset
+    SEEK_REC( fin, rec_num );
+    GET_DWord( fin, &offset );
 
     // read the next record offset to compute the record size
+    DWord next_offset;
     if ( rec_num < num_records ) {
-      SEEK_REC_ENTRY( fin, rec_num + 1 );
-      GET_DWord( fin, next_offset );
-    } else
+      SEEK_REC( fin, rec_num + 1 );
+      GET_DWord( fin, &next_offset );
+    } else {
       next_offset = file_size;
+    }
     DWord const rec_size = next_offset - offset;
 
     // read the record

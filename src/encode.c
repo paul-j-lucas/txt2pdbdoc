@@ -166,7 +166,7 @@ void encode( char const *document_name, char const *src_file_name,
   total_before = total_after = 0;
   for ( int rec_num = 1; rec_num <= num_records; ++rec_num ) {
     offset = ftell( fout );
-    SEEK_REC_ENTRY( fout, rec_num );
+    SEEK_REC( fout, rec_num );
     PUT_DWord( fout, offset );
 
     size_t bytes_read;

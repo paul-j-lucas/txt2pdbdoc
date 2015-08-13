@@ -46,7 +46,7 @@
 
 #define NEW_BUFFER(b) (b)->data = MALLOC( Byte, (b)->len = BUFFER_SIZE )
 
-#define SEEK_REC_ENTRY(F,I) \
+#define SEEK_REC(F,I) \
   FSEEK_FN( (F), DatabaseHdrSize + RecordEntrySize * (I), SEEK_SET )
 
 struct buffer {
