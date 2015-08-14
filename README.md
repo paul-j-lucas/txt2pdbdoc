@@ -4,7 +4,7 @@
 (It also converts Doc files to plain text.)
 A Doc file is a defacto standard file format
 for text documents for PalmOS document reader applications.
-My motivation for writing txt2pdbdoc was that such software at the time
+My motivation for writing **txt2pdbdoc** was that such software at the time
 was crufty and poorly documented.
 In contrast,
 **txt2pdbdoc** is well written and well documented.
