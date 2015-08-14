@@ -41,6 +41,7 @@ extern bool         opt_binary;
 extern bool         opt_compress;
 extern bool         opt_decode;
 extern bool         opt_no_check_doc;
+extern bool         opt_no_timestamp;
 extern bool         opt_verbose;
 
 ////////// extern functions ///////////////////////////////////////////////////

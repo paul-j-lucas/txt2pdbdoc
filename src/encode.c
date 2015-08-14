@@ -35,10 +35,10 @@
 #include <unistd.h>
 
 #define PUT_Word(F,N) \
-  BLOCK( Word const temp = htons(N); FWRITE( &temp, 2, 1, (F) ); )
+  BLOCK( Word const temp = htons(N); FWRITE( &temp, sizeof( Word ), 1, (F) ); )
 
 #define PUT_DWord(F,N) \
-  BLOCK( DWord const temp = htonl(N); FWRITE( &temp, 4, 1, (F) ); )
+  BLOCK( DWord const temp = htonl(N); FWRITE( &temp, sizeof( DWord ), 1, (F) ); )
 
 ////////// extern functions ///////////////////////////////////////////////////
 
@@ -102,7 +102,7 @@ void encode( void ) {
   if ( strlen( doc_name ) > sizeof header.name - 1 )
     strncpy( header.name + sizeof header.name - 4, "...", 3 );
 
-  DWord const date = htonl( palm_date() );
+  DWord const date = opt_no_timestamp ? 0 : htonl( palm_date() );
 
   header.attributes                     = 0;
   header.version                        = 0;
@@ -124,7 +124,7 @@ void encode( void ) {
 
   DWord num_offsets = num_records + 1;  // +1 for rec 0
   DWord offset = DatabaseHdrSize + RecordEntrySize * num_offsets;
-  unsigned long index = 0x40 << 24 | 0x6F8000;        // dirty + unique ID
+  unsigned long index = 0x40 << 24 | 0x6F8000; // dirty + unique ID
 
   PUT_DWord( fout, offset );            // offset for rec 0
   PUT_DWord( fout, index++ );
@@ -159,7 +159,7 @@ void encode( void ) {
     PUT_DWord( fout, offset );
 
     size_t bytes_read;
-    if ( !(bytes_read = fread( buf.data, RECORD_SIZE_MAX, 1, fin )) )
+    if ( !(bytes_read = fread( buf.data, 1, RECORD_SIZE_MAX, fin )) )
       break;
     if ( ferror( fin ) )
       PERROR_EXIT( READ_ERROR );

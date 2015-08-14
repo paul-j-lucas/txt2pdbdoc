@@ -20,13 +20,13 @@
 #	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 
-ROOT=txt2pdbdoc
+BASE_NAME=txt2pdbdoc
 
-ORIG_TXT=$ROOT.c
-TEMP_PDB=/tmp/$ROOT-pdb.$$
-TEMP_TXT=/tmp/$ROOT-txt.$$
+ORIG_TXT=$BASE_NAME.c
+TEMP_PDB=/tmp/$BASE_NAME-pdb_$$_
+TEMP_TXT=/tmp/$BASE_NAME-txt_$$_
 
-trap 'x=$?; rm -f /tmp/$ROOT-*.$$; exit $x' 0 1 2 15
+trap "x=$?; rm -f /tmp/*_$$_* 2>/dev/null; exit $x" EXIT HUP INT TERM
 
 ##
 # Convert some text file to a Doc file and back again and compare it to the

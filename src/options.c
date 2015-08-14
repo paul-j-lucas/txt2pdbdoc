@@ -39,16 +39,17 @@ char const *me;
 
 bool        opt_binary = true;
 bool        opt_compress = true;
-bool        opt_decode = false;
-bool        opt_no_check_doc = false;
-bool        opt_verbose = false;
+bool        opt_decode;
+bool        opt_no_check_doc;
+bool        opt_no_timestamp;
+bool        opt_verbose;
 
 ////////// local functions ////////////////////////////////////////////////////
 
 static void usage( void ) {
   PRINT_ERR(
-"usage: %s [-c] [-b] [-v] document_name file.txt file.pdb\n"
-"       %s  -d  [-D] [-v] file.pdb [file.txt]\n"
+"usage: %s [-bctv] document_name file.txt file.pdb\n"
+"       %s  -d  [-Dv] file.pdb [file.txt]\n"
 "       %s  -V\n"
 "\n"
 "options:\n"
@@ -56,6 +57,7 @@ static void usage( void ) {
 " -c: Don't compress Doc file [default: do].\n"
 " -d: Decode Doc file to text [default: encode to Doc].\n"
 " -D: Do not check the type/creator of the Doc file [default: do].\n"
+" -t: Do not include timestamps when encoding [default: do].\n"
 " -v: Be verbose [default: don't].\n"
 " -V: Print version and exit.\n"
     , me, me, me
@@ -66,7 +68,7 @@ static void usage( void ) {
 ////////// extern functions ///////////////////////////////////////////////////
 
 void process_options( int argc, char *argv[] ) {
-  char const opts[] = "bcdDvV";         // command line options
+  char const opts[] = "bcdDtvV";        // command line options
 
   me = strrchr( argv[0], '/' );         // determine base name...
   me = me ? me + 1 : argv[0];           // ...of executable
@@ -78,6 +80,7 @@ void process_options( int argc, char *argv[] ) {
       case 'c': opt_compress = false;               break;
       case 'd': opt_decode = true;                  break;
       case 'D': opt_no_check_doc = true;            break;
+      case 't': opt_no_timestamp = true;            break;
       case 'v': opt_verbose = true;                 break;
       case 'V': printf( PACKAGE " " VERSION "\n" ); exit( EXIT_SUCCESS );
       default : usage();
