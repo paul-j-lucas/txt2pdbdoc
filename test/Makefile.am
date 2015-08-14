@@ -20,7 +20,11 @@
 
 AUTOMAKE_OPTIONS = 1.12			# needed for TEST_LOG_DRIVER
 
-TESTS = tests/txt2pdbdoc-c-t.test \
+TESTS =	tests/txt2pdbdoc-b-d.test \
+	tests/txt2pdbdoc-c-d.test \
+	tests/txt2pdbdoc-c-t.test \
+	tests/txt2pdbdoc-d-t.test \
+	tests/txt2pdbdoc-D.test \
 	tests/txt2pdbdoc-t.test
 
 AM_TESTS_ENVIRONMENT = BUILD_SRC=$(top_builddir)/src; export BUILD_SRC ;
