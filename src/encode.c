@@ -27,18 +27,15 @@
 
 // standard
 #include <assert.h>
-#include <netinet/in.h>                 /* for htonl, etc */
+#include <netinet/in.h>                 /* for htonl() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define PUT_Word(F,N) \
-  BLOCK( Word const temp = htons(N); FWRITE( &temp, sizeof( Word ), 1, (F) ); )
-
 #define PUT_DWord(F,N) \
-  BLOCK( DWord const temp = htonl(N); FWRITE( &temp, sizeof( DWord ), 1, (F) ); )
+  BLOCK( DWord t = (N); t = htonl(t); FWRITE( &t, sizeof t, 1, (F) ); )
 
 ////////// extern functions ///////////////////////////////////////////////////
 
@@ -96,26 +93,19 @@ void encode( void ) {
   ////////// create and write header //////////////////////////////////////////
 
   DatabaseHdrType header;
-  bzero( header.name, sizeof header.name );
+  bzero( &header, sizeof header );
 
   strncpy( header.name, doc_name, sizeof header.name - 1 );
   if ( strlen( doc_name ) > sizeof header.name - 1 )
     strncpy( header.name + sizeof header.name - 4, "...", 3 );
 
-  DWord const date = opt_no_timestamp ? 0 : htonl( palm_date() );
-
-  header.attributes                     = 0;
-  header.version                        = 0;
-  memcpy( &header.creationDate,         &date, 4 );
-  memcpy( &header.modificationDate,     &date, 4 );
-  header.lastBackupDate                 = 0;
-  header.modificationNumber             = 0;
-  header.appInfoID                      = 0;
-  header.sortInfoID                     = 0;
+  if ( !opt_no_timestamp ) {
+    DWord const now = htonl( palm_date() );
+    header.creationDate                 = now;
+    header.modificationDate             = now;
+  }
   strncpy( header.type,    DOC_TYPE,    sizeof header.type );
   strncpy( header.creator, DOC_CREATOR, sizeof header.creator );
-  header.uniqueIDSeed                   = 0;
-  header.recordList.nextRecordListID    = 0;
   header.recordList.numRecords          = htons( num_records + 1 /* rec 0 */ );
 
   FWRITE( &header, DatabaseHdrSize, 1, fout );
@@ -124,7 +114,7 @@ void encode( void ) {
 
   DWord num_offsets = num_records + 1;  // +1 for rec 0
   DWord offset = DatabaseHdrSize + RecordEntrySize * num_offsets;
-  unsigned long index = 0x40 << 24 | 0x6F8000; // dirty + unique ID
+  DWord index = 0x40u << 24 | 0x6F8000u; // dirty + unique ID
 
   PUT_DWord( fout, offset );            // offset for rec 0
   PUT_DWord( fout, index++ );
