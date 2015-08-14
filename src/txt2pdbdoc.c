@@ -24,20 +24,31 @@
 #include "options.h"
 
 // standard
-#include <stdlib.h>                     /* for exit() */
+#include <stdio.h>
+#include <stdlib.h>                     /* for atexit(), exit() */
 
-extern void decode( char const*, char const* );
-extern void encode( char const*, char const*, char const* );
+extern void decode( void );
+extern void encode( void );
 
-///////////////////////////////////////////////////////////////////////////////
+////////// local functions ////////////////////////////////////////////////////
+
+static void clean_up( void ) {
+  if ( fin )
+    fclose( fin );
+  if ( fout )
+    fclose( fout );
+}
+
+////////// main ///////////////////////////////////////////////////////////////
 
 int main( int argc, char *argv[] ) {
+  atexit( clean_up );
   process_options( argc, argv );
 
   if ( opt_decode )
-    decode( argv[0], argc == 2 ? argv[1] : 0 );
+    decode();
   else
-    encode( argv[0], argv[1], argv[2] );
+    encode();
 
   exit( EXIT_SUCCESS );
 }

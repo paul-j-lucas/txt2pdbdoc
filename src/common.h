@@ -36,6 +36,7 @@
 #define EXIT_READ_ERROR           11    /* error reading */
 #define EXIT_WRITE_ERROR          12    /* error writing */
 #define EXIT_SEEK_ERROR           13    /* error seeking */
+#define EXIT_STAT_ERROR           13    /* error stat'ing */
 #define EXIT_NOT_DOC_FILE         20
 #define EXIT_UNKNOWN_COMPRESSION  21
 
@@ -44,7 +45,7 @@
 #define DOC_CREATOR   "REAd"
 #define DOC_TYPE      "TEXt"
 
-#define NEW_BUFFER(b) (b)->data = MALLOC( Byte, (b)->len = BUFFER_SIZE )
+#define NEW_BUFFER(B) (B)->data = MALLOC( Byte, (B)->len = BUFFER_SIZE )
 
 #define SEEK_REC(F,I) \
   FSEEK_FN( (F), DatabaseHdrSize + RecordEntrySize * (I), SEEK_SET )

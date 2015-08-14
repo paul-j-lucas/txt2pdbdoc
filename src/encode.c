@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #define PUT_Word(F,N) \
@@ -82,64 +83,48 @@ static void remove_binary( buffer_t *b ) {
 
 /**
  * Encodes the source text file into a Doc file.
- *
- * @param document_name The name of the document as it is to appear in the
- * Documents List view of a Doc reader application on the Pilot.
- * @param src_file_name The name of the text file.
- * @param dest_file_name  The name of the Doc file.
  */
-void encode( char const *document_name, char const *src_file_name,
-             char const *dest_file_name ) {
-  assert( document_name );
-  assert( src_file_name );
-  assert( dest_file_name );
+void encode( void ) {
+  struct stat sbuf;
+  FSTAT( fileno( fin ), &sbuf );
+  DWord const fin_size = sbuf.st_size;
 
-  DWord         date;
-  doc_record0_t   rec0;
-  buffer_t        buf;
-  DWord         num_offsets, offset;
-  unsigned long index;
-  int           total_before, total_after;
-
-  FILE *const fin  = check_fopen( src_file_name, "rb" );
-  FILE *const fout = check_fopen( dest_file_name, "wb" );
-
-  FSEEK( fin, 0, SEEK_END );
-  DWord file_size = ftell( fin );
-  int num_records = file_size / RECORD_SIZE_MAX;
-  if ( (long)num_records * RECORD_SIZE_MAX < file_size )
+  int num_records = fin_size / RECORD_SIZE_MAX;
+  if ( (long)num_records * RECORD_SIZE_MAX < fin_size )
     ++num_records;
 
   ////////// create and write header //////////////////////////////////////////
 
   DatabaseHdrType header;
   bzero( header.name, sizeof header.name );
-  strncpy( header.name, document_name, sizeof header.name - 1 );
-  if ( strlen( document_name ) > sizeof header.name - 1 )
+
+  strncpy( header.name, doc_name, sizeof header.name - 1 );
+  if ( strlen( doc_name ) > sizeof header.name - 1 )
     strncpy( header.name + sizeof header.name - 4, "...", 3 );
-  header.attributes                       = 0;
-  header.version                          = 0;
-  date = htonl( palm_date() );
-  memcpy( &header.creationDate,   &date, 4 );
-  date = htonl( palm_date() );
-  memcpy( &header.modificationDate, &date, 4 );
+
+  DWord const date = htonl( palm_date() );
+
+  header.attributes                     = 0;
+  header.version                        = 0;
+  memcpy( &header.creationDate,         &date, 4 );
+  memcpy( &header.modificationDate,     &date, 4 );
   header.lastBackupDate                 = 0;
   header.modificationNumber             = 0;
   header.appInfoID                      = 0;
   header.sortInfoID                     = 0;
   strncpy( header.type,    DOC_TYPE,    sizeof header.type );
   strncpy( header.creator, DOC_CREATOR, sizeof header.creator );
-  header.uniqueIDSeed                 = 0;
-  header.recordList.nextRecordListID  = 0;
-  header.recordList.numRecords        = htons( num_records + 1 /* rec 0 */ );
-  FSEEK( fin, 0, SEEK_SET );
+  header.uniqueIDSeed                   = 0;
+  header.recordList.nextRecordListID    = 0;
+  header.recordList.numRecords          = htons( num_records + 1 /* rec 0 */ );
+
   FWRITE( &header, DatabaseHdrSize, 1, fout );
 
-  /********** write record offsets *************************************/
+  ////////// write record offsets /////////////////////////////////////////////
 
-  num_offsets = num_records + 1;        // +1 for rec 0
-  offset = DatabaseHdrSize + RecordEntrySize * num_offsets;
-  index = 0x40 << 24 | 0x6F8000;        // dirty + unique ID
+  DWord num_offsets = num_records + 1;  // +1 for rec 0
+  DWord offset = DatabaseHdrSize + RecordEntrySize * num_offsets;
+  unsigned long index = 0x40 << 24 | 0x6F8000;        // dirty + unique ID
 
   PUT_DWord( fout, offset );            // offset for rec 0
   PUT_DWord( fout, index++ );
@@ -149,21 +134,25 @@ void encode( char const *document_name, char const *src_file_name,
     PUT_DWord( fout, index++ );
   }
 
-  /********** write record 0 *******************************************/
+  ////////// write record 0 ///////////////////////////////////////////////////
+
+  doc_record0_t rec0;
 
   rec0.version     = htons( opt_compress + 1 );
   rec0.reserved1   = 0;
-  rec0.doc_size    = htonl( file_size );
+  rec0.doc_size    = htonl( fin_size );
   rec0.num_records = htons( num_records );
   rec0.rec_size    = htons( RECORD_SIZE_MAX );
   rec0.reserved2   = 0;
 
   FWRITE( &rec0, sizeof rec0, 1, fout );
 
-  /********** write text ***********************************************/
+  ////////// write text ///////////////////////////////////////////////////////
 
+  buffer_t buf;
   NEW_BUFFER( &buf );
-  total_before = total_after = 0;
+  int total_before = 0, total_after = 0;
+
   for ( int rec_num = 1; rec_num <= num_records; ++rec_num ) {
     offset = ftell( fout );
     SEEK_REC( fout, rec_num );
@@ -198,6 +187,7 @@ void encode( char const *document_name, char const *src_file_name,
     } else
       PRINT_ERR( " %d", num_records - rec_num + 1 );
   } // for
+
   if ( opt_verbose ) {
     if ( opt_compress )
       PRINT_ERR( "\n-----\ntotal compression: %2d%%\n",

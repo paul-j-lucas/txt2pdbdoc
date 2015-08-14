@@ -47,30 +47,21 @@ extern void uncompress( buffer_t* );
 
 /**
  * Decodes the source Doc file to a text file.
- *
- * @param src_file_name The name of the Doc file.
- * @param dest_file_name The name of the text file.  If NULL, text is sent to
- * standard output.
  */
-void decode( char const *src_file_name, char const *dest_file_name ) {
+void decode( void ) {
 
   /********** open files, read header, ensure source is a Doc file *****/
-
-  FILE *const fin = check_fopen( src_file_name, "rb" );
 
   DatabaseHdrType header;
   FREAD( &header, DatabaseHdrSize, 1, fin );
   if ( !opt_no_check_doc && (
        strncmp( header.type,    DOC_TYPE,    sizeof header.type ) ||
        strncmp( header.creator, DOC_CREATOR, sizeof header.creator ) ) ) {
-    PRINT_ERR( "%s: %s is not a Doc file\n", me, src_file_name );
+    PRINT_ERR( "%s: %s is not a Doc file\n", me, fin_path );
     exit( EXIT_NOT_DOC_FILE );
   }
 
   int const num_records = ntohs( header.recordList.numRecords ) - 1; /* w/o rec 0 */
-
-  FILE *const fout = dest_file_name ?
-    check_fopen( dest_file_name, "wb" ) : stdout;
 
   /********** read record 0 ********************************************/
 

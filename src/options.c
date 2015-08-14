@@ -30,7 +30,13 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char const *me;                         // executable name
+char const *doc_name;
+FILE       *fin;
+char const *fin_path;
+FILE       *fout;
+char const *fout_path = "<stdout>";
+char const *me;
+
 bool        opt_binary = true;
 bool        opt_compress = true;
 bool        opt_decode = false;
@@ -77,14 +83,32 @@ void process_options( int argc, char *argv[] ) {
       default : usage();
     } // switch
   } // for
-  argc -= optind, argv += optind;
+  argc -= optind, argv += optind - 1;
 
   if ( opt_decode ) {
-    if ( argc < 1 || argc > 2 )
-      usage();
+    switch ( argc ) {
+      case 1:
+        fin_path = argv[1];
+        fin  = check_fopen( fin_path , "r" );
+        fout = stdout;
+        break;
+      case 2:
+        fin_path = argv[1];
+        fin = check_fopen( fin_path, "r" );
+        fout_path = argv[2];
+        fout = check_fopen( fout_path, "w" );
+        break;
+      default:
+        usage();
+    } // switch
   } else {
     if ( argc != 3 )
       usage();
+    doc_name = argv[1];
+    fin_path = argv[2];
+    fin = check_fopen( fin_path, "r" );
+    fout_path = argv[3];
+    fout = check_fopen( fout_path, "w" );
   }
 }
 

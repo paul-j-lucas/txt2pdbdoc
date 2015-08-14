@@ -70,6 +70,9 @@ typedef bool _Bool;
 #define FSEEK(STREAM,OFFSET,WHENCE) \
   BLOCK( if ( FSEEK_FN( (STREAM), (OFFSET), (WHENCE) ) == -1 ) PERROR_EXIT( SEEK_ERROR ); )
 
+#define FSTAT(FD,STAT) \
+  BLOCK( if ( fstat( (FD), (STAT) ) == -1 ) PERROR_EXIT( STAT_ERROR ); )
+
 #define FWRITE(PTR,SIZE,N,STREAM) \
   BLOCK( if ( fwrite( (PTR), (SIZE), (N), (STREAM) ) < (N) ) PERROR_EXIT( WRITE_ERROR ); )
 
