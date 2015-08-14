@@ -57,8 +57,7 @@ void decode( void ) {
   if ( !opt_no_check_doc && (
        strncmp( header.type,    DOC_TYPE,    sizeof header.type ) ||
        strncmp( header.creator, DOC_CREATOR, sizeof header.creator ) ) ) {
-    PRINT_ERR( "%s: %s is not a Doc file\n", me, fin_path );
-    exit( EXIT_NOT_DOC_FILE );
+    PMESSAGE_EXIT( NOT_DOC_FILE, "%s is not a Doc file\n", fin_path );
   }
 
   int const num_records = ntohs( header.recordList.numRecords ) - 1; /* w/o rec 0 */
@@ -74,13 +73,10 @@ void decode( void ) {
   FREAD( &rec0, sizeof rec0, 1, fin );
 
   int const compression = ntohs( rec0.version );
-  if ( compression != COMPRESSED && compression != UNCOMPRESSED ) {
-    PRINT_ERR(
-      "%s: error: unknown file compression type: %d\n",
-      me, compression
+  if ( compression != COMPRESSED && compression != UNCOMPRESSED )
+    PMESSAGE_EXIT( UNKNOWN_COMPRESSION,
+      "error: %d: unknown file compression type\n", compression
     );
-    exit( EXIT_UNKNOWN_COMPRESSION );
-  }
 
   /********* read Doc file record-by-record ****************************/
 
