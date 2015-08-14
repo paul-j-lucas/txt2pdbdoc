@@ -22,9 +22,14 @@
 #ifndef txt2pdbdoc_palm_H
 #define txt2pdbdoc_palm_H
 
+// local
+#include "config.h"
+
 // standard
 #include <stdint.h>
+#ifdef HAVE_TIME_H
 #include <time.h>
+#endif /* HAVE_TIME_H */
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +49,7 @@ typedef uint32_t  DWord;
 # define palm_date() (DWord)(time(0) + 2082844800ul)
 #else
 # define palm_date() 0
-#endif
+#endif /* HAVE_TIME_H */
 
 /**
  * Every record has one of these headers.
