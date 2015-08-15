@@ -11,6 +11,14 @@ generated PDB files.  (This was necessary for testing since two PDB files with
 equal content but different time-stamps would never compare equal on a
 byte-by-byte level.)
 
+** Better option checking.
+txt2pdbdoc is now more robust about checkint command-line options (options that
+either forbid or require other options).
+
+** Resurrected pdb.4 manual page.
+Since Palm information is hard to find nowadays, the pdb.4 manual page has been
+resurrected.
+
 * Changes in txt2pdbdoc 1.4.4
 
 ** Added type/creator checking suppression option.
