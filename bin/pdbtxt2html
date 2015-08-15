@@ -1,46 +1,46 @@
 #! /usr/bin/perl
 ##
-#	txt2pdbdoc -- Doc Text to HTML converted for Palm Pilots
-#	pdbtxt2html
+#       txt2pdbdoc -- Doc Text to HTML converted for Palm Pilots
+#       pdbtxt2html
 #
-#	Copyright (C) 1998  Paul J. Lucas
+#       Copyright (C) 1998  Paul J. Lucas
 #
-#	This program is free software; you can redistribute it and/or modify
-#	it under the terms of the GNU General Public License as published by
-#	the Free Software Foundation; either version 2 of the License, or
-#	(at your option) any later version.
-# 
-#	This program is distributed in the hope that it will be useful,
-#	but WITHOUT ANY WARRANTY; without even the implied warranty of
-#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#	GNU General Public License for more details.
-# 
-#	You should have received a copy of the GNU General Public License
-#	along with this program; if not, write to the Free Software
-#	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the License, or
+#       (at your option) any later version.
+#       
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#       
+#       You should have received a copy of the GNU General Public License
+#       along with this program; if not, write to the Free Software
+#       Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 
 ########## You shouldn't have to change anything below this line. #############
 
-use	File::Basename;
-use	Getopt::Std;
+use File::Basename;
+use Getopt::Std;
 
 $me = basename( $0 );
 $VERSION = '1.3.1';
 
 sub usage {
-	die "usage: $me [-t] file.txt [ file.html ]\n       $me -v\n";
+  die "usage: $me [-t] file.txt [ file.html ]\n       $me -v\n";
 }
 
 getopts( 'tv' ) or usage;
 
 ###############################################################################
-#	Input checks
+# Input checks
 ###############################################################################
 
 if ( $opt_v ) {
-	print "$me version $VERSION\n";
-	exit 0;
+  print "$me version $VERSION\n";
+  exit 0;
 }
 
 usage unless $#ARGV + 1 >= 1;
@@ -48,14 +48,14 @@ usage unless $#ARGV + 1 >= 1;
 
 open( INPUT, $txt_file ) or die "$me: can not open $txt_file for input\n";
 if ( $html_file ) {
-	open( OUTPUT, ">$html_file" ) or
-		die "$me: can not open $html_file for output\n";
-	select OUTPUT;
+  open( OUTPUT, ">$html_file" ) or
+    die "$me: can not open $html_file for output\n";
+  select OUTPUT;
 }
 
 ###############################################################################
-#	Set up URL syntax
-#	See RFC 1630: Universal Resource Identifiers in WWW
+# Set up URL syntax
+# See RFC 1630: Universal Resource Identifiers in WWW
 ###############################################################################
 
 # common sub-parts
@@ -75,79 +75,79 @@ $url_syntax{ telnet } = "telnet://$url_user_password$url_host$url_port";
 $url_syntax{ wais }   = "wais://$url_host$url_port$url_path$url_query";
 
 ###############################################################################
-#	Do it!
+# Do it!
 ###############################################################################
 
 # get the bookmark character sequence from the end of the file
 seek( INPUT, -10, 2 ) or die "$me: can not seek to end of file $txt_file\n";
 while ( <INPUT> ) {
-	s/^\s*(.*?)\s*$/$1/;
-	next unless /^<([^>]+)>$/;
-	$bookmark = quotemeta( $1 );
-	last;
+  s/^\s*(.*?)\s*$/$1/;
+  next unless /^<([^>]+)>$/;
+  $bookmark = quotemeta( $1 );
+  last;
 }
 seek( INPUT, 0, 0 );
 
 $last_level = 1;
 while ( <INPUT> ) {
-	s/^\s*(.*?)\s*$/$1/;
-	last if /^<$bookmark>/;
+  s/^\s*(.*?)\s*$/$1/;
+  last if /^<$bookmark>/;
 
-	s/</\&lt;/g;
-	s/>/\&gt;/g;
+  s/</\&lt;/g;
+  s/>/\&gt;/g;
 
-	$title = $_ unless $title;		# set title to first line
+  $title = $_ unless $title;    # set title to first line
 
-	# make embedded URLs selectable
-	s!$url_syntax{ ftp    }!<A HREF="$&">$&</A>!g;
-	s!$url_syntax{ gopher }!<A HREF="$&">$&</A>!g;
-	s!$url_syntax{ http   }!<A HREF="$&">$&</A>!g;
-	s!$url_syntax{ e_mail }!<A HREF="mailto:$&">$&</A>!g;
-	s!$url_syntax{ news   }!<A HREF="$&">$&</A>!g;
-	s!$url_syntax{ telnet }!<A HREF="$&">$&</A>!g;
-	s!$url_syntax{ wais   }!<A HREF="$&">$&</A>!g;
+  # make embedded URLs selectable
+  s!$url_syntax{ ftp    }!<A HREF="$&">$&</A>!g;
+  s!$url_syntax{ gopher }!<A HREF="$&">$&</A>!g;
+  s!$url_syntax{ http   }!<A HREF="$&">$&</A>!g;
+  s!$url_syntax{ e_mail }!<A HREF="mailto:$&">$&</A>!g;
+  s!$url_syntax{ news   }!<A HREF="$&">$&</A>!g;
+  s!$url_syntax{ telnet }!<A HREF="$&">$&</A>!g;
+  s!$url_syntax{ wais   }!<A HREF="$&">$&</A>!g;
 
-	unless ( /^\s*$bookmark/o ) {
-		$html .= "$_<BR>";
-		next;
-	}
+  unless ( /^\s*$bookmark/o ) {
+    $html .= "$_<BR>";
+    next;
+  }
 
-	##### parse heading and level
+  ##### parse heading and level
 
-	$_ = $';
-	( $level, $heading ) = $_ =~ /^(\s*)(\S.*)$/;
-	$initial_spaces = length( $level ) unless defined $initial_spaces;
-	$level = length( $level ) - $initial_spaces + 1;
-	$level = 1 if $level < 1;
+  $_ = $';
+  ( $level, $heading ) = $_ =~ /^(\s*)(\S.*)$/;
+  $initial_spaces = length( $level ) unless defined $initial_spaces;
+  $level = length( $level ) - $initial_spaces + 1;
+  $level = 1 if $level < 1;
 
-	unless ( $opt_t ) {
-		$html .= "<H$level>$heading</H$level>";
-		next;
-	}
+  unless ( $opt_t ) {
+    $html .= "<H$level>$heading</H$level>";
+    next;
+  }
 
-	##### build a table of contents
+  ##### build a table of contents
 
-	s/[]["#%&+\/:;<=>?@\\^`{|}~]//g;	# make an anchor out of heading
-	s/^\s*(.*?)\s*$/$1/;
-	tr/A-Z /a-z_/;
-	tr/_//s;
+  s/[]["#%&+\/:;<=>?@\\^`{|}~]//g;  # make an anchor out of heading
+  s/^\s*(.*?)\s*$/$1/;
+  tr/A-Z /a-z_/;
+  tr/_//s;
 
-	if ( $level > $last_level ) {
-		$toc .= "\n<DD><DL COMPACT>";
-	} elsif ( $level < $last_level ) {
-		$toc .= "\n</DL>" x ( $last_level - $level );
-	}
-	my $h = $level == 1 ? "<B>$heading</B>" : $heading;
-	$toc .= "\n<DT><A HREF=\"#$_\">$h</A>";
-	$html .= "<A NAME=\"$_\"></A>\n<H$level>$heading</H$level>";
-	$last_level = $level;
+  if ( $level > $last_level ) {
+    $toc .= "\n<DD><DL COMPACT>";
+  } elsif ( $level < $last_level ) {
+    $toc .= "\n</DL>" x ( $last_level - $level );
+  }
+  my $h = $level == 1 ? "<B>$heading</B>" : $heading;
+  $toc .= "\n<DT><A HREF=\"#$_\">$h</A>";
+  $html .= "<A NAME=\"$_\"></A>\n<H$level>$heading</H$level>";
+  $last_level = $level;
 }
 close( INPUT );
 
 print "<HTML><HEAD><TITLE>$title</TITLE></HEAD><BODY><H1>$title</H1><HR>\n";
 if ( $toc ) {
-	print "<H2>Contents</H2><DL><DT><DL>$toc\n";
-	print '</DL>' x ( $last_level - $level + 1 ), "</DL><P><HR><P>\n";
+  print "<H2>Contents</H2><DL><DT><DL>$toc\n";
+  print '</DL>' x ( $last_level - $level + 1 ), "</DL><P><HR><P>\n";
 }
 
 # "beautify" HTML somewhat
@@ -159,3 +159,5 @@ print "$html\n<HR><SMALL>End of document</SMALL></BODY></HTML>\n";
 
 close( OUTPUT );
 exit 0;
+
+# vim:set et sw=2 ts=2:
