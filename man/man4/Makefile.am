@@ -18,6 +18,6 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-dist_man4_MANS = doc.4
+dist_man4_MANS = doc.4 pdb.4
 
 # vim:set noet sw=8 ts=8:

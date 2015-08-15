@@ -1,8 +1,8 @@
 .\"
-.\"	Text-to-Doc converter for Palm Pilots
+.\"	txt2pdbdoc -- Text-to-Doc converter for Palm Pilots
 .\"	doc.4
 .\"
-.\"	Copyright (C) 1998  Paul J. Lucas
+.\"	Copyright (C) 1998-2015  Paul J. Lucas
 .\"
 .\"	This program is free software; you can redistribute it and/or modify
 .\"	it under the terms of the GNU General Public License as published by
@@ -35,20 +35,19 @@
 .sp
 ..
 .\" ---------------------------------------------------------------------------
-.TH \f3DOC\f1 4 "August 18, 1998" "txt2pdbdoc"
+.TH \f3DOC\f1 4 "August 15, 2015" "txt2pdbdoc"
 .SH NAME
 Doc (Pilot standard text document) file format
 .SH SYNOPSIS
 .nf
 .ft CW
-.ta 5 12 26
-struct doc_record0 {	/* 16 bytes total */
-	Word	version;	/* 1 = plain text, 2 = compressed text */
-	Word	reserved1;
-	DWord	doc_size;	/* uncompressed size in bytes */
-	Word	num_recs;	/* not counting itself */
-	Word	rec_size;	/* in bytes: usually 4096 (4K) */
-	DWord	reserved2;
+struct doc_record0 {            // 16 bytes total
+    Word  version;              // 1 = plain text, 2 = compressed text
+    Word  reserved1;
+    DWord doc_size;             // uncompressed size in bytes
+    Word  num_recs;             // not counting itself
+    Word  rec_size;             // in bytes: usually 4096 (4K)
+    DWord reserved2;
 };
 .ft 1
 .fi
@@ -75,16 +74,16 @@ header.)
 The remaining records contain text,
 either plain or compressed depending upon \f(CWversion\f1.
 .SS Word Sizes
-In the synopsis above, the types ``\f(CWWord\f1'' and ``\f(CWDWord\f1''
+In the synopsis above, the types \f(CWWord\f1 and \f(CWDWord\f1
 are used just as in the Pilot headers.
-The type ``\f(CWWord\f1'' is 16 bits;
-the type ``\f(CWDWord\f1'' is 32 bits.
+The type \f(CWWord\f1 is 16 bits;
+the type \f(CWDWord\f1 is 32 bits.
 Both are in big-endian format.
 .SS Compression Format
 A character ``\f(CWc\f1'' in a compressed record is in one of four classes:
 .TP 10
 \f(CW01-08\f1
-Copy ``c'' bytes
+Copy ``\f(CWc\f1'' bytes
 .TP
 \f(CW00,09-7F\f1
 Self
@@ -93,7 +92,7 @@ Self
 Sequence
 .TP
 \f(CWC0-FF\f1
-A space plus the ASCII character ``\f(CWc ^ 0x80\f1''
+A space plus the ASCII character \f(CWc ^ 0x80\f1
 .RE
 .SH SEE ALSO
 .BR txt2pdbdoc (1)
@@ -105,4 +104,4 @@ Palm, Inc.,
 May 16, 2000.
 .SH AUTHOR
 Paul J. Lucas
-.RI < pauljlucas@mac.com >
+.RI < paul@lucasmail.org >

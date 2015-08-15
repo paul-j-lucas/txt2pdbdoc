@@ -1,0 +1,98 @@
+.\"
+.\"	txt2pdbdoc Text-to-Doc converter for Palm Pilots
+.\"	pdb.4
+.\"
+.\"	Copyright (C) 1998  Paul J. Lucas
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\" 
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\" 
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\" ---------------------------------------------------------------------------
+.\" define code-start macro
+.de cS
+.sp
+.nf
+.RS 5
+.ft CW
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i
+..
+.\" define code-end macro
+.de cE
+.ft 1
+.RE
+.fi
+.sp
+..
+.\" ---------------------------------------------------------------------------
+.TH \f3PDB\f1 4 "August 15, 2015" "txt2pdbdoc"
+.SH NAME
+PDB (Pilot Database) file format
+.SH SYNOPSIS
+.nf
+.ft CW
+#define dmDBNameLength 32       /* 31 chars + 1 NULL terminator */
+
+struct pdb_header {             // 78 bytes total
+    char  name[ dmDBNameLength ];
+    Word  attributes;
+    Word  version;
+    DWord create_time;
+    DWord modify_time;
+    DWord backup_time;
+    DWord modificationNumber;
+    DWord appInfoID;
+    DWord sortInfoID;
+    char  type[4];
+    char  creator[4];
+    DWord id_seed;
+    DWord nextRecordList;
+    Word  numRecords;
+};
+.P
+struct pdb_rec_header {         // 8 bytes total
+    DWord offset;
+    struct {
+        unsigned delete   : 1;
+        unsigned dirty    : 1;
+        unsigned busy     : 1;
+        unsigned secret   : 1;
+        unsigned category : 4;
+    } attributes;
+    char uniqueID[3];
+};
+.ft 1
+.fi
+.SH DESCRIPTION
+The PDB (Pilot Database) file format is used by all models
+of Palm Pilots and IBM Workpad.
+The format consists of a header followed by a set of record headers
+followed by the records themselves.
+.SS Word Sizes
+In the synopsis above, the types
+\f(CWByte\f1,
+\f(CWWord\f1, and \f(CWDWord\f1
+are used just as in the Pilot headers.
+The type \f(CWByte\f1 is 8 bits;
+\f(CWWord\f1 is 16 bits;
+\f(CWDWord\f1 is 32 bits.
+The latter two are in big-endian format.
+.SH CAVEAT
+The C structures given in the synopsis above are illustrative
+and may not work in actual C code
+since compilers align data members on word boundaries.
+.SH SEE ALSO
+.BR txt2pdbdoc (1)
+.SH AUTHOR
+Paul J. Lucas
+.RI < paul@lucasmail.org >
