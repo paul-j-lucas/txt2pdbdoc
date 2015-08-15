@@ -27,6 +27,7 @@
 
 // standard
 #include <assert.h>
+#include <sys/types.h>                  /* for FreeBSD */
 #include <netinet/in.h>                 /* for htonl() */
 #include <stdio.h>
 #include <stdlib.h>
