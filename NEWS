@@ -1,0 +1,73 @@
+txt2pdbdoc NEWS -- history of user-visable changes.
+
+Copyright (C) 1998-2015 Paul J. Lucas.
+See the end of the file for license conditions.
+
+* Changes in txt2pdbdoc 1.5
+
+** Added time-stamp suppression option.
+txt2pdbdoc now has a -t option to suppress using the current time-stamp in
+generated PDB files.  (This was necessary for testing since two PDB files with
+equal content but different time-stamps would never compare equal on a
+byte-by-byte level.)
+
+* Changes in txt2pdbdoc 1.4.4
+
+** Added type/creator checking suppression option.
+txt2pdbdoc now has a -D option to suppress checking of a Doc file's
+type/creator.
+
+** Fixed a small bug in printing an error message.
+
+* Changes in txt2pdbdoc 1.4.3
+
+** Fixes a bug with signed bit fields on some machines.
+
+* Changes in txt2pdbdoc 1.4.2
+
+** Fixed compiling under FreeBSD.
+
+* Changes in txt2pdbdoc 1.4.1
+
+** Fixed the installation of manual pages.
+
+* Changes in txt2pdbdoc 1.4
+
+** Now putting current date/time into generated PDB file.
+** Made exit status codes more specific.
+
+* Changes in txt2pdbdoc 1.3
+
+** Updated author's e-mail address.
+
+* Changes in txt2pdbdoc 1.2.1
+
+* Fixed byte-swapping bug on machines with 64-bit longs.
+ 
+* Changes in txt2pdbdoc 1.2
+
+** Added script to convert from HTML to Doc text.
+
+* Changes in txt2pdbdoc 1.1
+
+** Fixed an off-by-1 bug when creating document names.
+
+* Changes in txt2pdbdoc 1.0
+
+** Initial version.
+
+----------------------------------------------------------------------
+The file is part of txt2pdbdoc.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the Licence, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.

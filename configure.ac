@@ -20,7 +20,7 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-AC_INIT([txt2pdbdoc], [1.6], [paul@lucasmail.org],,[https://github.com/paul-j-lucas/txt2pdbdoc])
+AC_INIT([txt2pdbdoc], [1.5], [paul@lucasmail.org],,[https://github.com/paul-j-lucas/txt2pdbdoc])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
@@ -67,6 +67,7 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
   Makefile
   src/Makefile
+  bin/Makefile
   test/Makefile
   man/Makefile
   man/man1/Makefile
