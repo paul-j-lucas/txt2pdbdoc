@@ -37,10 +37,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// constants
-#define COMPRESSED    2
-#define UNCOMPRESSED  1
-
 #define GET_DWord(F,N) \
   BLOCK( FREAD( (N), sizeof( DWord ), 1, (F) ); *(N) = ntohl( *(N) ); )
 
@@ -138,8 +134,8 @@ void decode( void ) {
 
   int const compression = ntohs( rec0.version );
   switch ( compression ) {
-    case COMPRESSED:
-    case UNCOMPRESSED:
+    case DOC_COMPRESSED:
+    case DOC_UNCOMPRESSED:
       break;
     default:
       PMESSAGE_EXIT( UNKNOWN_COMPRESSION,
@@ -178,7 +174,7 @@ void decode( void ) {
     FREAD( buf.data, 1, rec_size, fin );
     buf.len = rec_size;
 
-    if ( compression == COMPRESSED )
+    if ( compression == DOC_COMPRESSED )
       uncompress( &buf );
 
     for ( size_t i = 0; i < buf.len; ++i ) {

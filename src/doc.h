@@ -27,8 +27,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DOC_CREATOR   "REAd"
-#define DOC_TYPE      "TEXt"
+#define DOC_CREATOR       "REAd"
+#define DOC_TYPE          "TEXt"
+#define DOC_COMPRESSED    2
+#define DOC_UNCOMPRESSED  1
 
 /**
  * Record 0 of a Doc file contains information about the document as a whole.
