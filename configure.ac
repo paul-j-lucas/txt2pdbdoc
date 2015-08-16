@@ -26,6 +26,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for programs.
 AC_PROG_CC_C99
+gl_EARLY
 AC_PROG_INSTALL
 
 # Checks for libraries.
@@ -39,12 +40,14 @@ AC_CHECK_HEADERS([time.h])
 AC_CHECK_HEADERS([unistd.h])
 AC_HEADER_ASSERT
 AC_HEADER_STDBOOL
+gl_INIT
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 AC_TYPE_UINT8_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
 
 # Checks for library functions.
 AC_FUNC_FSEEKO
@@ -66,6 +69,7 @@ AH_BOTTOM([#endif /* txt2pdbdoc_config_H */])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
   Makefile
+  lib/Makefile
   src/Makefile
   bin/Makefile
   test/Makefile

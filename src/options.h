@@ -37,12 +37,14 @@ extern FILE        *fout;               // file to write to
 extern char const  *fout_path;          // path name of output file
 extern char const  *me;                 // executable name
 
-extern bool         opt_binary;
-extern bool         opt_compress;
-extern bool         opt_decode;
-extern bool         opt_no_check_doc;
-extern bool         opt_no_timestamp;
-extern bool         opt_verbose;
+extern bool         opt_binary;         // strip binary characters
+extern bool         opt_compress;       // compress generated Doc files
+extern bool         opt_decode;         // decode from Doc instead
+extern bool         opt_no_check_doc;   // don't check Doc file signature
+extern bool         opt_no_timestamp;   // don't timestamp generated Doc files
+extern bool         opt_no_warnings;    // don't emit character warnings
+extern uint32_t     opt_unmapped_codepoint;
+extern bool         opt_verbose;        // be verbose
 
 ////////// extern functions ///////////////////////////////////////////////////
 

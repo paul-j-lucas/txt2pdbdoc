@@ -21,8 +21,10 @@
 
 // local
 #include "common.h"
+#include "doc.h"
 #include "options.h"
 #include "palm.h"
+#include "utf8.h"
 #include "util.h"
 
 // standard
@@ -48,33 +50,37 @@ extern void compress( buffer_t* );
  * Replaces the given buffer with one that has had ASCII characters (0-8)
  * removed and carriage-returns and form-feeds converted to newlines.
  *
- * @param b The buffer to be affected.
+ * @param buf The buffer to be affected.
  */
-static void remove_binary( buffer_t *b ) {
-  assert( b );
+static void remove_binary( buffer_t *buf ) {
+  assert( buf );
 
-  Byte *const new_data = MALLOC( Byte, b->len );
+  Byte *const new_data = MALLOC( Byte, buf->len );
   size_t i, j;
 
-  for ( i = j = 0; i < b->len; ++i ) {
-    if ( b->data[ i ] < 9 )             // discard really low ASCII
+  for ( i = j = 0; i < buf->len; ++i ) {
+    if ( buf->data[ i ] < 9 )           // discard really low ASCII
       continue;
-    switch ( b->data[ i ] ) {
+    switch ( buf->data[ i ] ) {
       case '\r':
-        if ( i < b->len - 1 && b->data[ i+1 ] == '\n' )
+        if ( i < buf->len - 1 && buf->data[ i+1 ] == '\n' )
           continue;                     // CR+LF -> LF
         // no break;
       case '\f':
         new_data[ j ] = '\n';
         break;
       default:
-        new_data[ j ] = b->data[ i ];
+        new_data[ j ] = buf->data[ i ];
     } // switch
     ++j;
   } // for
-  free( b->data );
-  b->data = new_data;
-  b->len = j;
+  free( buf->data );
+  buf->data = new_data;
+  buf->len = j;
+}
+
+static inline Byte utf8_to_palm( char const *utf8_char, size_t *len ) {
+  return unicode_to_palm( utf8_decode( utf8_char, len ) );
 }
 
 ////////// extern functions ///////////////////////////////////////////////////
@@ -94,7 +100,7 @@ void encode( void ) {
   ////////// create and write header //////////////////////////////////////////
 
   DatabaseHdrType header;
-  bzero( &header, sizeof header );
+  memset( &header, 0, sizeof header );
 
   strncpy( header.name, doc_name, sizeof header.name - 1 );
   if ( strlen( doc_name ) > sizeof header.name - 1 )
@@ -128,13 +134,12 @@ void encode( void ) {
   ////////// write record 0 ///////////////////////////////////////////////////
 
   doc_record0_t rec0;
+  memset( &rec0, 0, sizeof rec0 );
 
   rec0.version     = htons( opt_compress + 1 );
-  rec0.reserved1   = 0;
   rec0.doc_size    = htonl( fin_size );
   rec0.num_records = htons( num_records );
   rec0.rec_size    = htons( RECORD_SIZE_MAX );
-  rec0.reserved2   = 0;
 
   FWRITE( &rec0, sizeof rec0, 1, fout );
 
@@ -187,9 +192,6 @@ void encode( void ) {
     else
       putc( '\n', stderr );
   }
-
-  fclose( fin );
-  fclose( fout );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

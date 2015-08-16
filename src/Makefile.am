@@ -20,6 +20,7 @@
 
 bin_PROGRAMS = txt2pdbdoc
 
-txt2pdbdoc_SOURCES = compress.c decode.c encode.c options.c txt2pdbdoc.c util.c
+txt2pdbdoc_SOURCES = compress.c decode.c encode.c options.c palm.c \
+	txt2pdbdoc.c utf8.c util.c
 
 # vim:set noet sw=8 ts=8:

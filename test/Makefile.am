@@ -25,7 +25,9 @@ TESTS =	tests/txt2pdbdoc-b-d.test \
 	tests/txt2pdbdoc-c-t.test \
 	tests/txt2pdbdoc-d-t.test \
 	tests/txt2pdbdoc-D.test \
-	tests/txt2pdbdoc-t.test
+	tests/txt2pdbdoc-t.test \
+	tests/txt2pdbdoc-U_01.test \
+	tests/txt2pdbdoc-U_02.test
 
 AM_TESTS_ENVIRONMENT = BUILD_SRC=$(top_builddir)/src; export BUILD_SRC ;
 TEST_EXTENSIONS = .sh .test

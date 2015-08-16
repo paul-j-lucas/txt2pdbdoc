@@ -22,6 +22,7 @@
 // local
 #include "common.h"
 #include "options.h"
+#include "util.h"
 
 // standard
 #include <stdio.h>
@@ -33,6 +34,7 @@ extern void encode( void );
 ////////// local functions ////////////////////////////////////////////////////
 
 static void clean_up( void ) {
+  freelist_free();
   if ( fin )
     fclose( fin );
   if ( fout )

@@ -21,12 +21,15 @@
 
 // local
 #include "common.h"
+#include "doc.h"
 #include "options.h"
 #include "palm.h"
+#include "utf8.h"
 #include "util.h"
 
 // standard
 #include <assert.h>
+#include <ctype.h>
 #include <sys/types.h>                  /* for FreeBSD */
 #include <netinet/in.h>                 /* for nthol, etc */
 #include <stdio.h>
@@ -43,6 +46,66 @@
 
 extern void uncompress( buffer_t* );
 
+////////// local functions ////////////////////////////////////////////////////
+
+/**
+ * Maps a PalmOS character into its corresponding UTF-8 octet sequence.
+ *
+ * @param c The PalmOS character to map.
+ * @return Returns said sequence or NULL if the PalmOS character can not be
+ * mapped into Unicode.
+ */
+static char const* palm_to_utf8( Byte c ) {
+  uint32_t codepoint = palm_to_unicode( c );
+
+  if ( !codepoint ) {
+    if ( !opt_no_warnings )
+      PMESSAGE(
+        "\"%s\" (%s): PalmOS character does not map to Unicode%s\n",
+        printable_char( c ), palm_to_string( c ),
+        (opt_unmapped_codepoint ? "" : ": skipped")
+      );
+    if ( !opt_unmapped_codepoint )
+      return NULL;
+    codepoint = opt_unmapped_codepoint;
+  }
+
+  switch ( codepoint ) {
+    case 0x81:
+    case 0x9B:
+      //
+      // These characters are not used in PalmOS and shouldn't be present;
+      // but since we got them, skip them.
+      //
+      if ( !opt_no_warnings )
+        PMESSAGE(
+          "\"%s\": character unused by PalmOS: skipped\n",
+          printable_char( c )
+        );
+      return NULL;
+  } // switch
+
+  static char utf8_char[ UTF8_LEN_MAX + 1 /*NULL*/ ];
+  size_t len;
+
+  if ( isascii( codepoint ) ) {
+    if ( !(isspace( (int)codepoint ) || isprint( (int)codepoint )) ) {
+      PMESSAGE(
+        "\"%s\" (%s): non-printable character found: skipped\n",
+        printable_char( c ), palm_to_string( c )
+      );
+      return NULL;
+    }
+    utf8_char[0] = c;
+    len = 1;
+  } else {
+    len = utf8_encode( codepoint, utf8_char );
+  }
+
+  utf8_char[ len ] = '\0';
+  return utf8_char;
+}
+
 ////////// extern functions ///////////////////////////////////////////////////
 
 /**
@@ -50,7 +113,7 @@ extern void uncompress( buffer_t* );
  */
 void decode( void ) {
 
-  /********** open files, read header, ensure source is a Doc file *****/
+  ////////// open files, read header, ensure source is a Doc file /////////////
 
   DatabaseHdrType header;
   FREAD( &header, DatabaseHdrSize, 1, fin );
@@ -60,9 +123,10 @@ void decode( void ) {
     PMESSAGE_EXIT( NOT_DOC_FILE, "%s is not a Doc file\n", fin_path );
   }
 
-  int const num_records = ntohs( header.recordList.numRecords ) - 1; /* w/o rec 0 */
+  // without rec 0
+  int const num_records = ntohs( header.recordList.numRecords ) - 1;
 
-  /********** read record 0 ********************************************/
+  ////////// read record 0 ////////////////////////////////////////////////////
 
   SEEK_REC( fin, 0 );
   DWord offset;
@@ -73,18 +137,23 @@ void decode( void ) {
   FREAD( &rec0, sizeof rec0, 1, fin );
 
   int const compression = ntohs( rec0.version );
-  if ( compression != COMPRESSED && compression != UNCOMPRESSED )
-    PMESSAGE_EXIT( UNKNOWN_COMPRESSION,
-      "error: %d: unknown file compression type\n", compression
-    );
+  switch ( compression ) {
+    case COMPRESSED:
+    case UNCOMPRESSED:
+      break;
+    default:
+      PMESSAGE_EXIT( UNKNOWN_COMPRESSION,
+        "error: %d: unknown file compression type\n", compression
+      );
+  } // switch
 
-  /********* read Doc file record-by-record ****************************/
+  ///////// read Doc file record-by-record ////////////////////////////////////
 
   FSEEK( fin, 0, SEEK_END );
   DWord const file_size = ftell( fin );
 
   if ( opt_verbose )
-    PRINT_ERR( "%s: decoding \"%s\":", me, header.name );
+    PMESSAGE( "decoding \"%s\":", header.name );
 
   buffer_t buf;
   NEW_BUFFER( &buf );
@@ -112,15 +181,18 @@ void decode( void ) {
     if ( compression == COMPRESSED )
       uncompress( &buf );
 
-    FWRITE( buf.data, buf.len, 1, fout );
+    for ( size_t i = 0; i < buf.len; ++i ) {
+      char const *const utf8_char = palm_to_utf8( buf.data[i] );
+      if ( utf8_char )
+        FPRINTF( fout, "%s", utf8_char );
+    } // for
+
     if ( opt_verbose )
       PRINT_ERR( " %d", num_records - rec_num );
   } // for
+
   if ( opt_verbose )
     putc( '\n', stderr );
-
-  fclose( fin );
-  fclose( fout );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

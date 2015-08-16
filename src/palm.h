@@ -23,33 +23,26 @@
 #define txt2pdbdoc_palm_H
 
 // local
-#include "config.h"
+#include "util.h"                       /* for bool */
 
 // standard
 #include <stdint.h>
 #ifdef HAVE_TIME_H
-#include <time.h>
+#include <time.h>                       /* for time() */
 #endif /* HAVE_TIME_H */
 
-///////////////////////////////////////////////////////////////////////////////
+#ifndef TXT2PDBDOC_PALM_INLINE
+# define TXT2PDBDOC_PALM_INLINE _GL_INLINE
+#endif /* TXT2PDBDOC_PALM_INLINE */
 
-// Define integral type Byte, Word, and DWord to match those on the Pilot being
-// 8, 16, and 32 bits, respectively.
+////////// PalmOS types ///////////////////////////////////////////////////////
 
 typedef uint8_t   Byte;
 typedef uint16_t  Word;
 typedef uint32_t  DWord;
 
-/********** Other stuff ******************************************************/
-
 #define dmDBNameLength  32              // 31 chars + 1 null terminator
 #define RECORD_SIZE_MAX 4096            // Pilots have a max 4K record size
-
-#ifdef HAVE_TIME_H
-# define palm_date() (DWord)(time(0) + 2082844800ul)
-#else
-# define palm_date() 0
-#endif /* HAVE_TIME_H */
 
 /**
  * Every record has one of these headers.
@@ -71,10 +64,8 @@ struct RecordEntryType {
 };
 typedef struct RecordEntryType RecordEntryType;
 
-/*
-** Some compilers pad structures out to DWord boundaries so using sizeof()
-** doesn't give the right result.
-*/
+// Some compilers pad structures out to DWord boundaries so using sizeof()
+// doesn't give the right result.
 #define RecordEntrySize   8
 
 /**
@@ -113,6 +104,50 @@ struct DatabaseHdrType {                // 78 bytes total
 typedef struct DatabaseHdrType DatabaseHdrType;
 
 #define DatabaseHdrSize   78
+
+#define SEEK_REC(F,I) \
+  FSEEK_FN( (F), DatabaseHdrSize + RecordEntrySize * (I), SEEK_SET )
+
+////////// PalmOS utility functions ///////////////////////////////////////////
+
+#ifdef HAVE_TIME_H
+# define palm_date()      ( (DWord)(time(0) + 2082844800ul) )
+#else
+# define palm_date()      0
+#endif /* HAVE_TIME_H */
+
+/**
+ * Gets the full name of the given PalmOS character
+ * (useful for error messages).
+ *
+ * @param c The PalmOS character to get the name of.
+ * @return Returns said name.
+ */
+TXT2PDBDOC_PALM_INLINE char const* palm_to_string( Byte c ) {
+  extern char const *const palm_to_string_table[];
+  return palm_to_string_table[ c ];
+}
+
+/**
+ * Maps a PalmOS character into its corresponding Unicode codepoint.
+ *
+ * @param c The PalmOS character to map.
+ * @return Returns said or 0 if the PalmOS character can not be mapped into
+ * Unicode.
+ */
+TXT2PDBDOC_PALM_INLINE uint32_t palm_to_unicode( Byte c ) {
+  extern uint32_t const palm_to_unicode_table[];
+  return palm_to_unicode_table[ c ];
+}
+
+/**
+ * Maps a Unicode codepoint into its corresponding PalmOS character.
+ *
+ * @param codepoint The Unicode codepoint to map.
+ * @return Returns said character or 0 if the codepoint can not be mapped into
+ * a PalmOS character.
+ */
+Byte unicode_to_palm( uint32_t codepoint );
 
 ///////////////////////////////////////////////////////////////////////////////
 
