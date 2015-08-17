@@ -70,6 +70,9 @@ typedef bool _Bool;
 #define FPRINTF(F,...) \
   BLOCK( if ( fprintf( (F), __VA_ARGS__ ) < 0 ) PERROR_EXIT( WRITE_ERROR ); )
 
+#define FPUTC(C,F) \
+  BLOCK( if ( putc( (C), (F) ) == EOF ) PERROR_EXIT( WRITE_ERROR ); )
+
 #define FSEEK(STREAM,OFFSET,WHENCE) \
   BLOCK( if ( FSEEK_FN( (STREAM), (OFFSET), (WHENCE) ) == -1 ) PERROR_EXIT( SEEK_ERROR ); )
 

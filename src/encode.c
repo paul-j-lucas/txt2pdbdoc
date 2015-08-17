@@ -47,6 +47,11 @@ extern void compress( buffer_t* );
 
 ////////// local functions ////////////////////////////////////////////////////
 
+/**
+ * Fills a buffer with characters from the input file.
+ *
+ * @param buf The buffer to fill.
+ */
 static void fill_buffer( buffer_t *buf ) {
   assert( buf );
   assert( buf->data );
@@ -221,7 +226,7 @@ void encode( void ) {
         (int)( 100.0 * total_after / total_before )
       );
     else
-      putc( '\n', stderr );
+      FPUTC( '\n', stderr );
   }
 }
 
