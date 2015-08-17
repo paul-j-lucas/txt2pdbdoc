@@ -23,6 +23,7 @@
 #include "utf8.h"
 
 // standard
+#include <assert.h>
 #include <ctype.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,29 +50,30 @@ uint8_t const utf8_len_table[] = {
 
 ////////// extern functions ///////////////////////////////////////////////////
 
-uint32_t utf8_decode( char const *u, size_t *plen ) {
-  uint32_t codepoint = *u & 0xFFu;      // prevents sign-extension
-  if ( isascii( codepoint ) )           // special-case ASCII
-    ++(*plen);
-  else {
-    size_t const len = utf8_len( *u );
-    unsigned m = (0x7F >> len) & 0x1F;  // mask
-    codepoint = 0;
-    switch ( len ) {
-      case 6: codepoint |= ((*u & m   ) << 30); ++u; m = 0x3F;
-      case 5: codepoint |= ((*u & m   ) << 24); ++u; m = 0x3F;
-      case 4: codepoint |= ((*u & m   ) << 18); ++u; m = 0x3F;
-      case 3: codepoint |= ((*u & m   ) << 12); ++u; m = 0x3F;
-      case 2: codepoint |= ((*u & m   ) <<  6); ++u;
-              codepoint |=  (*u & 0x3F)       ; ++u;
-              *plen += len;
-              break;
-    } // switch
-  }
+uint32_t utf8_decode( uint8_t const *u ) {
+  assert( u );
+
+  size_t const len = utf8_len( *u );
+  if ( len == 1 )                       // special-case ASCII
+    return *u & 0xFFu;                  // prevents sign-extension
+
+  uint32_t codepoint = 0;
+  unsigned m = (0x7F >> len) & 0x1F;    // mask
+  switch ( len ) {
+    case 6: codepoint |= ((*u & m   ) << 30); ++u; m = 0x3F;
+    case 5: codepoint |= ((*u & m   ) << 24); ++u; m = 0x3F;
+    case 4: codepoint |= ((*u & m   ) << 18); ++u; m = 0x3F;
+    case 3: codepoint |= ((*u & m   ) << 12); ++u; m = 0x3F;
+    case 2: codepoint |= ((*u & m   ) <<  6); ++u;
+            codepoint |=  (*u & 0x3F)       ; ++u;
+            break;
+  } // switch
   return codepoint;
 }
 
-size_t utf8_encode( uint32_t codepoint, char *u ) {
+size_t utf8_encode( uint32_t codepoint, uint8_t *u ) {
+  assert( u );
+
   static unsigned const Mask1 = 0x80;
   static unsigned const Mask2 = 0xC0;
   static unsigned const Mask3 = 0xE0;
@@ -79,41 +81,41 @@ size_t utf8_encode( uint32_t codepoint, char *u ) {
   static unsigned const Mask5 = 0xF8;
   static unsigned const Mask6 = 0xFC;
 
-  unsigned const n = codepoint & 0xFFFFFFFF;
-  char *const u0 = u;
+  uint32_t const n = codepoint & 0xFFFFFFFF;
+  uint8_t *const u0 = u;
   if ( isascii( n ) ) {
     // 0xxxxxxx
-    *u++ = (char)n;
+    *u++ = (uint8_t)n;
   } else if ( n < 0x800 ) {
     // 110xxxxx 10xxxxxx
-    *u++ = (char)( Mask2 |  (n >>  6)         );
-    *u++ = (char)( Mask1 | ( n        & 0x3F) );
+    *u++ = (uint8_t)( Mask2 |  (n >>  6)         );
+    *u++ = (uint8_t)( Mask1 | ( n        & 0x3F) );
   } else if ( n < 0x10000 ) {
     // 1110xxxx 10xxxxxx 10xxxxxx
-    *u++ = (char)( Mask3 |  (n >> 12)         );
-    *u++ = (char)( Mask1 | ((n >>  6) & 0x3F) );
-    *u++ = (char)( Mask1 | ( n        & 0x3F) );
+    *u++ = (uint8_t)( Mask3 |  (n >> 12)         );
+    *u++ = (uint8_t)( Mask1 | ((n >>  6) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ( n        & 0x3F) );
   } else if ( n < 0x200000 ) {
     // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-    *u++ = (char)( Mask4 |  (n >> 18)         );
-    *u++ = (char)( Mask1 | ((n >> 12) & 0x3F) );
-    *u++ = (char)( Mask1 | ((n >>  6) & 0x3F) );
-    *u++ = (char)( Mask1 | ( n        & 0x3F) );
+    *u++ = (uint8_t)( Mask4 |  (n >> 18)         );
+    *u++ = (uint8_t)( Mask1 | ((n >> 12) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ((n >>  6) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ( n        & 0x3F) );
   } else if ( n < 0x4000000 ) {
     // 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-    *u++ = (char)( Mask5 |  (n >> 24)         );
-    *u++ = (char)( Mask1 | ((n >> 18) & 0x3F) );
-    *u++ = (char)( Mask1 | ((n >> 12) & 0x3F) );
-    *u++ = (char)( Mask1 | ((n >>  6) & 0x3F) );
-    *u++ = (char)( Mask1 | ( n        & 0x3F) );
+    *u++ = (uint8_t)( Mask5 |  (n >> 24)         );
+    *u++ = (uint8_t)( Mask1 | ((n >> 18) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ((n >> 12) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ((n >>  6) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ( n        & 0x3F) );
   } else if ( n < 0x8000000 ) {
     // 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-    *u++ = (char)( Mask6 |  (n >> 30)         );
-    *u++ = (char)( Mask1 | ((n >> 24) & 0x3F) );
-    *u++ = (char)( Mask1 | ((n >> 18) & 0x3F) );
-    *u++ = (char)( Mask1 | ((n >> 12) & 0x3F) );
-    *u++ = (char)( Mask1 | ((n >>  6) & 0x3F) );
-    *u++ = (char)( Mask1 | ( n        & 0x3F) );
+    *u++ = (uint8_t)( Mask6 |  (n >> 30)         );
+    *u++ = (uint8_t)( Mask1 | ((n >> 24) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ((n >> 18) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ((n >> 12) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ((n >>  6) & 0x3F) );
+    *u++ = (uint8_t)( Mask1 | ( n        & 0x3F) );
   }
   return u - u0;
 }

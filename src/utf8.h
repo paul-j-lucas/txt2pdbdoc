@@ -60,7 +60,7 @@ TXT2PDBDOC_UTF8_INLINE bool codepoint_is_valid( uint64_t codepoint ) {
  * @param utf8 The UTF-8 octet sequence to decode.
  * @return Returns said codepoint or 0 if the \a utf8 is invalid.
  */
-uint32_t utf8_decode( char const *utf8, size_t *len );
+uint32_t utf8_decode( uint8_t const *utf8 );
 
 /**
  * Encodes a Unicode codepoint into UTF-8.
@@ -71,35 +71,7 @@ uint32_t utf8_decode( char const *utf8, size_t *len );
  * @return Returns the number of bytes comprising the codepoint encoded as
  * UTF-8.
  */
-size_t utf8_encode( uint32_t codepoint, char *utf8_buf );
-
-/**
- * Checks whether the given byte is the first byte of a UTF-8 byte sequence
- * comprising an encoded character.  Note that this is not equivalent to
- * !utf8_is_cont(c).
- *
- * @param c The byte to check.
- * @return Returns \c true only if the byte is the first byte of a UTF-8 byte
- * sequence comprising an encoded character.
- */
-TXT2PDBDOC_UTF8_INLINE bool utf8_is_start( char c ) {
-  uint8_t const u = c;
-  return u < 0x80u || (u >= 0xC2u && u < 0xFEu);
-}
-
-/**
- * Checks whether the given byte is not the first byte of a UTF-8 byte sequence
- * comprising an encoded character.  Note that this is not equivalent to
- * !utf8_is_start(c).
- *
- * @param c The byte to check.
- * @return Returns \c true only if the byte is not the first byte of a UTF-8
- * byte sequence comprising an encoded character.
- */
-TXT2PDBDOC_UTF8_INLINE bool utf8_is_cont( char c ) {
-  uint8_t const u = c;
-  return u >= 0x80u && u < 0xC0u;
-}
+size_t utf8_encode( uint32_t codepoint, uint8_t *utf8_buf );
 
 /**
  * Gets the length of a UTF-8 character.
@@ -108,9 +80,9 @@ TXT2PDBDOC_UTF8_INLINE bool utf8_is_cont( char c ) {
  * @return Returns the number of bytes needed for the UTF-8 character in the
  * range [1,6] or 0 if \a start is not a valid start byte.
  */
-TXT2PDBDOC_UTF8_INLINE size_t utf8_len( char start ) {
+TXT2PDBDOC_UTF8_INLINE size_t utf8_len( uint8_t start ) {
   extern uint8_t const utf8_len_table[];
-  return utf8_len_table[ (uint8_t)start ];
+  return utf8_len_table[ start ];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

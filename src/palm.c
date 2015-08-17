@@ -50,7 +50,7 @@ uint32_t const palm_to_unicode_table[] = {
   /* 0x0E */ 0x000E,  // SHIFT OUT
   /* 0x0F */ 0x000F,  // SHIFT IN
 
-  /* 0x10 */ 0x0010,  // DATA LINKE ESCAPE
+  /* 0x10 */ 0x0010,  // DATA LINK ESCAPE
   /* 0x11 */ 0x0011,  // DEVICE CONTROL ONE
   /* 0x12 */ 0x0012,  // DEVICE CONTROL TWO
   /* 0x13 */ 0x0013,  // DEVICE CONTROL THREE
@@ -172,7 +172,7 @@ uint32_t const palm_to_unicode_table[] = {
   ///// This range is where Palm's chacacter set differs from ISO 8859-1 //////
 
   /* 0x80 */ 0x20AC, // PalmOS: EURO SIGN
-  /* 0x81 */ 0x0081, // (not used)
+  /* 0x81 */ 0x0081, // PalmOS: (not used)
   /* 0x82 */ 0x201A, // PalmOS: SINGLE LOW-9 QUOTATION MARK
   /* 0x83 */ 0x0192, // PalmOS: LATIN SMALL LETTER F WITH HOOK
   /* 0x84 */ 0x201E, // PalmOS: DOUBLE LOW-9 QUOTATION MARK
@@ -199,7 +199,7 @@ uint32_t const palm_to_unicode_table[] = {
   /* 0x98 */ 0x02DC, // PalmOS: SMALL TILDE
   /* 0x99 */ 0x2122, // PalmOS: TRADE MARK SIGN
   /* 0x9A */ 0x0161, // PalmOS: LATIN SMALL LETTER S WITH CARON
-  /* 0x9B */ 0x009B, // (not used)
+  /* 0x9B */ 0x009B, // PalmOS: (not used)
   /* 0x9C */ 0x0153, // PalmOS: LATIN SMALL LIGATURE OE
   /* 0x9D */ NO_MAP, // PalmOS: COMMAND STROKE
   /* 0x9E */ NO_MAP, // PalmOS: SHORTCUT STROKE
@@ -324,7 +324,7 @@ char const *const palm_to_string_table[] = {
   /* 0x0E */ "shift out",
   /* 0x0F */ "shift in",
 
-  /* 0x10 */ "data linke escape",
+  /* 0x10 */ "data link escape",
   /* 0x11 */ "device control one",
   /* 0x12 */ "device control two",
   /* 0x13 */ "device control three",
@@ -583,18 +583,10 @@ char const *const palm_to_string_table[] = {
 
 Byte unicode_to_palm( uint32_t codepoint ) {
   switch ( codepoint ) {
-    case 0x0014:              // PalmOS: OTA SECURE
-    case 0x0015:              // PalmOS: OTA
-    case 0x0016:              // PalmOS: COMMAND STROKE
-    case 0x0017:              // PalmOS: SHORTCUT STROKE
-    case 0x009D:              // PalmOS: COMMAND STROKE
-    case 0x009E: return 0x00; // PalmOS: SHORTCUT STROKE
-
     case 0x2026: return 0x18; // HORIZONTAL ELLIPSIS
     case 0x2007: return 0x19; // FIGURE SPACE
 
     case 0x20AC: return 0x80; // EURO SIGN
-    case 0x0081: return 0x81; // (not used)
     case 0x201A: return 0x82; // SINGLE LOW-9 QUOTATION MARK
     case 0x0192: return 0x83; // LATIN SMALL LETTER F WITH HOOK
     case 0x201E: return 0x84; // DOUBLE LOW-9 QUOTATION MARK
@@ -619,7 +611,6 @@ Byte unicode_to_palm( uint32_t codepoint ) {
     case 0x02DC: return 0x98; // SMALL TILDE
     case 0x2122: return 0x99; // TRADE MARK SIGN
     case 0x0161: return 0x9A; // LATIN SMALL LETTER S WITH CARON
-    case 0x009B: return 0x9B; // (not used)
     case 0x0153: return 0x9C; // LATIN SMALL LIGATURE OE
 //  case NO_MAP: return 0x9D; // PalmOS: COMMAND STROKE
 //  case NO_MAP: return 0x9E; // PalmOS: SHORTCUT STROKE
@@ -628,6 +619,16 @@ Byte unicode_to_palm( uint32_t codepoint ) {
     default:
       if ( isascii( codepoint ) || (codepoint >= 0xA0 || codepoint <= 0xFF) )
         return (Byte)codepoint;
+      // no break;
+
+    case 0x0014:              // PalmOS: OTA SECURE
+    case 0x0015:              // PalmOS: OTA
+    case 0x0016:              // PalmOS: COMMAND STROKE
+    case 0x0017:              // PalmOS: SHORTCUT STROKE
+    case 0x0081:              // PalmOS: (not used)
+    case 0x009B:              // PalmOS: (not used)
+    case 0x009D:              // PalmOS: COMMAND STROKE
+    case 0x009E:              // PalmOS: SHORTCUT STROKE
       return 0x00;            // does not map to PalmOS
   } // switch
 }

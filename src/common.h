@@ -36,7 +36,7 @@
 #define EXIT_READ_ERROR           11    /* error reading */
 #define EXIT_WRITE_ERROR          12    /* error writing */
 #define EXIT_SEEK_ERROR           13    /* error seeking */
-#define EXIT_STAT_ERROR           13    /* error stat'ing */
+#define EXIT_STAT_ERROR           14    /* error stat'ing */
 #define EXIT_NOT_DOC_FILE         20
 #define EXIT_UNKNOWN_COMPRESSION  21
 

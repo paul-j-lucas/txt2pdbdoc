@@ -29,6 +29,7 @@
 
 // standard
 #include <assert.h>
+#include <ctype.h>
 #include <sys/types.h>                  /* for FreeBSD */
 #include <netinet/in.h>                 /* for htonl() */
 #include <stdio.h>
@@ -46,41 +47,78 @@ extern void compress( buffer_t* );
 
 ////////// local functions ////////////////////////////////////////////////////
 
-/**
- * Replaces the given buffer with one that has had ASCII characters (0-8)
- * removed and carriage-returns and form-feeds converted to newlines.
- *
- * @param buf The buffer to be affected.
- */
-static void remove_binary( buffer_t *buf ) {
+static void fill_buffer( buffer_t *buf ) {
   assert( buf );
+  assert( buf->data );
+  buf->len = 0;
 
-  Byte *const new_data = MALLOC( Byte, buf->len );
-  size_t i, j;
-
-  for ( i = j = 0; i < buf->len; ++i ) {
-    if ( buf->data[ i ] < 9 )           // discard really low ASCII
+  for ( int c; (c = getc( fin )) != EOF; ) {
+    size_t const len = utf8_len( c );
+    if ( !len ) {
+      if ( !opt_no_warnings )
+        PMESSAGE( "\"%s\": invalid UTF-8 start byte\n", printable_char( c ) );
       continue;
-    switch ( buf->data[ i ] ) {
-      case '\r':
-        if ( i < buf->len - 1 && buf->data[ i+1 ] == '\n' )
-          continue;                     // CR+LF -> LF
-        // no break;
-      case '\f':
-        new_data[ j ] = '\n';
-        break;
-      default:
-        new_data[ j ] = buf->data[ i ];
-    } // switch
-    ++j;
-  } // for
-  free( buf->data );
-  buf->data = new_data;
-  buf->len = j;
-}
+    }
 
-static inline Byte utf8_to_palm( char const *utf8_char, size_t *len ) {
-  return unicode_to_palm( utf8_decode( utf8_char, len ) );
+    ////////// handle ASCII ///////////////////////////////////////////////////
+
+    if ( len == 1 ) {
+      if ( opt_binary ) {
+        if ( !(isspace( c ) || isprint( c )) )
+          continue;
+        switch ( c ) {
+          case '\r':
+            if ( peekc( fin ) == '\n' )
+              continue;                     // CR+LF -> LF
+            // no break;
+          case '\f':
+            c = '\n';
+            break;
+        } // switch
+      }
+      buf->data[ buf->len ] = (Byte)c;
+    }
+
+    ////////// handle UTF-8 ///////////////////////////////////////////////////
+
+    else {
+      uint8_t utf8_char[ UTF8_LEN_MAX ];
+      size_t u = 0;
+      utf8_char[ u++ ] = c;
+      for ( size_t i = len; i > 1; --i ) {
+        if ( (c = getc( fin )) == EOF )
+          goto done;
+        if ( utf8_len( c ) ) {
+          if ( !opt_no_warnings )
+            PMESSAGE(
+              "\"%s\": invalid UTF-8 continuation byte\n",
+              printable_char( c )
+            );
+          goto next;
+        }
+        utf8_char[ u++ ] = c;
+      } // for
+      uint32_t const codepoint = utf8_decode( utf8_char );
+      if ( !(c = unicode_to_palm( codepoint )) ) {
+        if ( !opt_no_warnings )
+          PMESSAGE(
+            "\"%x04X\": Unicode codepoint does not map to PalmOS\n", codepoint
+          );
+        continue;
+      }
+    }
+
+    buf->data[ buf->len ] = c;
+    if ( ++buf->len == RECORD_SIZE_MAX )
+      break;
+
+next:
+    /* nothing */;
+  } // for
+
+done:
+  if ( ferror( fin ) )
+    PERROR_EXIT( READ_ERROR );
 }
 
 ////////// extern functions ///////////////////////////////////////////////////
@@ -154,15 +192,8 @@ void encode( void ) {
     SEEK_REC( fout, rec_num );
     PUT_DWord( fout, offset );
 
-    size_t bytes_read;
-    if ( !(bytes_read = fread( buf.data, 1, RECORD_SIZE_MAX, fin )) )
-      break;
-    if ( ferror( fin ) )
-      PERROR_EXIT( READ_ERROR );
-    buf.len = bytes_read;
-
-    if ( opt_binary )
-      remove_binary( &buf );
+    fill_buffer( &buf );
+    size_t const uncompressed_buf_len = buf.len;
     if ( opt_compress )
       compress( &buf );
 
@@ -175,10 +206,10 @@ void encode( void ) {
     if ( opt_compress ) {
       PRINT_ERR(
         "  record %2d: %5zu bytes -> %5zu (%2d%%)\n",
-        rec_num, bytes_read, buf.len,
-        (int)( 100.0 * buf.len / bytes_read )
+        rec_num, uncompressed_buf_len, buf.len,
+        (int)( 100.0 * buf.len / uncompressed_buf_len )
       );
-      total_before += bytes_read;
+      total_before += uncompressed_buf_len;
       total_after  += buf.len;
     } else
       PRINT_ERR( " %d", num_records - rec_num + 1 );

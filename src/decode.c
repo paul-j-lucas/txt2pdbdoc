@@ -51,7 +51,7 @@ extern void uncompress( buffer_t* );
  * @return Returns said sequence or NULL if the PalmOS character can not be
  * mapped into Unicode.
  */
-static char const* palm_to_utf8( Byte c ) {
+static uint8_t const* palm_to_utf8( Byte c ) {
   uint32_t codepoint = palm_to_unicode( c );
 
   if ( !codepoint ) {
@@ -81,7 +81,7 @@ static char const* palm_to_utf8( Byte c ) {
       return NULL;
   } // switch
 
-  static char utf8_char[ UTF8_LEN_MAX + 1 /*NULL*/ ];
+  static uint8_t utf8_char[ UTF8_LEN_MAX + 1 /*NULL*/ ];
   size_t len;
 
   if ( isascii( codepoint ) ) {
@@ -178,7 +178,7 @@ void decode( void ) {
       uncompress( &buf );
 
     for ( size_t i = 0; i < buf.len; ++i ) {
-      char const *const utf8_char = palm_to_utf8( buf.data[i] );
+      uint8_t const *const utf8_char = palm_to_utf8( buf.data[i] );
       if ( utf8_char )
         FPRINTF( fout, "%s", utf8_char );
     } // for

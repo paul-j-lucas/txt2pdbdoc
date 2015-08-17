@@ -87,6 +87,9 @@ typedef bool _Bool;
 #define PMESSAGE_EXIT(STATUS,FORMAT,...) \
   BLOCK( PMESSAGE( FORMAT, __VA_ARGS__ ); exit( EXIT_##STATUS ); )
 
+#define UNGETC(C,F) \
+  BLOCK( if ( ungetc( (C), (F) ) == EOF ) PERROR_EXIT( READ_ERROR ); )
+
 extern char const* me;                  // executable name from argv[0]
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,6 +157,15 @@ uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len );
  * number or prints an error message and exits if there was an error.
  */
 uint64_t parse_ull( char const *s );
+
+/**
+ * Peeks at the next character on the given file stream, but does not advance
+ * the \c FILE pointer.
+ *
+ * @param file The file to peek from.
+ * @return Returns the next character, if any, or \c EOF if none.
+ */
+int peekc( FILE *file );
 
 /**
  * Gets a printable version of the given character:

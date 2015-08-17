@@ -99,6 +99,7 @@ char* check_strdup( char const *s ) {
 }
 
 void* freelist_add( void *p ) {
+  assert( p );
   free_node_t *const new_node = MALLOC( free_node_t, 1 );
   new_node->ptr = p;
   new_node->next = free_head ? free_head : NULL;
@@ -117,6 +118,9 @@ void freelist_free() {
 }
 
 uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len ) {
+  assert( t );
+  assert( m );
+
   for ( size_t i = t_len - m_len + 1; i > 0; --i, ++t )
     if ( *t == *m && !memcmp( t, m, m_len ) )
       return t;
@@ -124,6 +128,7 @@ uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len ) {
 }
 
 uint64_t parse_ull( char const *s ) {
+  assert( s );
   s = skip_ws( s );
   if ( *s && *s != '-') {               // strtoull(3) wrongly allows '-'
     char *end = NULL;
@@ -133,6 +138,17 @@ uint64_t parse_ull( char const *s ) {
       return n;
   }
   PMESSAGE_EXIT( USAGE, "\"%s\": invalid integer\n", s );
+}
+
+int peekc( FILE *file ) {
+  int const c = getc( file );
+  if ( c == EOF ) {
+    if ( ferror( file ) )
+      PERROR_EXIT( READ_ERROR );
+  } else {
+    UNGETC( c, file );
+  }
+  return c;
 }
 
 char const* printable_char( char c ) {

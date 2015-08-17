@@ -179,7 +179,7 @@ esac
 DATA_DIR=$srcdir/data
 EXPECTED_DIR=$srcdir/expected
 TEST_NAME=`local_basename "$TEST_NAME"`
-OUTPUT=/tmp/ad_test_output_$$_
+OUTPUT=/tmp/txt2pdbdoc_test_output_$$_
 
 ########## Run test ###########################################################
 
@@ -227,14 +227,9 @@ run_test_file() {
 }
 
 ##
-# Must put BUILD_SRC first in PATH so we get the correct version of ad.
+# Must put BUILD_SRC first in PATH so we get the correct version of txt2pdbdoc.
 ##
 PATH=$BUILD_SRC:$PATH
-
-##
-# Must unset these so we get the default colors in test output.
-##
-unset AD_COLORS GREP_COLOR GREP_COLORS
 
 trap "x=$?; rm -f /tmp/*_$$_* 2>/dev/null; exit $x" EXIT HUP INT TERM
 

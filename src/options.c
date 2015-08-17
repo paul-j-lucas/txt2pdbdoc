@@ -68,6 +68,8 @@ static char opts_given[ 2 /* lower/upper */ ][ 26 + 1 /*NULL*/ ];
  * @param req_opts The set of required options for \a opt.
  */
 static void check_required( char opt, char const *req_opts ) {
+  assert( req_opts );
+
   if ( GAVE_OPTION( opt ) ) {
     for ( char const *req_opt = req_opts; *req_opt; ++req_opt )
       if ( GAVE_OPTION( *req_opt ) )
@@ -91,6 +93,9 @@ static void check_required( char opt, char const *req_opts ) {
  * @param opts2 The second set of short options.
  */
 static void check_mutually_exclusive( char const *opts1, char const *opts2 ) {
+  assert( opts1 );
+  assert( opts2 );
+
   int gave_count = 0;
   char const *opt = opts1;
   char gave_opt1 = '\0';
@@ -127,8 +132,10 @@ static void check_mutually_exclusive( char const *opts1, char const *opts2 ) {
  */
 static uint32_t parse_codepoint( char const *s ) {
   assert( s );
+
   if ( s[0] && !s[1] )                  // assume single-char ASCII
     return (uint32_t)s[0];
+
   char const *const s0 = s;
   if ( (s[0] == 'U' || s[0] == 'u') && s[1] == '+' ) {
     // convert [uU]+NNNN to 0xNNNN so strtoull() will grok it
@@ -163,7 +170,7 @@ static void usage( void ) {
 "  -U number  Set Unicode unmapped character [default: none].\n"
 "  -v         Be verbose [default: don't].\n"
 "  -V         Print version and exit.\n"
-"  -w:        Don't print character conversion warnings [default: do].\n"
+"  -w         Don't print character conversion warnings [default: do].\n"
     , me, me, me
   );
   exit( EXIT_USAGE );
