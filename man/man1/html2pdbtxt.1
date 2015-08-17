@@ -36,24 +36,16 @@
 ..
 .\" ---------------------------------------------------------------------------
 .tr ~
-.TH \f3html2pdbtxt\fP 1 "June 15, 2001" "html2pdbtxt"
+.TH \f3html2pdbtxt\fP 1 "August 16, 2015" "html2pdbtxt"
 .SH NAME
 html2pdbtxt \- HTML to Doc Text converter for Palm Pilots
 .SH SYNOPSIS
 .B html2pdbtxt
-[
-.BI \-b chars
-]
-[
-.BI \-t title
-]
-[
-.BI \-u URL
-]
+.RB [ \-b "\f2 chars\fP" ]
+.RB [ \-t "\f2 title\fP" ]
+.RB [ \-u "\f2 URL\fP" ]
 .I file.html
-[
-.I file.txt
-]
+.RI [ file.txt ]
 .br
 .B html2pdbtxt \-v
 .SH DESCRIPTION
@@ -109,17 +101,17 @@ Bookmarks are placed into the generated file
 wherever \f(CW<A~NAME="...">\fP tags are found in the HTML file.
 .SH OPTIONS
 .TP 10
-.BI \-b chars
+.BI \-b " chars"
 Specify the character sequence that is to serve as the bookmark indicator.
 The default is \f(CW(*)\fP.
 (See the CAVEATS.)
 .TP
-.BI \-t title
+.BI \-t " title"
 Specify the title of the document that is to appear on line 1
 of the generated file overriding any title found inside the HTML file
 between \f(CW<TITLE>\fP ... \f(CW</TITLE>\fP tags.
 .TP
-.BI \-u url
+.BI \-u " url"
 Specify the URL the HTML file supposedly came from
 and put it on the line after the title, if any, in the generated file.
 .TP
@@ -167,4 +159,4 @@ World Wide Web Consortium.
 http://www.w3.org/
 .SH AUTHOR
 Paul J. Lucas
-.RI < pauljlucas@mac.com >
+.RI < paul@lucasmail.org >
