@@ -67,6 +67,12 @@ typedef bool _Bool;
 #define FREAD(PTR,SIZE,N,STREAM) \
   BLOCK( if ( fread( (PTR), (SIZE), (N), (STREAM) ) < (N) ) PERROR_EXIT( READ_ERROR ); )
 
+#define FPRINTF(F,...) \
+  BLOCK( if ( fprintf( (F), __VA_ARGS__ ) < 0 ) PERROR_EXIT( WRITE_ERROR ); )
+
+#define FPUTC(C,F) \
+  BLOCK( if ( putc( (C), (F) ) == EOF ) PERROR_EXIT( WRITE_ERROR ); )
+
 #define FSEEK(STREAM,OFFSET,WHENCE) \
   BLOCK( if ( FSEEK_FN( (STREAM), (OFFSET), (WHENCE) ) == -1 ) PERROR_EXIT( SEEK_ERROR ); )
 
@@ -78,12 +84,27 @@ typedef bool _Bool;
 
 #define MALLOC(TYPE,N)      (TYPE*)check_realloc( NULL, sizeof(TYPE) * (N) )
 
+#define PMESSAGE(FORMAT,...) \
+  FPRINTF( stderr, "%s: " FORMAT, me, __VA_ARGS__ )
+
 #define PMESSAGE_EXIT(STATUS,FORMAT,...) \
-  BLOCK( PRINT_ERR( "%s: " FORMAT, me, __VA_ARGS__ ); exit( EXIT_##STATUS ); )
+  BLOCK( PMESSAGE( FORMAT, __VA_ARGS__ ); exit( EXIT_##STATUS ); )
+
+#define UNGETC(C,F) \
+  BLOCK( if ( ungetc( (C), (F) ) == EOF ) PERROR_EXIT( READ_ERROR ); )
 
 extern char const* me;                  // executable name from argv[0]
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Calls \c strdup(3) and checks for failure.
+ * If memory allocation fails, prints an error message and exits.
+ *
+ * @param s The NULL-terminated string to duplicate.
+ * @return Returns a copy of \a s.
+ */
+char* check_strdup( char const *s );
 
 /**
  * Opens the given file and seeks to the given offset
@@ -105,7 +126,68 @@ FILE* check_fopen( char const *path, char const *mode );
  */
 void* check_realloc( void *p, size_t size );
 
+/**
+ * Adds a pointer to the head of the free-list.
+ *  
+ * @param p The pointer to add.
+ * @return Returns \a p.
+ */
+void* freelist_add( void *p );
+
+/**
+ * Frees all the memory pointed to by all the nodes in the free-list.
+ */
+void freelist_free( void );
+
+/**
+ * TODO
+ *
+ * @param t TODO
+ * @param t_len TODO
+ * @param m TODO
+ * @param m_len TODO
+ * @return TODO
+ */
 uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len );
+
+/**
+ * Parses a string into a \c uint64_t.
+ * Unlike \c strtoull(3), insists that \a s is entirely a non-negative number.
+ *
+ * @param s The NULL-terminated string to parse.
+ * @param n A pointer to receive the parsed number.
+ * @return Returns the parsed number only if \a s is entirely a non-negative
+ * number or prints an error message and exits if there was an error.
+ */
+uint64_t parse_ull( char const *s );
+
+/**
+ * Peeks at the next character on the given file stream, but does not advance
+ * the \c FILE pointer.
+ *
+ * @param file The file to peek from.
+ * @return Returns the next character, if any, or \c EOF if none.
+ */
+int peekc( FILE *file );
+
+/**
+ * Gets a printable version of the given character:
+ *  + For characters for which isprint(3) returns non-zero,
+ *    the printable version is a single character string of itself.
+ *  + For the special-case characters of \0, \a, \b, \f, \n, \r, \t, and \v,
+ *    the printable version is a two character string of a backslash followed
+ *    by the letter.
+ *  + For all other characters, the printable version is a four-character
+ *    string of a backslash followed by an 'x' and the two-character
+ *    hexedecimal value of che characters ASCII code.
+ *
+ * @param c The character to get the printable form of.
+ * @return Returns a NULL-terminated string that is a printable version of
+ * \a c.  Note that the result is a pointer to static storage, hence subsequent
+ * calls will overwrite the returned value.  As such, this function is not
+ * thread-safe.
+ */
+char const* printable_char( char c );
 
 ///////////////////////////////////////////////////////////////////////////////
 

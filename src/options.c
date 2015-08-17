@@ -22,8 +22,10 @@
 // local
 #include "common.h"
 #include "util.h"
+#include "utf8.h"
 
 // standard
+#include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>                     /* for exit() */
 #include <string.h>
@@ -47,6 +49,8 @@ bool        opt_compress = true;
 bool        opt_decode;
 bool        opt_no_check_doc;
 bool        opt_no_timestamp;
+bool        opt_no_warnings;
+uint32_t    opt_unmapped_codepoint;
 bool        opt_verbose;
 
 ////////// local variables ////////////////////////////////////////////////////
@@ -64,6 +68,8 @@ static char opts_given[ 2 /* lower/upper */ ][ 26 + 1 /*NULL*/ ];
  * @param req_opts The set of required options for \a opt.
  */
 static void check_required( char opt, char const *req_opts ) {
+  assert( req_opts );
+
   if ( GAVE_OPTION( opt ) ) {
     for ( char const *req_opt = req_opts; *req_opt; ++req_opt )
       if ( GAVE_OPTION( *req_opt ) )
@@ -87,6 +93,9 @@ static void check_required( char opt, char const *req_opts ) {
  * @param opts2 The second set of short options.
  */
 static void check_mutually_exclusive( char const *opts1, char const *opts2 ) {
+  assert( opts1 );
+  assert( opts2 );
+
   int gave_count = 0;
   char const *opt = opts1;
   char gave_opt1 = '\0';
@@ -111,22 +120,57 @@ static void check_mutually_exclusive( char const *opts1, char const *opts2 ) {
 }
 
 /**
+ * Parses a Unicode code-point value.
+ *
+ * @param s The NULL-terminated string to parse.  Allows for strings of the
+ * form:
+ *  + X: a single character.
+ *  + NN: two-or-more decimal digits.
+ *  + 0xN, u+N, or U+N: one-or-more hexadecimal digits.
+ * @return Returns the Unicode code-point value
+ * or prints an error message and exits if \a s is invalid.
+ */
+static uint32_t parse_codepoint( char const *s ) {
+  assert( s );
+
+  if ( s[0] && !s[1] )                  // assume single-char ASCII
+    return (uint32_t)s[0];
+
+  char const *const s0 = s;
+  if ( (s[0] == 'U' || s[0] == 'u') && s[1] == '+' ) {
+    // convert [uU]+NNNN to 0xNNNN so strtoull() will grok it
+    char *const t = freelist_add( check_strdup( s ) );
+    s = memcpy( t, "0x", 2 );
+  }
+  uint64_t const codepoint = parse_ull( s );
+  if ( codepoint_is_valid( codepoint ) )
+    return (uint32_t)codepoint;         
+  PMESSAGE_EXIT( USAGE,
+    "\"%s\": invalid Unicode code-point for -%c\n",
+    s0, 'U'
+  );
+}
+
+
+/**
  * Prints the usage message to standard error and exits.
  */
 static void usage( void ) {
   PRINT_ERR(
-"usage: %s [-bctv] document_name file.txt file.pdb\n"
-"       %s -d [-Dv] file.pdb [file.txt]\n"
+"usage: %s [-bctvw] document_name file.txt file.pdb\n"
+"       %s -d [-Dvw] [-U codepoint] file.pdb [file.txt]\n"
 "       %s -V\n"
 "\n"
 "options:\n"
-" -b: Don't strip binary characters [default: do].\n"
-" -c: Don't compress Doc file [default: do].\n"
-" -d: Decode Doc file to text [default: encode to Doc].\n"
-" -D: Do not check the type/creator of the Doc file [default: do].\n"
-" -t: Do not include timestamps when encoding [default: do].\n"
-" -v: Be verbose [default: don't].\n"
-" -V: Print version and exit.\n"
+"  -b         Don't strip binary characters [default: do].\n"
+"  -c         Don't compress generated Doc file [default: do].\n"
+"  -d         Decode Doc file to text [default: encode to Doc].\n"
+"  -D         Don't check the type/creator of Doc files [default: do].\n"
+"  -t         Don't include timestamps when encoding [default: do].\n"
+"  -U number  Set Unicode unmapped character [default: none].\n"
+"  -v         Be verbose [default: don't].\n"
+"  -V         Print version and exit.\n"
+"  -w         Don't print character conversion warnings [default: do].\n"
     , me, me, me
   );
   exit( EXIT_USAGE );
@@ -135,7 +179,7 @@ static void usage( void ) {
 ////////// extern functions ///////////////////////////////////////////////////
 
 void process_options( int argc, char *argv[] ) {
-  char const opts[] = "bcdDtvV";        // command line options
+  char const opts[] = "bcdDtU:vVw";     // command line options
 
   me = strrchr( argv[0], '/' );         // determine base name...
   me = me ? me + 1 : argv[0];           // ...of executable
@@ -144,13 +188,15 @@ void process_options( int argc, char *argv[] ) {
   for ( int opt; (opt = getopt( argc, argv, opts )) != EOF; ) {
     SET_OPTION( opt );
     switch ( opt ) {
-      case 'b': opt_binary = false;                 break;
-      case 'c': opt_compress = false;               break;
-      case 'd': opt_decode = true;                  break;
-      case 'D': opt_no_check_doc = true;            break;
-      case 't': opt_no_timestamp = true;            break;
-      case 'v': opt_verbose = true;                 break;
-      case 'V': printf( PACKAGE " " VERSION "\n" ); exit( EXIT_SUCCESS );
+      case 'b': opt_binary = false;                                 break;
+      case 'c': opt_compress = false;                               break;
+      case 'd': opt_decode = true;                                  break;
+      case 'D': opt_no_check_doc = true;                            break;
+      case 't': opt_no_timestamp = true;                            break;
+      case 'U': opt_unmapped_codepoint = parse_codepoint( optarg ); break;
+      case 'v': opt_verbose = true;                                 break;
+      case 'V': printf( PACKAGE " " VERSION "\n" );  exit( EXIT_SUCCESS );
+      case 'w': opt_no_warnings = true;                             break;
       default : usage();
     } // switch
   } // for
@@ -158,10 +204,11 @@ void process_options( int argc, char *argv[] ) {
 
   // check for mutually exclusive options
   check_mutually_exclusive( "bct", "dD" );
-  check_mutually_exclusive( "V", "bcdDtv" );
+  check_mutually_exclusive( "V", "bcdDtUvw" );
 
   // check for options that require other options
   check_required( 'D', "d" );
+  check_required( 'U', "d" );
 
   if ( opt_decode ) {
     switch ( argc ) {

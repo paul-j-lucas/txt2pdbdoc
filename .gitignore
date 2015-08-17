@@ -14,5 +14,6 @@ depcomp
 install-sh
 Makefile
 missing
+*.a
 *.in
 *.o

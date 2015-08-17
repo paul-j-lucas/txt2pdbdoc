@@ -26,6 +26,41 @@
 
 // standard
 #include <assert.h>
+#include <ctype.h>
+#include <string.h>
+
+///////////////////////////////////////////////////////////////////////////////
+  
+/** 
+ * A node for a singly linked list of pointers to memory to be freed via
+ * \c atexit().
+ */
+struct free_node {
+  void *ptr;
+  struct free_node *next;
+};
+typedef struct free_node free_node_t;
+
+////////// local variables ////////////////////////////////////////////////////
+
+static free_node_t *free_head;          // linked list of stuff to free
+
+////////// local functions ////////////////////////////////////////////////////
+
+/**
+ * Skips leading whitespace, if any.
+ *
+ * @param s The NULL-terminated string to skip whitespace for.
+ * @return Returns a pointer within \a s pointing to the first non-whitespace
+ * character or pointing to the NULL byte if either \a s was all whitespace or
+ * empty.
+ */
+static char const* skip_ws( char const *s ) {
+  assert( s );
+  while ( isspace( *s ) )
+    ++s;
+  return s;
+}
 
 ////////// extern functions ///////////////////////////////////////////////////
 
@@ -55,11 +90,85 @@ void* check_realloc( void *p, size_t size ) {
   return r;
 }
 
+char* check_strdup( char const *s ) {
+  assert( s );
+  char *const dup = strdup( s );
+  if ( !dup )
+    PERROR_EXIT( OUT_OF_MEMORY );
+  return dup;
+}
+
+void* freelist_add( void *p ) {
+  assert( p );
+  free_node_t *const new_node = MALLOC( free_node_t, 1 );
+  new_node->ptr = p;
+  new_node->next = free_head ? free_head : NULL;
+  free_head = new_node;
+  return p;
+}
+
+void freelist_free() {
+  for ( free_node_t *p = free_head; p; ) {
+    free_node_t *const next = p->next;
+    free( p->ptr );
+    free( p );
+    p = next;
+  } // for
+  free_head = NULL;
+}
+
 uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len ) {
+  assert( t );
+  assert( m );
+
   for ( size_t i = t_len - m_len + 1; i > 0; --i, ++t )
     if ( *t == *m && !memcmp( t, m, m_len ) )
       return t;
   return NULL;
+}
+
+uint64_t parse_ull( char const *s ) {
+  assert( s );
+  s = skip_ws( s );
+  if ( *s && *s != '-') {               // strtoull(3) wrongly allows '-'
+    char *end = NULL;
+    errno = 0;
+    uint64_t const n = strtoull( s, &end, 0 );
+    if ( !errno && !*end )
+      return n;
+  }
+  PMESSAGE_EXIT( USAGE, "\"%s\": invalid integer\n", s );
+}
+
+int peekc( FILE *file ) {
+  int const c = getc( file );
+  if ( c == EOF ) {
+    if ( ferror( file ) )
+      PERROR_EXIT( READ_ERROR );
+  } else {
+    UNGETC( c, file );
+  }
+  return c;
+}
+
+char const* printable_char( char c ) {
+  switch( c ) {
+    case '\0': return "\\0";
+    case '\a': return "\\a";
+    case '\b': return "\\b";
+    case '\f': return "\\f";
+    case '\n': return "\\n";
+    case '\r': return "\\r";
+    case '\t': return "\\t";
+    case '\v': return "\\v";
+  } // switch
+
+  static char buf[5];                   // \xHH + NULL
+  if ( isprint( c ) )
+    buf[0] = c, buf[1] = '\0';
+  else
+    snprintf( buf, sizeof( buf ), "\\x%02X", (unsigned)c );
+  return buf;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

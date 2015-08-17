@@ -35,26 +35,21 @@
 .sp
 ..
 .\" ---------------------------------------------------------------------------
-.TH \f3txt2pdbdoc\fP 1 "December 3, 2003" "txt2pdbdoc"
+.TH \f3txt2pdbdoc\fP 1 "August 16, 2015" "txt2pdbdoc"
 .SH NAME
 txt2pdbdoc \- Text to Doc file converter for Palm Pilots
 .SH SYNOPSIS
 .B txt2pdbdoc
-.RB [ \-b ]
-.RB [ \-c ]
-.RB [ \-v ]
+.RB [ \-bctvw ]
 .I document-name
 .I file.txt
 .I file.pdb
 .br
 .B txt2pdbdoc
 .B \-d
-.RB [ \-D ]
-.RB [ \-v ]
+.RB [ \-Dvw ]
 .I file.pdb
-[
-.I file.txt
-]
+.RI [ file.txt ]
 .br
 .B txt2pdbdoc
 .B \-V
@@ -71,77 +66,114 @@ The
 .I document-name
 is used in the Document List view of a Doc reader application on the Pilot.
 .SH OPTIONS
-.TP 5
+An option argument
+.I n
+means
+.IR "unsigned integer" .
+If
+.I n
+starts with either
+.B 0x
+or
+.BR 0X,
+then
+.I n
+is interpreted as hexedecimal.
+.TP
 .B \-b
-Ordinarily, characters with an ASCII code less than 9 are removed
+Ordinarily,
+characters non-printable (binary) characters
+are stripped
 and both carriage-returns and form-feeds are converted to newlines.
 This option suppresses that behavior.
 .TP
 .B \-c
-Ordinarily, text is compressed.
+Ordinarily,
+generated Doc files are compressed.
 This option suppresses compression.
 .TP
 .B \-d
-Decode the given Doc file to text
+Decodes the given Doc file to text
 either to a file or to standard output if no file is specified.
 .TP
 .B \-D
-Do not check the file type/creator of the file to decode.
+Does not check the file type/creator of the Doc file to decode.
 This option should be specified
-.B only
+.I only
 if you know for
-.B sure
+.I sure
 that the file is in fact some sort of Doc file.
 Attempting to decode non-Doc files
-will result in undefined behavior
-and quite possibly crash.
+will result in undefined behavior.
+.TP
+.B \-t
+Ordinarily,
+the current time is embedded within generated Doc files
+as their creation and modification times.
+This option suppresses that behavior
+and sets both to zero instead.
+.TP
+.BI \-U " n"
+There are six characters used in the PalmOS character set
+that do not map to Unicode.
+Ordinarily,
+if these characters are encountered while decoding a Doc file,
+they are stripped.
+.TP
+.B ""
+This option specifies the Unicode code-point
+.I n
+to substitute for all unmappable characters.
+As additional special cases,
+the code-point can also be specified
+as either a single character
+or either a \f(CWU+\fP or \f(CWu+\fP
+followed by a hexedecimal integer.
 .TP
 .B \-v
-Verbose mode.
+Enables verbose output.
 For encoding, print progress and compression statistics per 4K of text
 to standard error as well as overall statistics when completed;
 for decoding, print progress in a ``countdown'' style.
 .TP
 .B \-V
-Print the version number of
+Prints the version number of
 .B txt2pdbdoc
-to standard output and exit.
+to standard error and exits.
+.TP
+.B \-w
+Suppresses warnings about either
+incompatibilties mapping between PalmOS and Unicode characters
+or unexpected characters.
 .SH EXAMPLE
 To convert a text file to Doc file:
 .cS
 txt2pdbdoc 'Through the Looking Glass' alice.txt alice.pdb
 .cE
 .SH EXIT STATUS
-Exits with one of the values given below:
-.PP
-.RS 5
 .PD 0
-.TP 5
-0
+.IP 0
 Success.
-.TP
-1
+.IP 1
 Error in command-line options or use.
-.TP
-2
-Unable to open source file.
-.TP
-3
-Unable to open destination file.
-.TP
-4
-Unable to read file.
-.TP
-5
-Unable to write file.
-.TP
-6
+.IP 2
+Out of memory.
+.IP 10
+Open file error.
+.IP 11
+Read error.
+.IP 12
+Write error.
+.IP 13
+Seek error.
+.IP 14
+.B stat
+error.
+.IP 20
 File is not a Doc file.
-.TP
-7
+.IP 21
 Doc file uses unknown compression type.
 .PD
-.RE
 .SH CAVEATS
 .TP 4
 1.
@@ -154,7 +186,10 @@ The command isn't called ``txt2doc'' to avoid confusion about possibly having
 anything to do with Microsoft Word documents that use the \f(CW.doc\f1
 extension.
 .SH SEE ALSO
-.BR doc (4)
+.BR html2pdbtxt (1),
+.BR pdbtxt2html (1),
+.BR doc (4),
+.BR pdb (4)
 .SH AUTHOR
 Paul J. Lucas
 .RI < pauljlucas@mac.com >

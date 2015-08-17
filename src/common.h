@@ -19,8 +19,8 @@
 **      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef txt2pdbdoc_H
-#define txt2pdbdoc_H
+#ifndef txt2pdbdoc_common_H
+#define txt2pdbdoc_common_H
 
 // local
 #include "palm.h"
@@ -36,19 +36,13 @@
 #define EXIT_READ_ERROR           11    /* error reading */
 #define EXIT_WRITE_ERROR          12    /* error writing */
 #define EXIT_SEEK_ERROR           13    /* error seeking */
-#define EXIT_STAT_ERROR           13    /* error stat'ing */
+#define EXIT_STAT_ERROR           14    /* error stat'ing */
 #define EXIT_NOT_DOC_FILE         20
 #define EXIT_UNKNOWN_COMPRESSION  21
 
-#define BUFFER_SIZE   6000              /* big enough for uncompressed record */
-
-#define DOC_CREATOR   "REAd"
-#define DOC_TYPE      "TEXt"
+#define BUFFER_SIZE               6000  /* big enough for uncompressed record */
 
 #define NEW_BUFFER(B) (B)->data = MALLOC( Byte, (B)->len = BUFFER_SIZE )
-
-#define SEEK_REC(F,I) \
-  FSEEK_FN( (F), DatabaseHdrSize + RecordEntrySize * (I), SEEK_SET )
 
 struct buffer {
   Byte   *data;
@@ -56,20 +50,7 @@ struct buffer {
 };
 typedef struct buffer buffer_t;
 
-/**
- * Record 0 of a Doc file contains information about the document as a whole.
- */
-struct doc_record0 {                    // 16 bytes total
-  Word  version;                        // 1 = plain text, 2 = compressed
-  Word  reserved1;
-  DWord doc_size;                       // in bytes, when uncompressed
-  Word  num_records;                    // PDB header numRecords - 1
-  Word  rec_size;                       // usually RECORD_SIZE_MAX
-  DWord reserved2;
-};
-typedef struct doc_record0 doc_record0_t;
-
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif /* txt2pdbdoc_H */
+#endif /* txt2pdbdoc_common_H */
 /* vim:set et sw=2 ts=2: */

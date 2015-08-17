@@ -1,6 +1,6 @@
 /*
 **      txt2pdbdoc -- Text to Doc converter for Palm Pilots
-**      txt2pdbdoc.c
+**      doc.h
 **
 **      Copyright (C) 1998-2015  Paul J. Lucas
 **
@@ -19,41 +19,33 @@
 **      Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef txt2pdbdoc_doc_H
+#define txt2pdbdoc_doc_H
+
 // local
-#include "common.h"
-#include "options.h"
-#include "util.h"
-
-// standard
-#include <stdio.h>
-#include <stdlib.h>                     /* for atexit(), exit() */
-
-extern void decode( void );
-extern void encode( void );
-
-////////// local functions ////////////////////////////////////////////////////
-
-static void clean_up( void ) {
-  freelist_free();
-  if ( fin )
-    fclose( fin );
-  if ( fout )
-    fclose( fout );
-}
-
-////////// main ///////////////////////////////////////////////////////////////
-
-int main( int argc, char *argv[] ) {
-  atexit( clean_up );
-  process_options( argc, argv );
-
-  if ( opt_decode )
-    decode();
-  else
-    encode();
-
-  exit( EXIT_SUCCESS );
-}
+#include "palm.h"
 
 ///////////////////////////////////////////////////////////////////////////////
+
+#define DOC_CREATOR       "REAd"
+#define DOC_TYPE          "TEXt"
+#define DOC_COMPRESSED    2
+#define DOC_UNCOMPRESSED  1
+
+/**
+ * Record 0 of a Doc file contains information about the document as a whole.
+ */
+struct doc_record0 {                    // 16 bytes total
+  Word  version;                        // 1 = plain text, 2 = compressed
+  Word  reserved1;
+  DWord doc_size;                       // in bytes, when uncompressed
+  Word  num_records;                    // PDB header numRecords - 1
+  Word  rec_size;                       // usually RECORD_SIZE_MAX
+  DWord reserved2;
+};
+typedef struct doc_record0 doc_record0_t;
+
+///////////////////////////////////////////////////////////////////////////////
+
+#endif /* txt2pdbdoc_doc_H */
 /* vim:set et sw=2 ts=2: */
