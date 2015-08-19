@@ -1,114 +1,191 @@
+2015-08-17  Paul J. Lucas <paul@lucasmail.org>
+
+   * NEWS: Added news for 1.6.
+   * html2pdbtxt: Comment clean-up.
+   * ChangeLog: Coalesced enties with same date.
+   * decode.c, encode.c, util.h: Added FPUTC().
+   * txt2pdbdoc.1, common.h, decode.c, encode.c, options.c, palm.c, utf8.c,
+     utf8.h, util.c, util.h, test/Makefile.am, ISO_8859-1.md,
+     txt2pdbdoc-c-t_02.pdb, txt2pdbdoc-t_01.pdb, txt2pdbdoc-t_02.pdb,
+     run_test.sh, txt2pdbdoc-c-t_02.test, txt2pdbdoc-t_02.test: UTF-8
+     translation.
+   * txt2pdbdoc-c-t_01.pdb, test/tests/README.md, txt2pdbdoc-c-t_01.test,
+     txt2pdbdoc-t_01.test: Removed filename warning.
+   * doc.4, pdb.4: Updated.
+   * html2pdbtxt.1, pdbtxt2html.1: Clean-up; updated e-mail address.
+   * decode.c, doc.h: Added DOC_ prefix to COMPRESSED and UNCOMPRESSED.
+   * .gitignore: Added *.a.
+
+2015-08-15  Paul J. Lucas <paul@lucasmail.org>
+
+   * Makefile.am, configure.ac, lib/Makefile.am, dummy.c, 00gnulib.m4,
+     extern-inline.m4, gnulib-cache.m4, gnulib-common.m4, gnulib-comp.m4,
+     gnulib-tool.m4, onceonly.m4, src/Makefile.am, common.h, decode.c, doc.h,
+     encode.c, options.c, options.h, palm.c, palm.h, txt2pdbdoc.c, utf8.c,
+     utf8.h, util.c, util.h, test/Makefile.am, txt2pdbdoc-U_01.test,
+     txt2pdbdoc-U_02.test: Added UTF-8 decode support.
+   * ChangeLog: Imported old CVS ChangeLog data.
+   * NEWS: Added mention of pdb.4.
+   * man/man4/Makefile.am, doc.4, pdb.4: Resurrected pdb.4 man page; updated
+     e-mail address.
+   * Makefile.am, NEWS, bin/Makefile.am, configure.ac: Now installing programs
+     in bin.
+
+2015-08-14  Paul J. Lucas <paul@lucasmail.org>
+
+   * encode.c: Put #include <sys/types.h> back for FreeBSD.
+   * html2pdbtxt, pdbtxt2html: Redid formatting.
+   * Makefile.am: Added "test" subdir.
+   * README.md: Fixed formatting.
+   * options.c, test/Makefile.am, txt2pdbdoc-D.test, txt2pdbdoc-b-d.test,
+     txt2pdbdoc-c-d.test, txt2pdbdoc-d-t.test: Added mutually exclusive and
+     required option checks and tests.
+   * encode.c: Fixed PUT_DWord; clean-up.
+
+2015-08-13  Paul J. Lucas <paul@lucasmail.org>
+
+   * decode.c: Now using PMESSAGE_EXIT().
+   * test/Makefile.am, txt2pdbdoc-c-t.pdb, txt2pdbdoc-t.pdb,
+     txt2pdbdoc-c-t.test, txt2pdbdoc-t.test: Renamed some tests.
+   * encode.c, options.c, options.h, txt2pdbdoc-c.pdb,
+     txt2pdbdoc-no_options.pdb, test-sh, txt2pdbdoc-c.test,
+     txt2pdbdoc-no_options.test: Intermediate commit.
+   * test/tests/.gitignore: Added missing .gitignore.
+   * palm.h: Added use of HAVE_TIME_H.
+   * configure.ac: Added test/Makefile back.
+   * test/.gitattributes, test/.gitignore, test/Makefile.am, sample.txt,
+     txt2pdbdoc-c.pdb, txt2pdbdoc-no_options.pdb, run_test.sh,
+     test/tests/README.md, txt2pdbdoc-c.test, txt2pdbdoc-no_options.test:
+     Preliminary tests.
+   * common.h, decode.c, encode.c, options.c, options.h, txt2pdbdoc.c, util.h:
+     Fixed command-line handling.
+   * configure.ac: Clean-up.
+   * configure.ac: Fixed extra CFLAGS.
+   * common.h, decode.c, encode.c: Clean-up.
+   * src/Makefile.am, common.h, decode.c, encode.c, options.c, options.h,
+     txt2pdbdoc.c: Finished code split-up.
+
+2015-08-12  Paul J. Lucas <paul@lucasmail.org>
+
+   * src/Makefile.am, common.h, compress.c, txt2pdbdoc.c: Split out
+     compress/uncompress.
+   * src/.gitignore, common.h, txt2pdbdoc.c, util.c, util.h: Builds.
+   * configure.ac: s/man5/man4/
+   * configure.ac, src/Makefile.am, common.h, palm.h, txt2pdbdoc.c, util.c,
+     util.h: Intermediate check-in.
+   * configure.ac, palm.h, txt2pdbdoc.c, test-sh: Clean-up.
+
 2004-01-08  Paul J. Lucas <paul@lucasmail.org>
 
-    * configure.in: Upped version to 1.5.
-    * txt2pdbdoc.1: Added mention that -D implies -d.
-    * txt2pdbdoc.c: Made -D imply -d.
+   * configure.in: Upped version to 1.5.
+   * txt2pdbdoc.1: Added mention that -D implies -d.
+   * txt2pdbdoc.c: Made -D imply -d.
 
 2003-12-03  Paul J. Lucas <paul@lucasmail.org>
 
-    * txt2pdbdoc.c:
-      1. Added code for the -D option.
-      2. Fixed error message output.
-      3. Added -D to usage message.
-      4. Removed -b as a decode option from usage message.
+   * txt2pdbdoc.c:
+     1. Added code for the -D option.
+     2. Fixed error message output.
+     3. Added -D to usage message.
+     4. Removed -b as a decode option from usage message.
 
-    * txt2pdbdoc.1: Added description of -D option.
+   * txt2pdbdoc.1: Added description of -D option.
 
 2003-12-03  Paul J. Lucas <paul@lucasmail.org>
 
-    * configure.in: Upped version to 1.4.4.
+   * configure.in: Upped version to 1.4.4.
 
 2003-10-17  Paul J. Lucas <paul@lucasmail.org>
 
-    * txt2pdbdoc.c: Removed blank lines.
+   * txt2pdbdoc.c: Removed blank lines.
 
 2003-04-22  Paul J. Lucas <paul@lucasmail.org>
 
-    * INSTALL, INSTALL.README: Replaced so it will work on MacOS X.
-    * configure.in: s/1.4.2/1.4.3/
+   * INSTALL, INSTALL.README: Replaced so it will work on MacOS X.
+   * configure.in: s/1.4.2/1.4.3/
 
 2003-04-22  Paul J. Lucas <paul@lucasmail.org>
 
-    * palm.h: s/int/unsigned/
+   * palm.h: s/int/unsigned/
 
 2001-10-12  Paul J. Lucas <paul@lucasmail.org>
 
-    * configure.in:
-      1. Upped version to 1.4.2.
-      2. Removed AC_CHECK_SIZEOF(unsigned char) since it's always 1 by
-      definition.
-    * palm.h: Removed SIZEOF_UNSIGNED_CHAR since it's always 1 by
-      definition.
-    * txt2pdbdoc.c: Added "#include <sys/types.h>" before "#include
-      <netinet/in.h>".
+   * configure.in:
+     1. Upped version to 1.4.2.
+     2. Removed AC_CHECK_SIZEOF(unsigned char) since it's always 1 by
+     definition.
+   * palm.h: Removed SIZEOF_UNSIGNED_CHAR since it's always 1 by
+     definition.
+   * txt2pdbdoc.c: Added "#include <sys/types.h>" before "#include
+     <netinet/in.h>".
 
 2001-07-14  Paul J. Lucas <paul@lucasmail.org>
 
-    * doc.4, html2pdbtxt.1, pdbtxt2html.1, txt2pdbdoc.1: Moved manual
-      pages to top-level to fix their installation.
-    * Makefile.am: Changed man_MANS to refer to the manual pages at the
-      top level to fix their installation.
+   * doc.4, html2pdbtxt.1, pdbtxt2html.1, txt2pdbdoc.1: Moved manual
+     pages to top-level to fix their installation.
+   * Makefile.am: Changed man_MANS to refer to the manual pages at the
+     top level to fix their installation.
 
 2001-07-14  Paul J. Lucas <paul@lucasmail.org>
 
-    * configure.in: Changed version to 1.4.1.
+   * configure.in: Changed version to 1.4.1.
 
 2001-06-19  Paul J. Lucas <paul@lucasmail.org>
 
-    * INSTALL: Minor changes to sentence structure.
+   * INSTALL: Minor changes to sentence structure.
 
 2001-06-15  Paul J. Lucas <paul@lucasmail.org>
 
-    * txt2pdbdoc.c: In usage(), added missing "me".
+   * txt2pdbdoc.c: In usage(), added missing "me".
 
 2001-06-13  Paul J. Lucas <paul@lucasmail.org>
 
-    * install-sh: Removed since automake supplies it.
-    * INSTALL: Changed to describe new configure stuff.
-    * configure.in, Makefile.am: Initial version in CVS.
-    * txt2pdbdoc.c: Moved #ifdef HAVE_TIME_H to palm.h instead.
-    * palm.h: Made #define palm_date() contingent on HAVE_TIME_H.
-    * txt2pdbdoc.c:
-      1. Removed #define VERSION; version now specified in configure.in.
-      2. Now using PACKAGE (specified in configure.in).
-      3. Fixed fread() size-check goofs.
-      4. Cleaned up usage message.
-    * palm.h: Switched to using autoconf macros for sizes.
-    * test-sh: Initial version in CVS.
-    * Makefile: Replaced by Makefile.am.
-    * html2pdbtxt, html2pdbtxt.in: Replaced html2pdbtxt with
-      html2pdbtxt.in.
-    * pdbtxt2html, pdbtxt2html.in: Replaced pdbtxt2html with
-      pdbtxt2html.in.
+   * install-sh: Removed since automake supplies it.
+   * INSTALL: Changed to describe new configure stuff.
+   * configure.in, Makefile.am: Initial version in CVS.
+   * txt2pdbdoc.c: Moved #ifdef HAVE_TIME_H to palm.h instead.
+   * palm.h: Made #define palm_date() contingent on HAVE_TIME_H.
+   * txt2pdbdoc.c:
+     1. Removed #define VERSION; version now specified in configure.in.
+     2. Now using PACKAGE (specified in configure.in).
+     3. Fixed fread() size-check goofs.
+     4. Cleaned up usage message.
+   * palm.h: Switched to using autoconf macros for sizes.
+   * test-sh: Initial version in CVS.
+   * Makefile: Replaced by Makefile.am.
+   * html2pdbtxt, html2pdbtxt.in: Replaced html2pdbtxt with
+     html2pdbtxt.in.
+   * pdbtxt2html, pdbtxt2html.in: Replaced pdbtxt2html with
+     pdbtxt2html.in.
 
 2001-06-08  Paul J. Lucas <paul@lucasmail.org>
 
-    * txt2pdbdoc.c:
-      1. Moved Palm OS stuff to palm.h.
-      2. Removed swap_* functions and now using htons(), et al.
-      3. Added more exit status codes.
-      4. Made all GET/PUT macros do error checking.
-      5. Added new SEEK_REC_ENTRY macro.
-      6. Put correct date/time into generated PDB file.
-      7. Removed zero_fill() in favor of bzero().
-      8. Added read_error() and write_error() functions.
-      9. s/PDB_HEADER_SIZE/DatabaseHdrSize/
-      A. s/PDB_RECORD_HEADER_SIZE/RecordEntrySize/
-      B. Updated version to 1.4.
-    * palm.h: Initial version in CVS.
+   * txt2pdbdoc.c:
+     1. Moved Palm OS stuff to palm.h.
+     2. Removed swap_* functions and now using htons(), et al.
+     3. Added more exit status codes.
+     4. Made all GET/PUT macros do error checking.
+     5. Added new SEEK_REC_ENTRY macro.
+     6. Put correct date/time into generated PDB file.
+     7. Removed zero_fill() in favor of bzero().
+     8. Added read_error() and write_error() functions.
+     9. s/PDB_HEADER_SIZE/DatabaseHdrSize/
+     A. s/PDB_RECORD_HEADER_SIZE/RecordEntrySize/
+     B. Updated version to 1.4.
+   * palm.h: Initial version in CVS.
 
 2001-01-15  Paul J. Lucas <paul@lucasmail.org>
 
-    * txt2pdbdoc.c: s/1.3/1.3.1/
+   * txt2pdbdoc.c: s/1.3/1.3.1/
 
 2001-01-08  Paul J. Lucas <paul@lucasmail.org>
 
-    * pdbtxt2html: Fixed typo.
-    * html2pdbtxt: For bookmarks, removed extra blank line.
-    * README: s/Paul J. Lucas <paul@lucasmail.org>@best.com/pauljlucas@mac.com/
-    * txt2pdbdoc.c: Upped version number to 1.3.
+   * pdbtxt2html: Fixed typo.
+   * html2pdbtxt: For bookmarks, removed extra blank line.
+   * README: s/Paul J. Lucas <paul@lucasmail.org>@best.com/pauljlucas@mac.com/
+   * txt2pdbdoc.c: Upped version number to 1.3.
 
 2000-10-24  Paul J. Lucas <paul@lucasmail.org>
 
-    * AUTHORS, COPYING, INSTALL, Makefile, README, html2pdbtxt, install-sh,
-      pdbtxt2html, txt2pdbdoc.c: First version in CVS.
+   * AUTHORS, COPYING, INSTALL, Makefile, README, html2pdbtxt, install-sh,
+     pdbtxt2html, txt2pdbdoc.c: First version in CVS.
