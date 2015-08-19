@@ -457,7 +457,7 @@ char const *const palm_to_string_table[] = {
   /* 0x89 */ "per mille sign",
   /* 0x8A */ "latin capital letter S with caron",
   /* 0x8B */ "single left-pointing angle quotation mark",
-  /* 0x8C */ "latin capital ligature oe",
+  /* 0x8C */ "latin capital ligature OE",
   /* 0x8D */ "white diamond suit",
   /* 0x8E */ "black club suit",
   /* 0x8F */ "white heart suit",
@@ -611,6 +611,7 @@ Byte unicode_to_palm( uint32_t codepoint ) {
     case 0x02DC: return 0x98; // SMALL TILDE
     case 0x2122: return 0x99; // TRADE MARK SIGN
     case 0x0161: return 0x9A; // LATIN SMALL LETTER S WITH CARON
+//  case NO_MAP: return 0x9B; // PalmOS: (not used)
     case 0x0153: return 0x9C; // LATIN SMALL LIGATURE OE
 //  case NO_MAP: return 0x9D; // PalmOS: COMMAND STROKE
 //  case NO_MAP: return 0x9E; // PalmOS: SHORTCUT STROKE
