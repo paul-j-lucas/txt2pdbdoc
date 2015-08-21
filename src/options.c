@@ -151,7 +151,6 @@ static uint32_t parse_codepoint( char const *s ) {
   );
 }
 
-
 /**
  * Prints the usage message to standard error and exits.
  */
