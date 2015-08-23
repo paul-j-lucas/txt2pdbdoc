@@ -65,7 +65,7 @@ typedef bool _Bool;
 #define STRERROR            strerror( errno )
 
 #define FREAD(PTR,SIZE,N,STREAM) \
-  BLOCK( if ( fread( (PTR), (SIZE), (N), (STREAM) ) < (N) ) PERROR_EXIT( READ_ERROR ); )
+  BLOCK( fread( (PTR), (SIZE), (N), (STREAM) ); if ( ferror( fin ) ) PERROR_EXIT( READ_ERROR ); )
 
 #define FPRINTF(F,...) \
   BLOCK( if ( fprintf( (F), __VA_ARGS__ ) < 0 ) PERROR_EXIT( WRITE_ERROR ); )
