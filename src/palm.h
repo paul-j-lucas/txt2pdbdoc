@@ -52,7 +52,7 @@ typedef uint32_t  DWord;
  *    Document Number 3008-003, Palm, Inc., May 16, 2000.
  */
 struct RecordEntryType {
-  DWord localChunkID;                   // offset to where record starts
+  DWord offset;                         // offset to where record starts
   struct {
     unsigned delete   : 1;
     unsigned dirty    : 1;
@@ -87,19 +87,19 @@ typedef struct RecordListType RecordListType;
  * This is a PDB database header as currently defined by Palm, Inc.
  */
 struct DatabaseHdrType {                // 78 bytes total
-  char    name[ dmDBNameLength ];
-  Word    attributes;
-  Word    version;
-  DWord   creationDate;
-  DWord   modificationDate;
-  DWord   lastBackupDate;
-  DWord   modificationNumber;
-  DWord   appInfoID;
-  DWord   sortInfoID;
-  char    type[4];
-  char    creator[4];
-  DWord   uniqueIDSeed;
-  RecordListType recordList;
+  char            name[ dmDBNameLength ];
+  Word            attributes;
+  Word            version;
+  DWord           creationDate;
+  DWord           modificationDate;
+  DWord           lastBackupDate;
+  DWord           modificationNumber;
+  DWord           appInfoID;
+  DWord           sortInfoID;
+  char            type[4];
+  char            creator[4];
+  DWord           uniqueIDSeed;
+  RecordListType  recordList;
 };
 typedef struct DatabaseHdrType DatabaseHdrType;
 
