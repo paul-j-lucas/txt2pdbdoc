@@ -40,6 +40,17 @@
 #define GET_DWord(F,N) \
   BLOCK( FREAD( (N), sizeof( DWord ), 1, (F) ); *(N) = ntohl( *(N) ); )
 
+////////// extern declarations ////////////////////////////////////////////////
+
+extern FILE        *fin;
+extern char const  *fin_path;
+extern FILE        *fout;
+
+extern bool         opt_no_check_doc;
+extern bool         opt_no_warnings;
+extern uint32_t     opt_unmapped_codepoint;
+extern bool         opt_verbose;
+
 extern void uncompress( buffer_t* );
 
 ////////// local functions ////////////////////////////////////////////////////

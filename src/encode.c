@@ -41,7 +41,18 @@
 #define PUT_DWord(F,N) \
   BLOCK( DWord t = (N); t = htonl(t); FWRITE( &t, sizeof t, 1, (F) ); )
 
-////////// extern functions ///////////////////////////////////////////////////
+////////// extern declarations ////////////////////////////////////////////////
+
+extern char const  *doc_name;
+extern FILE        *fin;
+extern FILE        *fout;
+extern char const  *fout_path;
+
+extern bool         opt_binary;
+extern bool         opt_compress;
+extern bool         opt_no_timestamp;
+extern bool         opt_no_warnings;
+extern bool         opt_verbose;
 
 extern void compress( buffer_t* );
 

@@ -36,12 +36,19 @@
 #include <unistd.h>                     /* for getopt() */
 
 #define BUF_SIZE  4096
-#define ROW_SIZE  16
+#define ROW_SIZE  16                    /* bytes per dump row */
+
+////////// extern variables ///////////////////////////////////////////////////
+
+char const  *me;
 
 ////////// local variables ////////////////////////////////////////////////////
 
-static bool opt_header_only = false;
-static bool opt_data_only = false;
+static FILE  *fin;                      // file to read from
+static FILE  *fout;                     // file to write to
+
+static bool   opt_header_only = false;
+static bool   opt_data_only = false;
 
 ////////// local functions ////////////////////////////////////////////////////
 
@@ -49,29 +56,29 @@ static void clean_up( void );
 static void dump_pdb_header( DatabaseHdrType const* );
 static void dump_rec_header( Word, RecordEntryType const* );
 static void dump_row( DWord, uint8_t const*, DWord );
-static void pdbdump_process_options( int, char*[] );
+static void process_options( int, char*[] );
 static void usage( void );
 
 ////////// main ///////////////////////////////////////////////////////////////
 
 int main( int argc, char *argv[] ) {
   atexit( clean_up );
-  pdbdump_process_options( argc, argv );
+  process_options( argc, argv );
 
   ////////// read PDB header //////////////////////////////////////////////////
 
-  DatabaseHdrType header;
-  FREAD( &header, DatabaseHdrSize, 1, fin );
+  DatabaseHdrType hdr;
+  FREAD( &hdr, DatabaseHdrSize, 1, fin );
 
   if ( !opt_data_only ) {
-    dump_pdb_header( &header );
+    dump_pdb_header( &hdr );
     if ( opt_header_only )
       exit( EXIT_SUCCESS );
   }
 
   ////////// read records /////////////////////////////////////////////////////
 
-  Word const num_records = ntohs( header.recordList.numRecords );
+  Word const num_records = ntohs( hdr.recordList.numRecords );
   for ( Word rec_num = 0; rec_num < num_records; ++rec_num ) {
 
     // read record
@@ -121,24 +128,28 @@ static void clean_up( void ) {
   freelist_free();
   if ( fin )
     fclose( fin );
+  if ( fout )
+    fclose( fout );
 }
 
-static void dump_pdb_header( DatabaseHdrType const *header ) {
-  PRINTF( "   Name: %s\n", header->name );
-  PRINTF( "Version: %d\n", ntohs( header->version ) );
-  PRINTF( "   Type: %c%c%c%c\n",
-    header->type[0], header->type[1],
-    header->type[2], header->type[3]
+static void dump_pdb_header( DatabaseHdrType const *hdr ) {
+  FPRINTF( fout,
+    "   Name: %s\n"
+    "Version: %d\n"
+    "   Type: %c%c%c%c\n"
+    "Creator: %c%c%c%c\n"
+    "Records: %d\n",
+
+    hdr->name,
+    ntohs( hdr->version ),
+    hdr->type[0], hdr->type[1], hdr->type[2], hdr->type[3],
+    hdr->creator[0], hdr->creator[1], hdr->creator[2], hdr->creator[3],
+    hdr->recordList.numRecords
   );
-  PRINTF( "Creator: %c%c%c%c\n",
-    header->creator[0], header->creator[1],
-    header->creator[2], header->creator[3]
-  );
-  PRINTF( "Records: %d\n", header->recordList.numRecords );
 }
 
 static void dump_rec_header( Word rec_num, RecordEntryType const *rec ) {
-  PRINTF(
+  FPRINTF( fout,
     "===================================================================\n"
     "Rec %4d: [%c] Delete [%c] Dirty [%c] Busy [%c] Secret\n"
     "-------------------------------------------------------------------\n",
@@ -152,31 +163,31 @@ static void dump_rec_header( Word rec_num, RecordEntryType const *rec ) {
 
 static void dump_row( DWord offset, uint8_t const *row, DWord row_len ) {
   // print offset
-  PRINTF( "%08X:", offset );
+  FPRINTF( fout, "%08X:", offset );
 
   // print hex part
   DWord row_pos;
   for ( row_pos = 0; row_pos < row_len; ++row_pos ) {
     if ( row_pos % 2 == 0 )
-      PUTCHAR( ' ' );
-    PRINTF( "%02X", (unsigned)row[ row_pos ] );
+      FPUTC( ' ', fout );
+    FPRINTF( fout, "%02X", (unsigned)row[ row_pos ] );
   } // for
 
   // print padding if necessary (last row only)
   while ( row_pos < ROW_SIZE ) {
     if ( row_pos++ % 2 == 0 )
-      PUTCHAR( ' ' );
-    PRINTF( "  " );
+      FPUTC( ' ', fout );
+    FPRINTF( fout, "  " );
   } // while
 
   // print ASCII part
-  PRINTF( "  " );
+  FPRINTF( fout, "  " );
   for ( row_pos = 0; row_pos < row_len; ++row_pos )
-    PUTCHAR( isprint( row[ row_pos ] ) ? row[ row_pos ] : '.' );
-  PUTCHAR( '\n' );
+    FPUTC( isprint( row[ row_pos ] ) ? row[ row_pos ] : '.', fout );
+  FPUTC( '\n', fout );
 }
 
-static void pdbdump_process_options( int argc, char *argv[] ) {
+static void process_options( int argc, char *argv[] ) {
   char const opts[] = "dhV";            // command line options
 
   me = strrchr( argv[0], '/' );         // determine base name...
@@ -197,10 +208,18 @@ static void pdbdump_process_options( int argc, char *argv[] ) {
   check_mutually_exclusive( "d", "h" );
   check_mutually_exclusive( "V", "dh" );
 
-  if ( argc != 1 )
-    usage();
-
-  fin = check_fopen( argv[1], "rb" );
+  switch ( argc ) {
+    case 1:
+      fin  = check_fopen( argv[1], "rb" );
+      fout = stdout;
+      break;
+    case 2:
+      fin  = check_fopen( argv[1], "rb" );
+      fout = check_fopen( argv[2], "wb" );
+      break;
+    default:
+      usage();
+  } // switch
 }
 
 /**
@@ -208,7 +227,7 @@ static void pdbdump_process_options( int argc, char *argv[] ) {
  */
 static void usage() {
   PRINT_ERR(
-"usage: %s [-dhV] file.pdb\n"
+"usage: %s [-dhV] file.pdb [file.txt]\n"
 "\n"
 "options:\n"
 "  -d  Dump data only.\n"

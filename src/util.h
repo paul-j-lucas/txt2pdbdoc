@@ -29,7 +29,7 @@
 #include <sys/types.h>                  /* for FreeBSD */
 #include <errno.h>
 #include <stddef.h>                     /* for size_t */
-#include <stdint.h>                     /* for uint8_t */
+#include <stdint.h>                     /* for uint8_t, ... */
 #include <stdio.h>                      /* for FILE */
 #include <stdlib.h>
 #include <string.h>                     /* for strerror() */
@@ -85,16 +85,10 @@ typedef bool _Bool;
 #define MALLOC(TYPE,N)      (TYPE*)check_realloc( NULL, sizeof(TYPE) * (N) )
 
 #define PMESSAGE(FORMAT,...) \
-  FPRINTF( stderr, "%s: " FORMAT, me, __VA_ARGS__ )
+  PRINT_ERR( "%s: " FORMAT, me, __VA_ARGS__ )
 
 #define PMESSAGE_EXIT(STATUS,FORMAT,...) \
   BLOCK( PMESSAGE( FORMAT, __VA_ARGS__ ); exit( EXIT_##STATUS ); )
-
-#define PRINTF(...) \
-  BLOCK( if ( printf( __VA_ARGS__ ) < 0 ) PERROR_EXIT( WRITE_ERROR ); )
-
-#define PUTCHAR(C) \
-  BLOCK( if ( putchar( C ) == EOF ) PERROR_EXIT( WRITE_ERROR ); )
 
 #define UNGETC(C,F) \
   BLOCK( if ( ungetc( (C), (F) ) == EOF ) PERROR_EXIT( READ_ERROR ); )
@@ -155,6 +149,19 @@ void freelist_free( void );
  * @return TODO
  */
 uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len );
+
+/**
+ * Parses a Unicode code-point value.
+ *
+ * @param s The NULL-terminated string to parse.  Allows for strings of the
+ * form:
+ *  + X: a single character.
+ *  + NN: two-or-more decimal digits.
+ *  + 0xN, u+N, or U+N: one-or-more hexadecimal digits.
+ * @return Returns the Unicode code-point value
+ * or prints an error message and exits if \a s is invalid.
+ */
+uint32_t parse_codepoint( char const *s );
 
 /**
  * Parses a string into a \c uint64_t.

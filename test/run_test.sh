@@ -198,7 +198,10 @@ run_test_file() {
   OUTFILE=`echo $OUTFILE`               # trims whitespace
   EXPECTED_EXIT=`echo $EXPECTED_EXIT`   # trims whitespace
 
-  $COMMAND $OPTIONS "$DOC_NAME" $INPUT $OUTPUT 2> $LOG_FILE
+  if [ -n "$DOC_NAME" ]
+  then $COMMAND $OPTIONS "$DOC_NAME" $INPUT $OUTPUT 2> $LOG_FILE
+  else $COMMAND $OPTIONS $INPUT $OUTPUT 2> $LOG_FILE
+  fi
   ACTUAL_EXIT=$?
 
   if [ $ACTUAL_EXIT -eq 0 ]

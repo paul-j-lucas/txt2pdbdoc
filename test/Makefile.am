@@ -20,7 +20,8 @@
 
 AUTOMAKE_OPTIONS = 1.12			# needed for TEST_LOG_DRIVER
 
-TESTS =	tests/txt2pdbdoc-b-d.test \
+TESTS =	tests/pdbdump-no_options.test \
+	tests/txt2pdbdoc-b-d.test \
 	tests/txt2pdbdoc-c-d.test \
 	tests/txt2pdbdoc-c-t_01.test \
 	tests/txt2pdbdoc-c-t_02.test \

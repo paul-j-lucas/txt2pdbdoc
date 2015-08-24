@@ -22,6 +22,7 @@
 // local
 #include "config.h"
 #include "common.h"
+#include "utf8.h"
 #include "util.h"
 
 // standard
@@ -126,6 +127,27 @@ uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len ) {
     if ( *t == *m && !memcmp( t, m, m_len ) )
       return t;
   return NULL;
+}
+
+uint32_t parse_codepoint( char const *s ) {
+  assert( s );
+
+  if ( s[0] && !s[1] )                  // assume single-char ASCII
+    return (uint32_t)s[0];
+
+  char const *const s0 = s;
+  if ( (s[0] == 'U' || s[0] == 'u') && s[1] == '+' ) {
+    // convert [uU]+NNNN to 0xNNNN so strtoull() will grok it
+    char *const t = freelist_add( check_strdup( s ) );
+    s = memcpy( t, "0x", 2 );
+  }
+  uint64_t const codepoint = parse_ull( s );
+  if ( codepoint_is_valid( codepoint ) )
+    return (uint32_t)codepoint;         
+  PMESSAGE_EXIT( USAGE,
+    "\"%s\": invalid Unicode code-point for -%c\n",
+    s0, 'U'
+  );
 }
 
 uint64_t parse_ull( char const *s ) {
