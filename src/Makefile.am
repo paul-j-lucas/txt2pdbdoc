@@ -18,7 +18,9 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-bin_PROGRAMS = txt2pdbdoc
+bin_PROGRAMS = txt2pdbdoc pdbdump
+
+pdbdump_SOURCES = pdbdump.c options.c util.c
 
 txt2pdbdoc_SOURCES = compress.c decode.c encode.c options.c palm.c \
 	txt2pdbdoc.c utf8.c util.c

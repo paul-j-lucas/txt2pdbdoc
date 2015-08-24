@@ -66,6 +66,7 @@ static char const* skip_ws( char const *s ) {
 
 FILE* check_fopen( char const *path, char const *mode ) {
   assert( path );
+  assert( mode );
   FILE *const file = fopen( path, mode );
   if ( !file )
     PMESSAGE_EXIT( OPEN_ERROR,

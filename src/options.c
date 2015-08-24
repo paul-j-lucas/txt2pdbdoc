@@ -21,8 +21,9 @@
 
 // local
 #include "common.h"
-#include "util.h"
+#include "options.h"
 #include "utf8.h"
+#include "util.h"
 
 // standard
 #include <assert.h>
@@ -31,33 +32,26 @@
 #include <string.h>
 #include <unistd.h>                     /* for getopt() */
 
-#define GAVE_OPTION(OPT)  isalpha( OPTION_VALUE(OPT) )
-#define OPTION_VALUE(OPT) opts_given[ !islower(OPT) ][ toupper(OPT) - 'A' ]
-#define SET_OPTION(OPT)   OPTION_VALUE(OPT) = (OPT)
-
 ////////// extern variables ///////////////////////////////////////////////////
 
-char const *doc_name;
-FILE       *fin;
-char const *fin_path;
-FILE       *fout;
-char const *fout_path = "<stdout>";
-char const *me;
+char const   *doc_name;
+FILE         *fin;
+char const   *fin_path;
+FILE         *fout;
+char const   *fout_path = "<stdout>";
+char const   *me;
 
-bool        opt_binary = true;
-bool        opt_compress = true;
-bool        opt_decode;
-bool        opt_no_check_doc;
-bool        opt_no_timestamp;
-bool        opt_no_warnings;
-uint32_t    opt_unmapped_codepoint;
-bool        opt_verbose;
+bool          opt_binary = true;
+bool          opt_compress = true;
+bool          opt_decode;
+bool          opt_no_check_doc;
+bool          opt_no_timestamp;
+bool          opt_no_warnings;
+uint32_t      opt_unmapped_codepoint;
+bool          opt_verbose;
+opts_given_t  opts_given;
 
 ////////// local variables ////////////////////////////////////////////////////
-
-static char opts_given[ 2 /* lower/upper */ ][ 26 + 1 /*NULL*/ ];
-
-////////// local functions ////////////////////////////////////////////////////
 
 /**
  * Checks that if \a opt was given, that at least one \a req_opts was also
@@ -92,7 +86,7 @@ static void check_required( char opt, char const *req_opts ) {
  * @param opts1 The first set of short options.
  * @param opts2 The second set of short options.
  */
-static void check_mutually_exclusive( char const *opts1, char const *opts2 ) {
+void check_mutually_exclusive( char const *opts1, char const *opts2 ) {
   assert( opts1 );
   assert( opts2 );
 

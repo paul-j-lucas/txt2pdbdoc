@@ -18,6 +18,6 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-dist_man1_MANS = html2pdbtxt.1 pdbtxt2html.1 txt2pdbdoc.1
+dist_man1_MANS = html2pdbtxt.1 pdbdump.1 pdbtxt2html.1 txt2pdbdoc.1
 
 # vim:set noet sw=8 ts=8:

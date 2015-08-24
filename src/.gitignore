@@ -1,4 +1,5 @@
 *.dSYM
-txt2pdbdoc
 config.h
+pdbdump
 stamp-h1
+txt2pdbdoc

@@ -90,6 +90,12 @@ typedef bool _Bool;
 #define PMESSAGE_EXIT(STATUS,FORMAT,...) \
   BLOCK( PMESSAGE( FORMAT, __VA_ARGS__ ); exit( EXIT_##STATUS ); )
 
+#define PRINTF(...) \
+  BLOCK( if ( printf( __VA_ARGS__ ) < 0 ) PERROR_EXIT( WRITE_ERROR ); )
+
+#define PUTCHAR(C) \
+  BLOCK( if ( putchar( C ) == EOF ) PERROR_EXIT( WRITE_ERROR ); )
+
 #define UNGETC(C,F) \
   BLOCK( if ( ungetc( (C), (F) ) == EOF ) PERROR_EXIT( READ_ERROR ); )
 

@@ -1,0 +1,96 @@
+.\"
+.\"	txt2pdbdoc -- Text to Doc file converter for Palm Pilots
+.\"	pdbdump.1
+.\"
+.\"	Copyright (C) 2001-2015  Paul J. Lucas
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\" 
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\" 
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\" ---------------------------------------------------------------------------
+.\" define code-start macro
+.de cS
+.sp
+.nf
+.RS 5
+.ft CW
+.ta .5i 1i 1.5i 2i 2.5i 3i 3.5i 4i 4.5i 5i 5.5i
+..
+.\" define code-end macro
+.de cE
+.ft 1
+.RE
+.fi
+.sp
+..
+.\" ---------------------------------------------------------------------------
+.TH \f3pdbdump\fP 1 "August 23, 2015" "txt2pdbdoc"
+.SH NAME
+pdbdump \- PDB (Palm Database file) dumper
+.SH SYNOPSIS
+.B pdbdump
+.RB [ \-dh ]
+.I file.pdb
+.br
+.B pdbdump
+.B \-V
+.SH DESCRIPTION
+.B pdbdump
+dumps a
+.BR pdb (4)
+(Pilot Database)
+file used by all models of the Palm Pilot
+to standard output.
+PDB files are sequences of records.
+For each record,
+.B pdbdump
+dumps its header information
+as well as the payload data
+in both hexedecimal and ASCII.
+.SH OPTIONS
+.TP
+.B \-d
+Dumps only the payload data.
+.TP
+.B \-h
+Dumps only the header information.
+.TP
+.B \-V
+Prints the version number of
+.B pdbdump
+to standard error and exits.
+.SH EXIT STATUS
+.PD 0
+.IP 0
+Success.
+.IP 1
+Error in command-line options or use.
+.IP 2
+Out of memory.
+.IP 10
+Open file error.
+.IP 11
+Read error.
+.IP 12
+Write error.
+.IP 13
+Seek error.
+.PD
+.SH SEE ALSO
+.BR txt2pdbdoc (1),
+.BR doc (4),
+.BR pdb (4)
+.SH AUTHOR
+Paul J. Lucas
+.RI < paul@lucasmail.org >

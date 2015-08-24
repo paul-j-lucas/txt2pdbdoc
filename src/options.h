@@ -28,6 +28,8 @@
 // standard
 #include <stdio.h>                      /* for FILE */
 
+typedef char opts_given_t[ 2 /* lower/upper */ ][ 26 + 1 /*NULL*/ ];
+
 ////////// extern variables ///////////////////////////////////////////////////
 
 extern char const  *doc_name;           // document name (when encoding)
@@ -45,8 +47,23 @@ extern bool         opt_no_timestamp;   // don't timestamp generated Doc files
 extern bool         opt_no_warnings;    // don't emit character warnings
 extern uint32_t     opt_unmapped_codepoint;
 extern bool         opt_verbose;        // be verbose
+extern opts_given_t opts_given;         // options given
+
+#define GAVE_OPTION(OPT)  isalpha( OPTION_VALUE(OPT) )
+#define OPTION_VALUE(OPT) opts_given[ !islower(OPT) ][ toupper(OPT) - 'A' ]
+#define SET_OPTION(OPT)   OPTION_VALUE(OPT) = (OPT)
 
 ////////// extern functions ///////////////////////////////////////////////////
+
+/**
+ * Checks that no options were given that are among the two given mutually
+ * exclusive sets of short options.
+ * Prints an error message and exits if any such options are found.
+ *
+ * @param opts1 The first set of short options.
+ * @param opts2 The second set of short options.
+ */
+void check_mutually_exclusive( char const *opts1, char const *opts2 );
 
 /**
  * Parses command-line options and sets global variables.
