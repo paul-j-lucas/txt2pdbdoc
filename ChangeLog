@@ -1,20 +1,43 @@
-2015-08-17  Paul J. Lucas <paul@lucasmail.org>
+2015-08-24  Paul J. Lucas <paul@lucasmail.org>
 
+   * pdbdump-d-h.test: Added pdbdump -dh test.
+   * decode.c, encode.c, options.c, options.h, pdbdump.c, txt2pdbdoc.c, util.c,
+     util.h, test/Makefile.am, ISO_8859-1.pdb, pdbdump-no_options.txt,
+     run_test.sh, pdbdump-no_options.test: Reworked util macros; added pdbdump
+     test.
+
+2015-08-23  Paul J. Lucas <paul@lucasmail.org>
+
+   * man/man1/Makefile.am, pdbdump.1, src/Makefile.am, options.c, options.h,
+     pdbdump.c, util.c, util.h: Initial pdbdump.
+   * txt2pdbdoc.1: Updated e-mail address.
+
+2015-08-22  Paul J. Lucas <paul@lucasmail.org>
+
+   * txt2pdbdoc.1: Added "txt2pdbdoc" and 2015.
+   * util.h: Fixed checking for error in FREAD().
+
+2015-08-21  Paul J. Lucas <paul@lucasmail.org>
+
+   * palm.h: Cosmetic change.
+
+2015-08-18  Paul J. Lucas <paul@lucasmail.org>
+
+   * options.c: Removed blank line.
+   * palm.c: Fixed name of "latin capital ligature OE".
    * NEWS: Added news for 1.6.
    * html2pdbtxt: Comment clean-up.
-   * ChangeLog: Coalesced enties with same date.
    * decode.c, encode.c, util.h: Added FPUTC().
    * txt2pdbdoc.1, common.h, decode.c, encode.c, options.c, palm.c, utf8.c,
      utf8.h, util.c, util.h, test/Makefile.am, ISO_8859-1.md,
      txt2pdbdoc-c-t_02.pdb, txt2pdbdoc-t_01.pdb, txt2pdbdoc-t_02.pdb,
      run_test.sh, txt2pdbdoc-c-t_02.test, txt2pdbdoc-t_02.test: UTF-8
      translation.
-   * txt2pdbdoc-c-t_01.pdb, test/tests/README.md, txt2pdbdoc-c-t_01.test,
-     txt2pdbdoc-t_01.test: Removed filename warning.
+   * txt2pdbdoc-c-t_01.pdb, txt2pdbdoc-c-t_01.test, txt2pdbdoc-t_01.test:
+     Removed filename warning.
    * doc.4, pdb.4: Updated.
    * html2pdbtxt.1, pdbtxt2html.1: Clean-up; updated e-mail address.
    * decode.c, doc.h: Added DOC_ prefix to COMPRESSED and UNCOMPRESSED.
-   * .gitignore: Added *.a.
 
 2015-08-15  Paul J. Lucas <paul@lucasmail.org>
 
@@ -24,7 +47,6 @@
      encode.c, options.c, options.h, palm.c, palm.h, txt2pdbdoc.c, utf8.c,
      utf8.h, util.c, util.h, test/Makefile.am, txt2pdbdoc-U_01.test,
      txt2pdbdoc-U_02.test: Added UTF-8 decode support.
-   * ChangeLog: Imported old CVS ChangeLog data.
    * NEWS: Added mention of pdb.4.
    * man/man4/Makefile.am, doc.4, pdb.4: Resurrected pdb.4 man page; updated
      e-mail address.
@@ -36,7 +58,6 @@
    * encode.c: Put #include <sys/types.h> back for FreeBSD.
    * html2pdbtxt, pdbtxt2html: Redid formatting.
    * Makefile.am: Added "test" subdir.
-   * README.md: Fixed formatting.
    * options.c, test/Makefile.am, txt2pdbdoc-D.test, txt2pdbdoc-b-d.test,
      txt2pdbdoc-c-d.test, txt2pdbdoc-d-t.test: Added mutually exclusive and
      required option checks and tests.
@@ -50,13 +71,11 @@
    * encode.c, options.c, options.h, txt2pdbdoc-c.pdb,
      txt2pdbdoc-no_options.pdb, test-sh, txt2pdbdoc-c.test,
      txt2pdbdoc-no_options.test: Intermediate commit.
-   * test/tests/.gitignore: Added missing .gitignore.
    * palm.h: Added use of HAVE_TIME_H.
    * configure.ac: Added test/Makefile back.
-   * test/.gitattributes, test/.gitignore, test/Makefile.am, sample.txt,
-     txt2pdbdoc-c.pdb, txt2pdbdoc-no_options.pdb, run_test.sh,
-     test/tests/README.md, txt2pdbdoc-c.test, txt2pdbdoc-no_options.test:
-     Preliminary tests.
+   * test/Makefile.am, sample.txt, txt2pdbdoc-c.pdb, txt2pdbdoc-no_options.pdb,
+     run_test.sh, txt2pdbdoc-c.test, txt2pdbdoc-no_options.test: Preliminary
+     tests.
    * common.h, decode.c, encode.c, options.c, options.h, txt2pdbdoc.c, util.h:
      Fixed command-line handling.
    * configure.ac: Clean-up.
@@ -69,7 +88,7 @@
 
    * src/Makefile.am, common.h, compress.c, txt2pdbdoc.c: Split out
      compress/uncompress.
-   * src/.gitignore, common.h, txt2pdbdoc.c, util.c, util.h: Builds.
+   * common.h, txt2pdbdoc.c, util.c, util.h: Builds.
    * configure.ac: s/man5/man4/
    * configure.ac, src/Makefile.am, common.h, palm.h, txt2pdbdoc.c, util.c,
      util.h: Intermediate check-in.
