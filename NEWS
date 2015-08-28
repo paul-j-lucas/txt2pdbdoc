@@ -15,6 +15,9 @@ UTF-8.
 When transcoding of a particular character is impossible (because there is no
 equivalent in the other character set), a warning is printed.
 
+** Added pdbdump command
+A separate command, pdbdump, can be used to dump the raw data of a PDB file.
+
 * Changes in txt2pdbdoc 1.5
 
 ** Added time-stamp suppression option.
@@ -24,7 +27,7 @@ equal content but different time-stamps would never compare equal on a
 byte-by-byte level.)
 
 ** Better option checking.
-txt2pdbdoc is now more robust about checkint command-line options (options that
+txt2pdbdoc is now more robust about checking command-line options (options that
 either forbid or require other options).
 
 ** Resurrected pdb.4 manual page.
