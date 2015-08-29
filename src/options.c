@@ -38,15 +38,15 @@ void check_required( char const *opts, char const *req_opts ) {
   assert( opts );
   assert( req_opts );
 
-  for ( ; *opts; ++opts ) {
-    if ( GAVE_OPTION( *opts ) ) {
+  for ( char const *opt = opts; *opt; ++opt ) {
+    if ( GAVE_OPTION( *opt ) ) {
       for ( char const *req_opt = req_opts; *req_opt; ++req_opt )
         if ( GAVE_OPTION( *req_opt ) )
           return;
       bool const reqs_multiple = strlen( req_opts ) > 1;
       PMESSAGE_EXIT( USAGE,
         "-%c requires %sthe -%s option%s to be given also\n",
-        *opts, (reqs_multiple ? "one of " : ""),
+        *opt, (reqs_multiple ? "one of " : ""),
         req_opts, (reqs_multiple ? "s" : "")
       );
     }
