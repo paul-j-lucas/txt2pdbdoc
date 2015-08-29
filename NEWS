@@ -5,7 +5,7 @@ See the end of the file for license conditions.
 
 * Changes in txt2pdbdoc 1.6
 
-** Added support for transcoding between PalmOS and Unicode
+** Added support for transcoding between PalmOS and Unicode.
 Text documents to be encoded to Doc can now be in UTF-8.  The Unicode
 codepoints are now automatically transcoded into the PalmOS character set that
 is simiar to but slightly different from both ISO 8859-1 and Windows-1252.
@@ -15,7 +15,7 @@ UTF-8.
 When transcoding of a particular character is impossible (because there is no
 equivalent in the other character set), a warning is printed.
 
-** Added pdbdump command
+** Added pdbdump command.
 A separate command, pdbdump, can be used to dump the raw data of a PDB file.
 
 * Changes in txt2pdbdoc 1.5
