@@ -48,14 +48,14 @@ extern opts_given_t opts_given;         // options given
 void check_mutually_exclusive( char const *opts1, char const *opts2 );
 
 /**
- * Checks that if \a opt was given, that at least one \a req_opts was also
- * given.
+ * For each option in \a opts that was given, checks that at least one of
+ * \a req_opts was also given.
  * If not, prints an error message and exits.
  *
- * @param opt The short option.
+ * @param opts The set of short options.
  * @param req_opts The set of required options for \a opt.
  */
-void check_required( char opt, char const *req_opts );
+void check_required( char const *opts, char const *req_opts );
 
 ///////////////////////////////////////////////////////////////////////////////
 

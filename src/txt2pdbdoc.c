@@ -133,8 +133,7 @@ static void process_options( int argc, char *argv[] ) {
   check_mutually_exclusive( "V", "bcdDtUvw" );
 
   // check for options that require other options
-  check_required( 'D', "d" );
-  check_required( 'U', "d" );
+  check_required( "DU", "d" );
 
   if ( opt_decode ) {
     switch ( argc ) {
