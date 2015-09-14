@@ -105,7 +105,8 @@ static void usage( void ) {
 }
 
 static void process_options( int argc, char *argv[] ) {
-  char const opts[] = "bcdDtU:vVw";     // command line options
+  char const  opts[] = "bcdDtU:vVw";    // command line options
+  bool        print_version = false;
 
   me = strrchr( argv[0], '/' );         // determine base name...
   me = me ? me + 1 : argv[0];           // ...of executable
@@ -121,7 +122,7 @@ static void process_options( int argc, char *argv[] ) {
       case 't': opt_no_timestamp = true;                            break;
       case 'U': opt_unmapped_codepoint = parse_codepoint( optarg ); break;
       case 'v': opt_verbose = true;                                 break;
-      case 'V': printf( PACKAGE " " VERSION "\n" );  exit( EXIT_SUCCESS );
+      case 'V': print_version = true;                               break;
       case 'w': opt_no_warnings = true;                             break;
       default : usage();
     } // switch
@@ -134,6 +135,11 @@ static void process_options( int argc, char *argv[] ) {
 
   // check for options that require other options
   check_required( "DU", "d" );
+
+  if ( print_version ) {
+    PRINT_ERR( "%s\n", PACKAGE_STRING );
+    exit( EXIT_SUCCESS );
+  }
 
   if ( opt_decode ) {
     switch ( argc ) {
