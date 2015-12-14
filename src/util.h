@@ -28,6 +28,7 @@
 // standard
 #include <sys/types.h>                  /* for FreeBSD */
 #include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>                     /* for size_t */
 #include <stdint.h>                     /* for uint8_t, ... */
 #include <stdio.h>                      /* for FILE */
@@ -35,23 +36,6 @@
 #include <string.h>                     /* for strerror() */
 
 ///////////////////////////////////////////////////////////////////////////////
-
-// define a "bool" type
-#ifdef HAVE_STDBOOL_H
-# include <stdbool.h>
-#else
-# ifndef HAVE__BOOL
-#   ifdef __cplusplus
-typedef bool _Bool;
-#   else
-#     define _Bool signed char
-#   endif /* __cplusplus */
-# endif /* HAVE__BOOL */
-# define bool   _Bool
-# define false  0
-# define true   1
-# define __bool_true_false_are_defined 1
-#endif /* HAVE_STDBOOL_H */
 
 #ifdef HAVE_FSEEKO
 # define FSEEK_FN fseeko

@@ -37,8 +37,12 @@ AC_DEFUN([gl_EARLY],
   m4_pattern_allow([^gl_ES$])dnl a valid locale name
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
+
+  # Pre-early section.
   AC_REQUIRE([gl_PROG_AR_RANLIB])
+
   # Code from module extern-inline:
+  # Code from module stdbool:
 ])
 
 # This macro should be invoked from ./configure.ac, in the section
@@ -58,6 +62,7 @@ AC_DEFUN([gl_INIT],
   gl_COMMON
   gl_source_base='lib'
   AC_REQUIRE([gl_EXTERN_INLINE])
+  AM_STDBOOL_H
   # End of code from modules
   m4_ifval(gl_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gl_LIBSOURCES_DIR])[ ||
@@ -199,8 +204,10 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
   lib/dummy.c
+  lib/stdbool.in.h
   m4/00gnulib.m4
   m4/extern-inline.m4
   m4/gnulib-common.m4
   m4/onceonly.m4
+  m4/stdbool.m4
 ])
