@@ -144,7 +144,7 @@ static void dump_pdb_header( DatabaseHdrType const *hdr ) {
     ntohs( hdr->version ),
     hdr->type[0], hdr->type[1], hdr->type[2], hdr->type[3],
     hdr->creator[0], hdr->creator[1], hdr->creator[2], hdr->creator[3],
-    hdr->recordList.numRecords
+    ntohs( hdr->recordList.numRecords )
   );
 }
 
