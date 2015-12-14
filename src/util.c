@@ -119,13 +119,13 @@ void freelist_free() {
   free_head = NULL;
 }
 
-uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len ) {
-  assert( t );
+uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len ) {
   assert( m );
+  assert( b );
 
-  for ( size_t i = t_len - m_len + 1; i > 0; --i, ++t )
-    if ( *t == *m && !memcmp( t, m, m_len ) )
-      return t;
+  for ( size_t i = m_len - b_len + 1; i > 0; --i, ++m )
+    if ( *m == *b && memcmp( m, b, b_len ) == 0 )
+      return m;
   return NULL;
 }
 

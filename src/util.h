@@ -140,15 +140,16 @@ void* freelist_add( void *p );
 void freelist_free( void );
 
 /**
- * TODO
+ * Finds a byte sequence within memory.
  *
- * @param t TODO
- * @param t_len TODO
- * @param m TODO
- * @param m_len TODO
- * @return TODO
+ * @param m The start of memory to search within.
+ * @param m_len The number of bytes of \a m.
+ * @param b The bytes to find.
+ * @param b_len The number of bytes of \a b.
+ * @return Returns a pointer to the found byte sequence within \a m
+ * or NULL if not found.
  */
-uint8_t* mem_find( uint8_t *t, size_t t_len, uint8_t *m, size_t m_len );
+uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len );
 
 /**
  * Parses a Unicode code-point value.
