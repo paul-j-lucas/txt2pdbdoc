@@ -148,7 +148,7 @@ void encode( void ) {
   DWord const fin_size = sbuf.st_size;
 
   int num_records = fin_size / RECORD_SIZE_MAX;
-  if ( (long)num_records * RECORD_SIZE_MAX < fin_size )
+  if ( (DWord)num_records * RECORD_SIZE_MAX < fin_size )
     ++num_records;
 
   ////////// create and write header //////////////////////////////////////////
