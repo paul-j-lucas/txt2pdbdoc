@@ -57,7 +57,7 @@ static free_node_t *free_head;          // linked list of stuff to free
  * empty.
  */
 static char const* skip_ws( char const *s ) {
-  assert( s );
+  assert( s != NULL );
   while ( isspace( *s ) )
     ++s;
   return s;
@@ -66,10 +66,11 @@ static char const* skip_ws( char const *s ) {
 ////////// extern functions ///////////////////////////////////////////////////
 
 FILE* check_fopen( char const *path, char const *mode ) {
-  assert( path );
-  assert( mode );
+  assert( path != NULL );
+  assert( mode != NULL );
+
   FILE *const file = fopen( path, mode );
-  if ( !file )
+  if ( file == NULL )
     PMESSAGE_EXIT( OPEN_ERROR,
       "\"%s\": can not open: %s\n", path, STRERROR
     );
@@ -84,7 +85,7 @@ void* check_realloc( void *p, size_t size ) {
   //    The C standard says a call realloc(NULL, size) is equivalent to
   //    malloc(size), but some old systems don't support this (e.g., NextStep).
   //
-  if ( !size )
+  if ( size == 0 )
     size = 1;
   void *const r = p ? realloc( p, size ) : malloc( size );
   if ( !r )
@@ -93,15 +94,15 @@ void* check_realloc( void *p, size_t size ) {
 }
 
 char* check_strdup( char const *s ) {
-  assert( s );
+  assert( s != NULL );
   char *const dup = strdup( s );
-  if ( !dup )
+  if ( dup == NULL )
     PERROR_EXIT( OUT_OF_MEMORY );
   return dup;
 }
 
-void* freelist_add( void *p ) {
-  assert( p );
+void* free_later( void *p ) {
+  assert( p != NULL );
   free_node_t *const new_node = MALLOC( free_node_t, 1 );
   new_node->ptr = p;
   new_node->next = free_head ? free_head : NULL;
@@ -109,7 +110,7 @@ void* freelist_add( void *p ) {
   return p;
 }
 
-void freelist_free() {
+void free_now( void ) {
   for ( free_node_t *p = free_head; p; ) {
     free_node_t *const next = p->next;
     free( p->ptr );
@@ -120,8 +121,8 @@ void freelist_free() {
 }
 
 uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len ) {
-  assert( m );
-  assert( b );
+  assert( m != NULL );
+  assert( b != NULL );
 
   for ( size_t i = m_len - b_len + 1; i > 0; --i, ++m )
     if ( *m == *b && memcmp( m, b, b_len ) == 0 )
@@ -130,15 +131,15 @@ uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len ) {
 }
 
 uint32_t parse_codepoint( char const *s ) {
-  assert( s );
+  assert( s != NULL );
 
-  if ( s[0] && !s[1] )                  // assume single-char ASCII
+  if ( s[0] != '\0' && s[1] == '\0' )   // assume single-char ASCII
     return (uint32_t)s[0];
 
   char const *const s0 = s;
   if ( (s[0] == 'U' || s[0] == 'u') && s[1] == '+' ) {
     // convert [uU]+NNNN to 0xNNNN so strtoull() will grok it
-    char *const t = freelist_add( check_strdup( s ) );
+    char *const t = free_later( check_strdup( s ) );
     s = memcpy( t, "0x", 2 );
   }
   uint64_t const codepoint = parse_ull( s );
@@ -151,13 +152,13 @@ uint32_t parse_codepoint( char const *s ) {
 }
 
 uint64_t parse_ull( char const *s ) {
-  assert( s );
+  assert( s != NULL );
   s = skip_ws( s );
-  if ( *s && *s != '-') {               // strtoull(3) wrongly allows '-'
+  if ( *s != '\0' && *s != '-' ) {      // strtoull(3) wrongly allows '-'
     char *end = NULL;
     errno = 0;
     uint64_t const n = strtoull( s, &end, 0 );
-    if ( !errno && !*end )
+    if ( errno == 0 && *end == '\0' )
       return n;
   }
   PMESSAGE_EXIT( USAGE, "\"%s\": invalid integer\n", s );

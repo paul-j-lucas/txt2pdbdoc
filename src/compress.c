@@ -42,8 +42,8 @@
  * @param space Is it a space?
  */
 static void put_byte( buffer_t *b, Byte c, bool *space ) {
-  assert( b );
-  assert( space );
+  assert( b != NULL );
+  assert( space != NULL );
 
   if ( *space ) {
     *space = false;
@@ -76,7 +76,7 @@ static void put_byte( buffer_t *b, Byte c, bool *space ) {
  * @param b The buffer to be compressed.
  */
 void compress( buffer_t *b ) {
-  assert( b );
+  assert( b != NULL );
 
   bool space = false;
 
@@ -171,7 +171,7 @@ void compress( buffer_t *b ) {
  * @param b The buffer to be uncompressed.
  */
 void uncompress( buffer_t *b ) {
-  assert( b );
+  assert( b != NULL );
 
   Byte *const new_data = MALLOC( Byte, BUFFER_SIZE );
   size_t i, j;

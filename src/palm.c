@@ -618,7 +618,7 @@ Byte unicode_to_palm( uint32_t codepoint ) {
     case 0x0178: return 0x9F; // LATIN CAPITAL LETTER Y WITH DIAERESIS
 
     default:
-      if ( isascii( codepoint ) || (codepoint >= 0xA0 || codepoint <= 0xFF) )
+      if ( isascii( codepoint ) || (codepoint >= 0xA0 && codepoint <= 0xFF) )
         return (Byte)codepoint;
       // no break;
 

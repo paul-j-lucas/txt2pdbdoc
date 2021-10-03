@@ -35,14 +35,15 @@ opts_given_t opts_given;
 ////////// extern functions ///////////////////////////////////////////////////
 
 void check_required( char const *opts, char const *req_opts ) {
-  assert( opts );
-  assert( req_opts );
+  assert( opts != NULL );
+  assert( req_opts != NULL );
 
   for ( char const *opt = opts; *opt; ++opt ) {
     if ( GAVE_OPTION( *opt ) ) {
-      for ( char const *req_opt = req_opts; *req_opt; ++req_opt )
+      for ( char const *req_opt = req_opts; *req_opt; ++req_opt ) {
         if ( GAVE_OPTION( *req_opt ) )
           return;
+      } // for
       bool const reqs_multiple = strlen( req_opts ) > 1;
       PMESSAGE_EXIT( USAGE,
         "-%c requires %sthe -%s option%s to be given also\n",
@@ -54,14 +55,14 @@ void check_required( char const *opts, char const *req_opts ) {
 }
 
 void check_mutually_exclusive( char const *opts1, char const *opts2 ) {
-  assert( opts1 );
-  assert( opts2 );
+  assert( opts1 != NULL );
+  assert( opts2 != NULL );
 
-  int gave_count = 0;
+  unsigned gave_count = 0;
   char const *opt = opts1;
   char gave_opt1 = '\0';
 
-  for ( int i = 0; i < 2; ++i ) {
+  for ( unsigned i = 0; i < 2; ++i ) {
     for ( ; *opt; ++opt ) {
       if ( GAVE_OPTION( *opt ) ) {
         if ( ++gave_count > 1 ) {

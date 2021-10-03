@@ -51,7 +51,7 @@ uint8_t const utf8_len_table[] = {
 ////////// extern functions ///////////////////////////////////////////////////
 
 uint32_t utf8_decode( uint8_t const *u ) {
-  assert( u );
+  assert( u != NULL );
 
   size_t const len = utf8_len( *u );
   if ( len == 1 )                       // special-case ASCII
@@ -72,7 +72,7 @@ uint32_t utf8_decode( uint8_t const *u ) {
 }
 
 size_t utf8_encode( uint32_t codepoint, uint8_t *u ) {
-  assert( u );
+  assert( u != NULL );
 
   static unsigned const Mask1 = 0x80;
   static unsigned const Mask2 = 0xC0;

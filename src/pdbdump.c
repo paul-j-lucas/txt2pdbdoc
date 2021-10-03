@@ -125,7 +125,7 @@ int main( int argc, char *argv[] ) {
 ////////// miscellaneous functions ////////////////////////////////////////////
 
 static void clean_up( void ) {
-  freelist_free();
+  free_now();
   if ( fin )
     fclose( fin );
   if ( fout )
@@ -188,7 +188,7 @@ static void dump_row( DWord offset, uint8_t const *row, DWord row_len ) {
 }
 
 static void process_options( int argc, char *argv[] ) {
-  char const opts[] = "dhV";            // command line options
+  static char const opts[] = "dhV";     // command line options
 
   me = strrchr( argv[0], '/' );         // determine base name...
   me = me ? me + 1 : argv[0];           // ...of executable
@@ -225,7 +225,7 @@ static void process_options( int argc, char *argv[] ) {
 /**
  * Prints the usage message to standard error and exits.
  */
-static void usage() {
+static void usage( void ) {
   PRINT_ERR(
 "usage: %s [-dhV] file.pdb [file.txt]\n"
 "\n"

@@ -54,7 +54,7 @@ extern void encode( void );
 
 static void clean_up( void );
 static void process_options( int, char*[] );
-static void usage();
+static void usage( void );
 
 ////////// main ///////////////////////////////////////////////////////////////
 
@@ -73,7 +73,7 @@ int main( int argc, char *argv[] ) {
 ////////// local functions ////////////////////////////////////////////////////
 
 static void clean_up( void ) {
-  freelist_free();
+  free_now();
   if ( fin )
     fclose( fin );
   if ( fout )

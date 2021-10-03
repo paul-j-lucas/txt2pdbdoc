@@ -116,12 +116,12 @@ void* check_realloc( void *p, size_t size );
  * @param p The pointer to add.
  * @return Returns \a p.
  */
-void* freelist_add( void *p );
+void* free_later( void *p );
 
 /**
  * Frees all the memory pointed to by all the nodes in the free-list.
  */
-void freelist_free( void );
+void free_now( void );
 
 /**
  * Finds a byte sequence within memory.

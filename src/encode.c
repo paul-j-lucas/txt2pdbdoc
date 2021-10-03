@@ -64,8 +64,8 @@ extern void compress( buffer_t* );
  * @param buf The buffer to fill.
  */
 static void fill_buffer( buffer_t *buf ) {
-  assert( buf );
-  assert( buf->data );
+  assert( buf != NULL );
+  assert( buf->data != NULL );
   buf->len = 0;
 
   for ( int c; (c = getc( fin )) != EOF; ) {
@@ -227,17 +227,19 @@ void encode( void ) {
       );
       total_before += uncompressed_buf_len;
       total_after  += buf.len;
-    } else
+    } else {
       PRINT_ERR( " %d", num_records - rec_num + 1 );
+    }
   } // for
 
   if ( opt_verbose ) {
-    if ( opt_compress )
+    if ( opt_compress ) {
       PRINT_ERR( "\n-----\ntotal compression: %2d%%\n",
         (int)( 100.0 * total_after / total_before )
       );
-    else
+    } else {
       FPUTC( '\n', stderr );
+    }
   }
 }
 
