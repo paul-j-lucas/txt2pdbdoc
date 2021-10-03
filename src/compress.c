@@ -106,9 +106,9 @@ void compress( buffer_t *b ) {
          tail == end ) {
       // issued the codes
       // first, check for short runs
-      if ( tail - head < 4 )
+      if ( tail - head < 4 ) {
         put_byte( b, *head++, &space );
-      else {
+      } else {
         unsigned dist = head - p_prev;
         unsigned compound = (dist << COUNT_BITS) + tail - head - 4;
 
@@ -127,8 +127,9 @@ void compress( buffer_t *b ) {
         head = tail - 1;                // and start again
       }
       p_prev = buf_orig;                // start search again
-    } else
+    } else {
       p_prev = p;                       // got a match
+    }
 
     // when we get to the end of the buffer, don't inc past the
     // end; this forces the residue chars out one at a time
@@ -179,16 +180,16 @@ void uncompress( buffer_t *b ) {
   for ( i = j = 0; i < b->len; ) {
     unsigned c = b->data[ i++ ];
 
-    if ( c >= 1 && c <= 8 )
+    if ( c >= 1 && c <= 8 ) {
       while ( c-- )                     // copy 'c' bytes
         new_data[ j++ ] = b->data[ i++ ];
-
-    else if ( c <= 0x7F )               // 0,09-7F = self
+    }
+    else if ( c <= 0x7F ) {             // 0,09-7F = self
       new_data[ j++ ] = c;
-
-    else if ( c >= 0xC0 )               // space + ASCII char
+    }
+    else if ( c >= 0xC0 ) {             // space + ASCII char
       new_data[ j++ ] = ' ', new_data[ j++ ] = c ^ 0x80;
-
+    }
     else {                              // 80-BF = sequences
       c = (c << 8) + b->data[ i++ ];
       int const di = (c & 0x3FFF) >> COUNT_BITS;

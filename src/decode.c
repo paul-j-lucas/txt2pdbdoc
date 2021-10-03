@@ -65,7 +65,7 @@ extern void uncompress( buffer_t* );
 static uint8_t const* palm_to_utf8( Byte c ) {
   uint32_t codepoint = palm_to_unicode( c );
 
-  if ( !codepoint ) {
+  if ( codepoint == 0 ) {
     if ( !opt_no_warnings )
       PMESSAGE(
         "\"%s\" (%s): PalmOS character does not map to Unicode%s\n",

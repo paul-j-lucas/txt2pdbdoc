@@ -70,7 +70,7 @@ static void fill_buffer( buffer_t *buf ) {
 
   for ( int c; (c = getc( fin )) != EOF; ) {
     size_t const len = utf8_len( c );
-    if ( !len ) {
+    if ( len == 0 ) {
       if ( !opt_no_warnings )
         PMESSAGE( "\"%s\": invalid UTF-8 start byte\n", printable_char( c ) );
       continue;
@@ -105,21 +105,23 @@ static void fill_buffer( buffer_t *buf ) {
         if ( (c = getc( fin )) == EOF )
           goto done;
         if ( utf8_len( c ) ) {
-          if ( !opt_no_warnings )
+          if ( !opt_no_warnings ) {
             PMESSAGE(
               "\"%s\": invalid UTF-8 continuation byte\n",
               printable_char( c )
             );
+          }
           goto next;
         }
         utf8_char[ u++ ] = c;
       } // for
       uint32_t const codepoint = utf8_decode( utf8_char );
       if ( !(c = unicode_to_palm( codepoint )) ) {
-        if ( !opt_no_warnings )
+        if ( !opt_no_warnings ) {
           PMESSAGE(
             "\"%x04X\": Unicode codepoint does not map to PalmOS\n", codepoint
           );
+        }
         continue;
       }
     }
