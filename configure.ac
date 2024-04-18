@@ -25,7 +25,8 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for programs.
-AC_PROG_CC_C99
+AC_LANG(C)
+AC_PROG_CC
 gl_EARLY
 AC_PROG_INSTALL
 
