@@ -2,7 +2,7 @@
 #	txt2pdbdoc -- Text to Doc converter for Palm Pilots
 #	src/Makefile.am
 #
-#	Copyright (C) 2015  Paul J. Lucas
+#	Copyright (C) 2015-2024  Paul J. Lucas
 #
 #	This program is free software; you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
@@ -20,9 +20,17 @@
 
 bin_PROGRAMS = txt2pdbdoc pdbdump
 
-pdbdump_SOURCES = pdbdump.c options.c util.c
+pdbdump_SOURCES =	pdbdump.c \
+			options.c \
+			util.c
 
-txt2pdbdoc_SOURCES = compress.c decode.c encode.c options.c palm.c \
-	txt2pdbdoc.c utf8.c util.c
+txt2pdbdoc_SOURCES =	compress.c \
+			decode.c \
+			encode.c \
+			options.c \
+			palm.c \
+			txt2pdbdoc.c \
+			utf8.c \
+			util.c
 
 # vim:set noet sw=8 ts=8:

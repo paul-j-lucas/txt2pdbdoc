@@ -2,7 +2,7 @@
 **      txt2pdbdoc -- Text to Doc converter for Palm Pilots
 **      compress.c
 **
-**      Copyright (C) 1998-2015  Paul J. Lucas
+**      Copyright (C) 1998-2024  Paul J. Lucas
 **
 **      This program is free software; you can redistribute it and/or modify
 **      it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@
 #include <stdlib.h>
 
 // constants
-#define BUFFER_SIZE   6000              /* big enough for uncompressed record */
 #define COUNT_BITS    3                 /* why this value?  I don't know */
 #define DISP_BITS     11                /* ditto */
 
