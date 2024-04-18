@@ -126,8 +126,8 @@ typedef struct DatabaseHdrType DatabaseHdrType;
  */
 TXT2PDBDOC_PALM_INLINE
 char const* palm_to_string( Byte c ) {
-  extern char const *const palm_to_string_table[];
-  return palm_to_string_table[ c ];
+  extern char const *const PALM_TO_STRING_TABLE[];
+  return PALM_TO_STRING_TABLE[ c ];
 }
 
 /**

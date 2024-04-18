@@ -306,7 +306,7 @@ char32_t const PALM_TO_UNICODE_TABLE[] = {
   /* 0xFF */ 0x00FF  // LATIN SMALL LETTER Y WITH DIAERESIS
 };
 
-char const *const palm_to_string_table[] = {
+char const *const PALM_TO_STRING_TABLE[] = {
 
   /* 0x00 */ "null",
   /* 0x01 */ "start of heading",
