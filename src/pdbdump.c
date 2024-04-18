@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sysexits.h>
 #include <unistd.h>                     /* for getopt() */
 
 #define BUF_SIZE  4096
@@ -100,7 +101,7 @@ int main( int argc, char *argv[] ) {
       next_offset = ntohl( rec.offset );
     } else {
       FSEEK( fin, 0, SEEK_END );
-      next_offset = ftell( fin );
+      next_offset = STATIC_CAST( DWord, ftell( fin ) );
     }
 
     // read record payload
@@ -195,15 +196,16 @@ static void process_options( int argc, char *argv[] ) {
 
   opterr = 1;
   for ( int opt; (opt = getopt( argc, argv, opts )) != EOF; ) {
-    SET_OPTION( opt );
     switch ( opt ) {
       case 'd': opt_data_only = true;               break;
       case 'h': opt_header_only = true;             break;
       case 'V': printf( "pdbdump %s\n", VERSION );  exit( EXIT_SUCCESS );
       default : usage();
     } // switch
+    opts_given[ opt ] = true;
   } // for
-  argc -= optind, argv += optind - 1;
+  argc -= optind;
+  argv += optind - 1;
 
   check_mutually_exclusive( "d", "h" );
   check_mutually_exclusive( "V", "dh" );
@@ -235,7 +237,7 @@ static void usage( void ) {
 "  -V  Print version and exit.\n"
     , me
   );
-  exit( EXIT_USAGE );
+  exit( EX_USAGE );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

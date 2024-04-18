@@ -23,7 +23,8 @@
 #define txt2pdbdoc_palm_H
 
 // local
-#include "util.h"                       /* for bool */
+#include "utf8.h"
+#include "util.h"
 
 // standard
 #include <stdint.h>
@@ -111,7 +112,7 @@ typedef struct DatabaseHdrType DatabaseHdrType;
 ////////// PalmOS utility functions ///////////////////////////////////////////
 
 #ifdef HAVE_TIME_H
-# define palm_date()      ( (DWord)(time(0) + 2082844800ul) )
+# define palm_date()      ( (DWord)(time(0) + 2082844800l) )
 #else
 # define palm_date()      0
 #endif /* HAVE_TIME_H */
@@ -123,7 +124,8 @@ typedef struct DatabaseHdrType DatabaseHdrType;
  * @param c The PalmOS character to get the name of.
  * @return Returns said name.
  */
-TXT2PDBDOC_PALM_INLINE char const* palm_to_string( Byte c ) {
+TXT2PDBDOC_PALM_INLINE
+char const* palm_to_string( Byte c ) {
   extern char const *const palm_to_string_table[];
   return palm_to_string_table[ c ];
 }
@@ -135,9 +137,10 @@ TXT2PDBDOC_PALM_INLINE char const* palm_to_string( Byte c ) {
  * @return Returns said or 0 if the PalmOS character can not be mapped into
  * Unicode.
  */
-TXT2PDBDOC_PALM_INLINE uint32_t palm_to_unicode( Byte c ) {
-  extern uint32_t const palm_to_unicode_table[];
-  return palm_to_unicode_table[ c ];
+TXT2PDBDOC_PALM_INLINE
+char32_t palm_to_unicode( Byte c ) {
+  extern char32_t const PALM_TO_UNICODE_TABLE[];
+  return PALM_TO_UNICODE_TABLE[ c ];
 }
 
 /**
@@ -147,7 +150,7 @@ TXT2PDBDOC_PALM_INLINE uint32_t palm_to_unicode( Byte c ) {
  * @return Returns said character or 0 if the codepoint can not be mapped into
  * a PalmOS character.
  */
-Byte unicode_to_palm( uint32_t codepoint );
+Byte unicode_to_palm( char32_t codepoint );
 
 ///////////////////////////////////////////////////////////////////////////////
 

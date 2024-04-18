@@ -29,6 +29,7 @@
 
 // standard
 #include <assert.h>
+#include <attribute.h>
 #include <ctype.h>
 #include <sys/types.h>                  /* for FreeBSD */
 #include <netinet/in.h>                 /* for htonl() */
@@ -36,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sysexits.h>
 #include <unistd.h>
 
 #define PUT_DWord(F,N) \
@@ -69,10 +71,15 @@ static void fill_buffer( buffer_t *buf ) {
   buf->len = 0;
 
   for ( int c; (c = getc( fin )) != EOF; ) {
-    size_t const len = utf8_len( c );
+    char8_t c8 = STATIC_CAST( char8_t, c );
+    size_t const len = utf8_len( c8 );
     if ( len == 0 ) {
-      if ( !opt_no_warnings )
-        PMESSAGE( "\"%s\": invalid UTF-8 start byte\n", printable_char( c ) );
+      if ( !opt_no_warnings ) {
+        PMESSAGE(
+          "\"%s\": invalid UTF-8 start byte\n",
+          printable_char( STATIC_CAST( char, c ) )
+        );
+      }
       continue;
     }
 
@@ -86,13 +93,13 @@ static void fill_buffer( buffer_t *buf ) {
           case '\r':
             if ( peekc( fin ) == '\n' )
               continue;                     // CR+LF -> LF
-            // no break;
+            FALLTHROUGH;
           case '\f':
-            c = '\n';
+            c8 = '\n';
             break;
         } // switch
       }
-      buf->data[ buf->len ] = (Byte)c;
+      buf->data[ buf->len ] = c8;
     }
 
     ////////// handle UTF-8 ///////////////////////////////////////////////////
@@ -100,23 +107,24 @@ static void fill_buffer( buffer_t *buf ) {
     else {
       uint8_t utf8_char[ UTF8_LEN_MAX ];
       size_t u = 0;
-      utf8_char[ u++ ] = c;
+      utf8_char[ u++ ] = c8;
       for ( size_t i = len; i > 1; --i ) {
         if ( (c = getc( fin )) == EOF )
           goto done;
-        if ( utf8_len( c ) ) {
+        c8 = STATIC_CAST( char8_t, c );
+        if ( utf8_len( c8 ) ) {
           if ( !opt_no_warnings ) {
             PMESSAGE(
               "\"%s\": invalid UTF-8 continuation byte\n",
-              printable_char( c )
+              printable_char( STATIC_CAST( char, c ) )
             );
           }
           goto next;
         }
-        utf8_char[ u++ ] = c;
+        utf8_char[ u++ ] = c8;
       } // for
-      uint32_t const codepoint = utf8_decode( utf8_char );
-      if ( !(c = unicode_to_palm( codepoint )) ) {
+      char32_t const codepoint = utf8_decode( utf8_char );
+      if ( !(c8 = unicode_to_palm( codepoint )) ) {
         if ( !opt_no_warnings ) {
           PMESSAGE(
             "\"%x04X\": Unicode codepoint does not map to PalmOS\n", codepoint
@@ -126,17 +134,17 @@ static void fill_buffer( buffer_t *buf ) {
       }
     }
 
-    buf->data[ buf->len ] = c;
+    buf->data[ buf->len ] = c8;
     if ( ++buf->len == RECORD_SIZE_MAX )
       break;
 
 next:
-    /* nothing */;
+    NO_OP;
   } // for
 
 done:
   if ( ferror( fin ) )
-    PERROR_EXIT( READ_ERROR );
+    PERROR_EXIT( EX_NOINPUT );
 }
 
 ////////// extern functions ///////////////////////////////////////////////////
@@ -147,10 +155,10 @@ done:
 void encode( void ) {
   struct stat sbuf;
   FSTAT( fileno( fin ), &sbuf );
-  DWord const fin_size = sbuf.st_size;
+  DWord const fin_size = STATIC_CAST( DWord, sbuf.st_size );
 
-  int num_records = fin_size / RECORD_SIZE_MAX;
-  if ( (DWord)num_records * RECORD_SIZE_MAX < fin_size )
+  DWord num_records = fin_size / RECORD_SIZE_MAX;
+  if ( num_records * RECORD_SIZE_MAX < fin_size )
     ++num_records;
 
   ////////// create and write header //////////////////////////////////////////
@@ -205,8 +213,8 @@ void encode( void ) {
   NEW_BUFFER( &buf );
   int total_before = 0, total_after = 0;
 
-  for ( int rec_num = 1; rec_num <= num_records; ++rec_num ) {
-    offset = ftell( fout );
+  for ( DWord rec_num = 1; rec_num <= num_records; ++rec_num ) {
+    offset = STATIC_CAST( DWord, ftell( fout ) );
     SEEK_REC( fout, rec_num );
     PUT_DWord( fout, offset );
 

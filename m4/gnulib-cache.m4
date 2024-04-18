@@ -37,12 +37,14 @@
 #  --no-conditional-dependencies \
 #  --no-libtool \
 #  --macro-prefix=gl \
+#  attribute \
 #  extern-inline \
 #  stdbool
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
+  attribute
   extern-inline
   stdbool
 ])

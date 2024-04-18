@@ -24,16 +24,11 @@
 
 // standard
 #include <ctype.h>
-
-#define GAVE_OPTION(OPT)  isalpha( OPTION_VALUE(OPT) )
-#define OPTION_VALUE(OPT) opts_given[ !islower(OPT) ][ toupper(OPT) - 'A' ]
-#define SET_OPTION(OPT)   OPTION_VALUE(OPT) = (OPT)
+#include <stdbool.h>
 
 ////////// extern variables ///////////////////////////////////////////////////
 
-typedef char opts_given_t[ 2 /* lower/upper */ ][ 26 + 1 /*NULL*/ ];
-
-extern opts_given_t opts_given;         // options given
+extern bool opts_given[ 128 ];          // options given
 
 ////////// extern functions ///////////////////////////////////////////////////
 

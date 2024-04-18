@@ -98,7 +98,10 @@ void compress( buffer_t *b ) {
       p_prev = head - (( 1 << DISP_BITS )-1);
 
     // scan in the previous data for a match
-    p = mem_find( p_prev, tail - p_prev, head, tail - head );
+    p = mem_find(
+      p_prev, STATIC_CAST( size_t, tail - p_prev ),
+      head, STATIC_CAST( size_t, tail - head )
+    );
 
     // on a mismatch or end of buffer, issued codes
     if ( !p || p == head || tail - head > (1 << COUNT_BITS) + 2 ||
@@ -108,8 +111,8 @@ void compress( buffer_t *b ) {
       if ( tail - head < 4 ) {
         put_byte( b, *head++, &space );
       } else {
-        unsigned dist = head - p_prev;
-        unsigned compound = (dist << COUNT_BITS) + tail - head - 4;
+        size_t const dist = STATIC_CAST( size_t, head - p_prev );
+        size_t const compound = (dist << COUNT_BITS) + STATIC_CAST( size_t, tail - head - 4 );
 
         if ( dist >= ( 1 << DISP_BITS ) || tail - head - 4 > 7 )
           PRINT_ERR( "%s: error: dist overflow\n", me );
@@ -121,7 +124,7 @@ void compress( buffer_t *b ) {
           space = false;
         }
 
-        b->data[ b->len++ ] = 0x80 + ( compound >> 8 );
+        b->data[ b->len++ ] = STATIC_CAST( Byte, 0x80 + (compound >> 8) );
         b->data[ b->len++ ] = compound & 0xFF;
         head = tail - 1;                // and start again
       }
@@ -184,14 +187,15 @@ void uncompress( buffer_t *b ) {
         new_data[ j++ ] = b->data[ i++ ];
     }
     else if ( c <= 0x7F ) {             // 0,09-7F = self
-      new_data[ j++ ] = c;
+      new_data[ j++ ] = STATIC_CAST( Byte, c );
     }
     else if ( c >= 0xC0 ) {             // space + ASCII char
-      new_data[ j++ ] = ' ', new_data[ j++ ] = c ^ 0x80;
+      new_data[ j++ ] = ' ';
+      new_data[ j++ ] = STATIC_CAST( Byte, c ^ 0x80 );
     }
     else {                              // 80-BF = sequences
       c = (c << 8) + b->data[ i++ ];
-      int const di = (c & 0x3FFF) >> COUNT_BITS;
+      unsigned const di = (c & 0x3FFF) >> COUNT_BITS;
       for ( int n = (c & ((1 << COUNT_BITS) - 1)) + 3; n--; ++j )
         new_data[ j ] = new_data[ j - di ];
     }

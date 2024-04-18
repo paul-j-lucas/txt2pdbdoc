@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sysexits.h>
 #include <unistd.h>
 
 #define GET_DWord(F,N) \
@@ -48,7 +49,7 @@ extern FILE        *fout;
 
 extern bool         opt_no_check_doc;
 extern bool         opt_no_warnings;
-extern uint32_t     opt_unmapped_codepoint;
+extern char32_t     opt_unmapped_codepoint;
 extern bool         opt_verbose;
 
 extern void uncompress( buffer_t* );
@@ -63,13 +64,13 @@ extern void uncompress( buffer_t* );
  * mapped into Unicode.
  */
 static uint8_t const* palm_to_utf8( Byte c ) {
-  uint32_t codepoint = palm_to_unicode( c );
+  char32_t codepoint = palm_to_unicode( c );
 
   if ( codepoint == 0 ) {
     if ( !opt_no_warnings )
       PMESSAGE(
         "\"%s\" (%s): PalmOS character does not map to Unicode%s\n",
-        printable_char( c ), palm_to_string( c ),
+        printable_char( STATIC_CAST( char, c ) ), palm_to_string( c ),
         (opt_unmapped_codepoint ? "" : ": skipped")
       );
     if ( !opt_unmapped_codepoint )
@@ -87,7 +88,7 @@ static uint8_t const* palm_to_utf8( Byte c ) {
       if ( !opt_no_warnings )
         PMESSAGE(
           "\"%s\": character unused by PalmOS: skipped\n",
-          printable_char( c )
+          printable_char( STATIC_CAST( char, c ) )
         );
       return NULL;
   } // switch
@@ -95,11 +96,11 @@ static uint8_t const* palm_to_utf8( Byte c ) {
   static uint8_t utf8_char[ UTF8_LEN_MAX + 1 /*NULL*/ ];
   size_t len;
 
-  if ( isascii( codepoint ) ) {
+  if ( isascii( STATIC_CAST( int, codepoint ) ) ) {
     if ( !(isspace( (int)codepoint ) || isprint( (int)codepoint )) ) {
       PMESSAGE(
         "\"%s\" (%s): non-printable character found: skipped\n",
-        printable_char( c ), palm_to_string( c )
+        printable_char( STATIC_CAST( char, c ) ), palm_to_string( c )
       );
       return NULL;
     }
@@ -127,7 +128,7 @@ void decode( void ) {
   if ( !opt_no_check_doc && (
        strncmp( header.type,    DOC_TYPE,    sizeof header.type ) ||
        strncmp( header.creator, DOC_CREATOR, sizeof header.creator ) ) ) {
-    PMESSAGE_EXIT( NOT_DOC_FILE, "%s is not a Doc file\n", fin_path );
+    PMESSAGE_EXIT( EX_DATAERR, "%s is not a Doc file\n", fin_path );
   }
 
   // without rec 0
@@ -149,7 +150,7 @@ void decode( void ) {
     case DOC_UNCOMPRESSED:
       break;
     default:
-      PMESSAGE_EXIT( UNKNOWN_COMPRESSION,
+      PMESSAGE_EXIT( EX_DATAERR,
         "error: %d: unknown file compression type\n", compression
       );
   } // switch
@@ -157,7 +158,7 @@ void decode( void ) {
   ///////// read Doc file record-by-record ////////////////////////////////////
 
   FSEEK( fin, 0, SEEK_END );
-  DWord const file_size = ftell( fin );
+  DWord const file_size = STATIC_CAST( DWord, ftell( fin ) );
 
   if ( opt_verbose )
     PMESSAGE( "decoding \"%s\":", header.name );

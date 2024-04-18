@@ -41,6 +41,7 @@ AC_DEFUN([gl_EARLY],
   # Pre-early section.
   AC_REQUIRE([gl_PROG_AR_RANLIB])
 
+  # Code from module attribute:
   # Code from module c99:
   # Code from module extern-inline:
   # Code from module std-gnu11:
@@ -240,6 +241,7 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
+  lib/attribute.h
   lib/dummy.c
   m4/00gnulib.m4
   m4/c-bool.m4

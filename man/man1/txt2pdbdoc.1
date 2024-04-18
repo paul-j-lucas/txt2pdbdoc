@@ -35,7 +35,7 @@
 .sp
 ..
 .\" ---------------------------------------------------------------------------
-.TH \f3txt2pdbdoc\fP 1 "August 16, 2015" "txt2pdbdoc"
+.TH \f3txt2pdbdoc\fP 1 "April 18, 2024" "txt2pdbdoc"
 .SH NAME
 txt2pdbdoc \- Text to Doc file converter for Palm Pilots
 .SH SYNOPSIS
@@ -154,25 +154,14 @@ txt2pdbdoc 'Through the Looking Glass' alice.txt alice.pdb
 .PD 0
 .IP 0
 Success.
-.IP 1
-Error in command-line options or use.
-.IP 2
-Out of memory.
-.IP 10
+.IP 64
+Command-line usage error.
+.IP 66
 Open file error.
-.IP 11
-Read error.
-.IP 12
-Write error.
-.IP 13
-Seek error.
-.IP 14
-.B stat
-error.
-.IP 20
-File is not a Doc file.
-.IP 21
-Doc file uses unknown compression type.
+.IP 71
+System error.
+.IP 74
+I/O error.
 .PD
 .SH CAVEATS
 .TP 4

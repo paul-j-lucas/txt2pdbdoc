@@ -23,11 +23,22 @@
 #define txt2pdbdoc_utf8_H
 
 // local
-#include "util.h"                       /* for bool */
+#include "config.h"
 
 // standard
+#include <stdbool.h>
 #include <stddef.h>                     /* for size_t */
 #include <stdint.h>                     /* for uint8_t, ... */
+
+#if !HAVE_CHAR8_T
+typedef uint8_t char8_t;                /* borrowed from C++20 */
+#endif /* !HAVE_CHAR8_T */
+#if !HAVE_CHAR16_T
+typedef uint16_t char16_t;              /* C11's char16_t */
+#endif /* !HAVE_CHAR16_T */
+#if !HAVE_CHAR32_T
+typedef uint32_t char32_t;              /* C11's char32_t */
+#endif /* !HAVE_CHAR32_T */
 
 #ifndef TXT2PDBDOC_UTF8_INLINE
 # define TXT2PDBDOC_UTF8_INLINE _GL_INLINE
@@ -45,14 +56,28 @@
 /**
  * Checks whether the given Unicode code-point is valid.
  *
- * @param codepoint The Unicode code-point to check.
- * @return Returns \c true only if \a codepoint is valid.
+ * @param cp The Unicode code-point to check.
+ * @return Returns \c true only if \a cp is valid.
  */
-TXT2PDBDOC_UTF8_INLINE bool codepoint_is_valid( uint64_t codepoint ) {
-  return                            codepoint <= 0x00D7FF
-      ||  (codepoint >= 0x00E000 && codepoint <= 0x00FFFD)
-      ||  (codepoint >= 0x010000 && codepoint <= 0x10FFFF);
+TXT2PDBDOC_UTF8_INLINE
+bool codepoint_is_valid( uint64_t cp ) {
+  return                            cp <= 0x00D7FF
+      ||  (cp >= 0x00E000 && cp <= 0x00FFFD)
+      ||  (cp >= 0x010000 && cp <= 0x10FFFF);
 }
+
+/**
+ * Parses a Unicode code-point value.
+ *
+ * @param s The NULL-terminated string to parse.  Allows for strings of the
+ * form:
+ *  + X: a single character.
+ *  + NN: two-or-more decimal digits.
+ *  + 0xN, u+N, or U+N: one-or-more hexadecimal digits.
+ * @return Returns the Unicode code-point value
+ * or prints an error message and exits if \a s is invalid.
+ */
+char32_t parse_codepoint( char const *s );
 
 /**
  * Decodes a UTF-8 octet sequence into a Unicode codepoint.
@@ -60,18 +85,18 @@ TXT2PDBDOC_UTF8_INLINE bool codepoint_is_valid( uint64_t codepoint ) {
  * @param utf8 The UTF-8 octet sequence to decode.
  * @return Returns said codepoint or 0 if the \a utf8 is invalid.
  */
-uint32_t utf8_decode( uint8_t const *utf8 );
+char32_t utf8_decode( char8_t const *utf8 );
 
 /**
  * Encodes a Unicode codepoint into UTF-8.
  *
- * @param codepoint The Unicode code-point to encode.
+ * @param cp The Unicode code-point to encode.
  * @param utf8_buf A pointer to the start of a buffer to receive the UTF-8
  * bytes; must be at least \c UTF8_LEN_MAX long.  No NULL byte is appended.
  * @return Returns the number of bytes comprising the codepoint encoded as
  * UTF-8.
  */
-size_t utf8_encode( uint32_t codepoint, uint8_t *utf8_buf );
+size_t utf8_encode( char32_t cp, char8_t *utf8_buf );
 
 /**
  * Gets the length of a UTF-8 character.
@@ -80,9 +105,10 @@ size_t utf8_encode( uint32_t codepoint, uint8_t *utf8_buf );
  * @return Returns the number of bytes needed for the UTF-8 character in the
  * range [1,6] or 0 if \a start is not a valid start byte.
  */
-TXT2PDBDOC_UTF8_INLINE size_t utf8_len( uint8_t start ) {
-  extern uint8_t const utf8_len_table[];
-  return utf8_len_table[ start ];
+TXT2PDBDOC_UTF8_INLINE
+unsigned utf8_len( char8_t start ) {
+  extern char8_t const UTF8_LEN_TABLE[];
+  return UTF8_LEN_TABLE[ start ];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

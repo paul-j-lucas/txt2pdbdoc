@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
+#include <sysexits.h>
 
 ///////////////////////////////////////////////////////////////////////////////
   
@@ -71,7 +72,7 @@ FILE* check_fopen( char const *path, char const *mode ) {
 
   FILE *const file = fopen( path, mode );
   if ( file == NULL )
-    PMESSAGE_EXIT( OPEN_ERROR,
+    PMESSAGE_EXIT( EX_NOINPUT,
       "\"%s\": can not open: %s\n", path, STRERROR
     );
   return file;
@@ -89,7 +90,7 @@ void* check_realloc( void *p, size_t size ) {
     size = 1;
   void *const r = p ? realloc( p, size ) : malloc( size );
   if ( !r )
-    PERROR_EXIT( OUT_OF_MEMORY );
+    PERROR_EXIT( EX_OSERR );
   return r;
 }
 
@@ -97,7 +98,7 @@ char* check_strdup( char const *s ) {
   assert( s != NULL );
   char *const dup = strdup( s );
   if ( dup == NULL )
-    PERROR_EXIT( OUT_OF_MEMORY );
+    PERROR_EXIT( EX_OSERR );
   return dup;
 }
 
@@ -130,27 +131,6 @@ uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len ) {
   return NULL;
 }
 
-uint32_t parse_codepoint( char const *s ) {
-  assert( s != NULL );
-
-  if ( s[0] != '\0' && s[1] == '\0' )   // assume single-char ASCII
-    return (uint32_t)s[0];
-
-  char const *const s0 = s;
-  if ( (s[0] == 'U' || s[0] == 'u') && s[1] == '+' ) {
-    // convert [uU]+NNNN to 0xNNNN so strtoull() will grok it
-    char *const t = free_later( check_strdup( s ) );
-    s = memcpy( t, "0x", 2 );
-  }
-  uint64_t const codepoint = parse_ull( s );
-  if ( codepoint_is_valid( codepoint ) )
-    return (uint32_t)codepoint;         
-  PMESSAGE_EXIT( USAGE,
-    "\"%s\": invalid Unicode code-point for -%c\n",
-    s0, 'U'
-  );
-}
-
 uint64_t parse_ull( char const *s ) {
   assert( s != NULL );
   s = skip_ws( s );
@@ -161,14 +141,14 @@ uint64_t parse_ull( char const *s ) {
     if ( errno == 0 && *end == '\0' )
       return n;
   }
-  PMESSAGE_EXIT( USAGE, "\"%s\": invalid integer\n", s );
+  PMESSAGE_EXIT( EX_USAGE, "\"%s\": invalid integer\n", s );
 }
 
 int peekc( FILE *file ) {
   int const c = getc( file );
   if ( c == EOF ) {
     if ( ferror( file ) )
-      PERROR_EXIT( READ_ERROR );
+      PERROR_EXIT( EX_NOINPUT );
   } else {
     UNGETC( c, file );
   }
@@ -188,10 +168,13 @@ char const* printable_char( char c ) {
   } // switch
 
   static char buf[5];                   // \xHH + NULL
-  if ( isprint( c ) )
-    buf[0] = c, buf[1] = '\0';
-  else
-    snprintf( buf, sizeof( buf ), "\\x%02X", (unsigned)c );
+  if ( isprint( c ) ) {
+    buf[0] = c;
+    buf[1] = '\0';
+  }
+  else {
+    snprintf( buf, sizeof( buf ), "\\x%02X", STATIC_CAST( unsigned, c ) );
+  }
   return buf;
 }
 

@@ -18,7 +18,10 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-bin_PROGRAMS = txt2pdbdoc pdbdump
+bin_PROGRAMS =		txt2pdbdoc pdbdump
+
+AM_CFLAGS =		$(T2PD_CFLAGS)
+AM_CPPFLAGS =		-I$(top_srcdir)/lib -I$(top_builddir)/lib
 
 pdbdump_SOURCES =	pdbdump.c \
 			options.c \

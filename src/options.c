@@ -26,11 +26,12 @@
 
 // standard
 #include <assert.h>
-#include <string.h>
+#include <stdbool.h>
+#include <sysexits.h>
 
 ////////// extern declarations ////////////////////////////////////////////////
 
-opts_given_t opts_given;
+bool opts_given[ 128 ];
 
 ////////// extern functions ///////////////////////////////////////////////////
 
@@ -39,13 +40,13 @@ void check_required( char const *opts, char const *req_opts ) {
   assert( req_opts != NULL );
 
   for ( char const *opt = opts; *opt; ++opt ) {
-    if ( GAVE_OPTION( *opt ) ) {
+    if ( opts_given[ STATIC_CAST( unsigned, *opt ) ] ) {
       for ( char const *req_opt = req_opts; *req_opt; ++req_opt ) {
-        if ( GAVE_OPTION( *req_opt ) )
+        if ( opts_given[ STATIC_CAST( unsigned, *req_opt ) ] )
           return;
       } // for
       bool const reqs_multiple = strlen( req_opts ) > 1;
-      PMESSAGE_EXIT( USAGE,
+      PMESSAGE_EXIT( EX_USAGE,
         "-%c requires %sthe -%s option%s to be given also\n",
         *opt, (reqs_multiple ? "one of " : ""),
         req_opts, (reqs_multiple ? "s" : "")
@@ -64,10 +65,10 @@ void check_mutually_exclusive( char const *opts1, char const *opts2 ) {
 
   for ( unsigned i = 0; i < 2; ++i ) {
     for ( ; *opt; ++opt ) {
-      if ( GAVE_OPTION( *opt ) ) {
+      if ( opts_given[ STATIC_CAST( unsigned, *opt ) ] ) {
         if ( ++gave_count > 1 ) {
           char const gave_opt2 = *opt;
-          PMESSAGE_EXIT( USAGE,
+          PMESSAGE_EXIT( EX_USAGE,
             "-%c and -%c are mutually exclusive\n", gave_opt1, gave_opt2
           );
         }

@@ -25,13 +25,14 @@
 #include "palm.h"
 
 // standard
+#include <attribute.h>
 #include <ctype.h>
 
 ////////// extern variables ///////////////////////////////////////////////////
 
 #define NO_MAP 0x0000 /* PalmOS character doesn't map to Unicode */
 
-uint32_t const palm_to_unicode_table[] = {
+char32_t const PALM_TO_UNICODE_TABLE[] = {
 
   /* 0x00 */ 0x0000,  // NULL
   /* 0x01 */ 0x0001,  // START OF HEADING
@@ -581,7 +582,7 @@ char const *const palm_to_string_table[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Byte unicode_to_palm( uint32_t codepoint ) {
+Byte unicode_to_palm( char32_t codepoint ) {
   switch ( codepoint ) {
     case 0x2026: return 0x18; // HORIZONTAL ELLIPSIS
     case 0x2007: return 0x19; // FIGURE SPACE
@@ -618,9 +619,11 @@ Byte unicode_to_palm( uint32_t codepoint ) {
     case 0x0178: return 0x9F; // LATIN CAPITAL LETTER Y WITH DIAERESIS
 
     default:
-      if ( isascii( codepoint ) || (codepoint >= 0xA0 && codepoint <= 0xFF) )
-        return (Byte)codepoint;
-      // no break;
+      if ( isascii( STATIC_CAST( int, codepoint ) ) ||
+           (codepoint >= 0xA0 && codepoint <= 0xFF) ) {
+        return STATIC_CAST( Byte, codepoint );
+      }
+      FALLTHROUGH;
 
     case 0x0014:              // PalmOS: OTA SECURE
     case 0x0015:              // PalmOS: OTA
@@ -630,7 +633,7 @@ Byte unicode_to_palm( uint32_t codepoint ) {
     case 0x009B:              // PalmOS: (not used)
     case 0x009D:              // PalmOS: COMMAND STROKE
     case 0x009E:              // PalmOS: SHORTCUT STROKE
-      return 0x00;            // does not map to PalmOS
+      return 0;               // does not map to PalmOS
   } // switch
 }
 

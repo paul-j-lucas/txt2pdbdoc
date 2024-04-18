@@ -25,20 +25,7 @@
 // local
 #include "palm.h"
 
-// standard
-#include <stdlib.h>                     /* for EXIT_SUCCESS */
-
 ///////////////////////////////////////////////////////////////////////////////
-
-#define EXIT_USAGE                1     /* command-line usage error */
-#define EXIT_OUT_OF_MEMORY        2
-#define EXIT_OPEN_ERROR           10    /* error opening file */
-#define EXIT_READ_ERROR           11    /* error reading */
-#define EXIT_WRITE_ERROR          12    /* error writing */
-#define EXIT_SEEK_ERROR           13    /* error seeking */
-#define EXIT_STAT_ERROR           14    /* error stat'ing */
-#define EXIT_NOT_DOC_FILE         20
-#define EXIT_UNKNOWN_COMPRESSION  21
 
 #define BUFFER_SIZE               6000  /* big enough for uncompressed record */
 

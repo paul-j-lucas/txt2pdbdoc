@@ -34,6 +34,7 @@
 #include <stdio.h>                      /* for FILE */
 #include <stdlib.h>
 #include <string.h>                     /* for strerror() */
+#include <sysexits.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -44,38 +45,65 @@
 #endif /* HAVE_FSEEKO */
 
 #define BLOCK(...)          do { __VA_ARGS__ } while (0)
-#define PERROR_EXIT(STATUS) BLOCK( perror( me ); exit( EXIT_##STATUS ); )
+#define PERROR_EXIT(STATUS) BLOCK( perror( me ); exit( STATUS ); )
 #define PRINT_ERR(...)      fprintf( stderr, __VA_ARGS__ )
 #define STRERROR            strerror( errno )
 
 #define FREAD(PTR,SIZE,N,STREAM) \
-  BLOCK( fread( (PTR), (SIZE), (N), (STREAM) ); if ( ferror( fin ) ) PERROR_EXIT( READ_ERROR ); )
+  BLOCK( fread( (PTR), (SIZE), (N), (STREAM) ); if ( ferror( fin ) ) PERROR_EXIT( EX_NOINPUT ); )
 
 #define FPRINTF(F,...) \
-  BLOCK( if ( fprintf( (F), __VA_ARGS__ ) < 0 ) PERROR_EXIT( WRITE_ERROR ); )
+  BLOCK( if ( fprintf( (F), __VA_ARGS__ ) < 0 ) PERROR_EXIT( EX_IOERR ); )
 
 #define FPUTC(C,F) \
-  BLOCK( if ( putc( (C), (F) ) == EOF ) PERROR_EXIT( WRITE_ERROR ); )
+  BLOCK( if ( putc( (C), (F) ) == EOF ) PERROR_EXIT( EX_IOERR ); )
 
 #define FSEEK(STREAM,OFFSET,WHENCE) \
-  BLOCK( if ( FSEEK_FN( (STREAM), (OFFSET), (WHENCE) ) == -1 ) PERROR_EXIT( SEEK_ERROR ); )
+  BLOCK( if ( FSEEK_FN( (STREAM), (OFFSET), (WHENCE) ) == -1 ) PERROR_EXIT( EX_IOERR ); )
 
 #define FSTAT(FD,STAT) \
-  BLOCK( if ( fstat( (FD), (STAT) ) == -1 ) PERROR_EXIT( STAT_ERROR ); )
+  BLOCK( if ( fstat( (FD), (STAT) ) == -1 ) PERROR_EXIT( EX_IOERR ); )
 
 #define FWRITE(PTR,SIZE,N,STREAM) \
-  BLOCK( if ( fwrite( (PTR), (SIZE), (N), (STREAM) ) < (N) ) PERROR_EXIT( WRITE_ERROR ); )
+  BLOCK( if ( fwrite( (PTR), (SIZE), (N), (STREAM) ) < (N) ) PERROR_EXIT( EX_IOERR ); )
 
 #define MALLOC(TYPE,N)      (TYPE*)check_realloc( NULL, sizeof(TYPE) * (N) )
+
+/**
+ * No-operation statement.
+ *
+ * @remarks This is useful for a declaration immediately after either a `goto`
+ * or `case` label:
+ *
+ *      label:
+ *        NO_OP;                    // needed until C23
+ *        char const *s = f();
+ *        // ...
+ *
+ * C doesn't allow declarations after labels until C23.
+ */
+#define NO_OP                     ((void)0)
 
 #define PMESSAGE(FORMAT,...) \
   PRINT_ERR( "%s: " FORMAT, me, __VA_ARGS__ )
 
 #define PMESSAGE_EXIT(STATUS,FORMAT,...) \
-  BLOCK( PMESSAGE( FORMAT, __VA_ARGS__ ); exit( EXIT_##STATUS ); )
+  BLOCK( PMESSAGE( FORMAT, __VA_ARGS__ ); exit( STATUS ); )
+
+/**
+ * C version of C++'s `static_cast`.
+ *
+ * @param T The type to cast to.
+ * @param EXPR The expression to cast.
+ *
+ * @note This macro can't actually implement C++'s `static_cast` because
+ * there's no way to do it in C.  It serves merely as a visual cue for the type
+ * of cast meant.
+ */
+#define STATIC_CAST(T,EXPR)       ((T)(EXPR))
 
 #define UNGETC(C,F) \
-  BLOCK( if ( ungetc( (C), (F) ) == EOF ) PERROR_EXIT( READ_ERROR ); )
+  BLOCK( if ( ungetc( (C), (F) ) == EOF ) PERROR_EXIT( EX_NOINPUT ); )
 
 extern char const* me;                  // executable name from argv[0]
 
@@ -134,19 +162,6 @@ void free_now( void );
  * or NULL if not found.
  */
 uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len );
-
-/**
- * Parses a Unicode code-point value.
- *
- * @param s The NULL-terminated string to parse.  Allows for strings of the
- * form:
- *  + X: a single character.
- *  + NN: two-or-more decimal digits.
- *  + 0xN, u+N, or U+N: one-or-more hexadecimal digits.
- * @return Returns the Unicode code-point value
- * or prints an error message and exits if \a s is invalid.
- */
-uint32_t parse_codepoint( char const *s );
 
 /**
  * Parses a string into a \c uint64_t.

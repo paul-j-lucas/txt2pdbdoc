@@ -27,6 +27,7 @@
 // standard
 #include <stdio.h>
 #include <stdlib.h>                     /* for atexit(), exit() */
+#include <sysexits.h>
 #include <unistd.h>                     /* for getopt() */
 
 ////////// extern declarations ////////////////////////////////////////////////
@@ -44,7 +45,7 @@ bool         opt_decode;                // decode from Doc instead
 bool         opt_no_check_doc;          // don't check Doc file signature
 bool         opt_no_timestamp;          // don't timestamp generated Doc files
 bool         opt_no_warnings;           // don't emit character warnings
-uint32_t     opt_unmapped_codepoint;    // codepoint to subsitute for unmapped
+char32_t     opt_unmapped_codepoint;    // codepoint to subsitute for unmapped
 bool         opt_verbose;               // be verbose
 
 extern void decode( void );
@@ -101,7 +102,7 @@ static void usage( void ) {
 "  -w         Don't print character conversion warnings [default: do].\n"
     , me, me, me
   );
-  exit( EXIT_USAGE );
+  exit( EX_USAGE );
 }
 
 static void process_options( int argc, char *argv[] ) {
@@ -113,7 +114,6 @@ static void process_options( int argc, char *argv[] ) {
 
   opterr = 1;
   for ( int opt; (opt = getopt( argc, argv, opts )) != EOF; ) {
-    SET_OPTION( opt );
     switch ( opt ) {
       case 'b': opt_binary = false;                                 break;
       case 'c': opt_compress = false;                               break;
@@ -126,8 +126,10 @@ static void process_options( int argc, char *argv[] ) {
       case 'w': opt_no_warnings = true;                             break;
       default : usage();
     } // switch
+    opts_given[ opt ] = true;
   } // for
-  argc -= optind, argv += optind - 1;
+  argc -= optind;
+  argv += optind - 1;
 
   // check for mutually exclusive options
   check_mutually_exclusive( "bct", "dD" );
