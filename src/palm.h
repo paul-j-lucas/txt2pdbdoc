@@ -42,18 +42,17 @@ typedef uint8_t   Byte;
 typedef uint16_t  Word;
 typedef uint32_t  DWord;
 
-#define dmDBNameLength  32              // 31 chars + 1 null terminator
-#define RECORD_SIZE_MAX 4096            // Pilots have a max 4K record size
+#define dmDBNameLength  32              /**< 31 chars + 1 null terminator. */
+#define RECORD_SIZE_MAX 4096            /**< Palm has a max. 4K record size. */
 
 /**
  * Every record has one of these headers.
  *
- * See also:
- *    Christopher Bey and Kathleen Dupre.  "Palm File Format Specification,"
- *    Document Number 3008-003, Palm, Inc., May 16, 2000.
+ * @sa Christopher Bey and Kathleen Dupre.  _Palm File Format Specification_,
+ * Document Number 3008-003, Palm, Inc., May 16, 2000.
  */
 struct RecordEntryType {
-  DWord offset;                         // offset to where record starts
+  DWord offset;                         ///< Offset to where record starts.
   struct {
     unsigned delete   : 1;
     unsigned dirty    : 1;
@@ -72,9 +71,8 @@ typedef struct RecordEntryType RecordEntryType;
 /**
  * This is a PDB database header as currently defined by Palm, Inc.
  *
- * See also:
- *    Christopher Bey and Kathleen Dupre.  "Palm File Format Specification,"
- *    Document Number 3008-003, Palm, Inc., May 16, 2000.
+ * @sa Christopher Bey and Kathleen Dupre.  _Palm File Format Specification_,
+ * Document Number 3008-003, Palm, Inc., May 16, 2000.
  */
 struct RecordListType {                 // 6 bytes total
   DWord nextRecordListID;
@@ -134,8 +132,10 @@ char const* palm_to_string( Byte c ) {
  * Maps a PalmOS character into its corresponding Unicode codepoint.
  *
  * @param c The PalmOS character to map.
- * @return Returns said or 0 if the PalmOS character can not be mapped into
- * Unicode.
+ * @return Returns said codepoint or 0 if the PalmOS character can not be
+ * mapped into Unicode.
+ *
+ * @sa unicode_to_palm()
  */
 TXT2PDBDOC_PALM_INLINE
 char32_t palm_to_unicode( Byte c ) {
@@ -149,6 +149,8 @@ char32_t palm_to_unicode( Byte c ) {
  * @param codepoint The Unicode codepoint to map.
  * @return Returns said character or 0 if the codepoint can not be mapped into
  * a PalmOS character.
+ *
+ * @sa palm_to_unicode()
  */
 Byte unicode_to_palm( char32_t codepoint );
 
