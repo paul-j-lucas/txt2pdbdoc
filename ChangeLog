@@ -1,5 +1,12 @@
 2024-04-18  Paul J. Lucas <paul@lucasmail.org>
 
+   * configure.ac, lib/Makefile.am, attribute.h, ax_check_typedef.m4,
+     gnulib-cache.m4, gnulib-comp.m4, pjl_check_typedef.m4, txt2pdbdoc.1,
+     src/Makefile.am, common.h, compress.c, decode.c, encode.c, options.c,
+     options.h, palm.c, palm.h, pdbdump.c, txt2pdbdoc.c, utf8.c, utf8.h,
+     util.c, util.h, txt2pdbdoc-D.test, txt2pdbdoc-U_01.test,
+     txt2pdbdoc-U_02.test, txt2pdbdoc-b-d.test, txt2pdbdoc-c-d.test,
+     txt2pdbdoc-d-t.test: Major clean-up.
    * Makefile.am, bin/Makefile.am, html2pdbtxt, pdbtxt2html, configure.ac,
      man/Makefile.am, man/man1/Makefile.am, html2pdbtxt.1, pdbdump.1,
      pdbtxt2html.1, txt2pdbdoc.1, man/man4/Makefile.am, doc.4, pdb.4,
