@@ -25,11 +25,16 @@
 // local
 #include "palm.h"
 
+// standard
+#include <stddef.h>                     /* for size_t */
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define BUFFER_SIZE               6000  /* big enough for uncompressed record */
 
 #define NEW_BUFFER(B) (B)->data = MALLOC( Byte, (B)->len = BUFFER_SIZE )
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct buffer {
   Byte   *data;

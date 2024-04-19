@@ -20,6 +20,7 @@
 */
 
 // local
+#include "pjl_config.h"
 #include "common.h"
 #include "doc.h"
 #include "options.h"
@@ -29,7 +30,6 @@
 
 // standard
 #include <assert.h>
-#include <attribute.h>
 #include <ctype.h>
 #include <sys/types.h>                  /* for FreeBSD */
 #include <netinet/in.h>                 /* for htonl() */
@@ -105,7 +105,7 @@ static void fill_buffer( buffer_t *buf ) {
     ////////// handle UTF-8 ///////////////////////////////////////////////////
 
     else {
-      uint8_t utf8_char[ UTF8_LEN_MAX ];
+      char8_t utf8_char[ UTF8_LEN_MAX ];
       size_t u = 0;
       utf8_char[ u++ ] = c8;
       for ( size_t i = len; i > 1; --i ) {
@@ -123,11 +123,11 @@ static void fill_buffer( buffer_t *buf ) {
         }
         utf8_char[ u++ ] = c8;
       } // for
-      char32_t const codepoint = utf8_decode( utf8_char );
-      if ( !(c8 = unicode_to_palm( codepoint )) ) {
+      char32_t const cp = utf8_decode( utf8_char );
+      if ( !(c8 = unicode_to_palm( cp )) ) {
         if ( !opt_no_warnings ) {
           PMESSAGE(
-            "\"%x04X\": Unicode codepoint does not map to PalmOS\n", codepoint
+            "\"%x04X\": Unicode codepoint does not map to PalmOS\n", cp
           );
         }
         continue;
@@ -245,7 +245,7 @@ void encode( void ) {
   if ( opt_verbose ) {
     if ( opt_compress ) {
       PRINT_ERR( "\n-----\ntotal compression: %2d%%\n",
-        (int)( 100.0 * total_after / total_before )
+        STATIC_CAST( int, 100.0 * total_after / total_before )
       );
     } else {
       FPUTC( '\n', stderr );

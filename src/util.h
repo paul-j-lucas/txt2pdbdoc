@@ -23,7 +23,7 @@
 #define txt2pdbdoc_util_H
 
 // local
-#include "config.h"
+#include "pjl_config.h"
 
 // standard
 #include <sys/types.h>                  /* for FreeBSD */
@@ -105,7 +105,7 @@
 #define UNGETC(C,F) \
   BLOCK( if ( ungetc( (C), (F) ) == EOF ) PERROR_EXIT( EX_NOINPUT ); )
 
-extern char const* me;                  // executable name from argv[0]
+extern char const *me;                  // executable name from argv[0]
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -116,6 +116,7 @@ extern char const* me;                  // executable name from argv[0]
  * @param s The NULL-terminated string to duplicate.
  * @return Returns a copy of \a s.
  */
+NODISCARD
 char* check_strdup( char const *s );
 
 /**
@@ -126,6 +127,7 @@ char* check_strdup( char const *s );
  * @param mode The mode to use.
  * @return Returns the corresponding \c FILE.
  */
+NODISCARD
 FILE* check_fopen( char const *path, char const *mode );
 
 /**
@@ -136,6 +138,7 @@ FILE* check_fopen( char const *path, char const *mode );
  * @param size The number of bytes to allocate.
  * @return Returns a pointer to the allocated memory.
  */
+NODISCARD
 void* check_realloc( void *p, size_t size );
 
 /**
@@ -144,6 +147,7 @@ void* check_realloc( void *p, size_t size );
  * @param p The pointer to add.
  * @return Returns \a p.
  */
+PJL_DISCARD
 void* free_later( void *p );
 
 /**
@@ -161,6 +165,7 @@ void free_now( void );
  * @return Returns a pointer to the found byte sequence within \a m
  * or NULL if not found.
  */
+NODISCARD
 uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len );
 
 /**
@@ -172,6 +177,7 @@ uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len );
  * @return Returns the parsed number only if \a s is entirely a non-negative
  * number or prints an error message and exits if there was an error.
  */
+NODISCARD
 uint64_t parse_ull( char const *s );
 
 /**
@@ -181,6 +187,7 @@ uint64_t parse_ull( char const *s );
  * @param file The file to peek from.
  * @return Returns the next character, if any, or \c EOF if none.
  */
+NODISCARD
 int peekc( FILE *file );
 
 /**
@@ -200,6 +207,7 @@ int peekc( FILE *file );
  * calls will overwrite the returned value.  As such, this function is not
  * thread-safe.
  */
+NODISCARD
 char const* printable_char( char c );
 
 ///////////////////////////////////////////////////////////////////////////////

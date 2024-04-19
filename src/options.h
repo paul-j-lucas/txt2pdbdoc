@@ -23,7 +23,6 @@
 #define txt2pdbdoc_options_H
 
 // standard
-#include <ctype.h>
 #include <stdbool.h>
 
 ////////// extern variables ///////////////////////////////////////////////////

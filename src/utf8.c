@@ -20,12 +20,12 @@
 */
 
 // local
+#include "pjl_config.h"
 #include "utf8.h"
 #include "util.h"
 
 // standard
 #include <assert.h>
-#include <attribute.h>
 #include <ctype.h>
 #include <sysexits.h>
 

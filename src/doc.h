@@ -36,12 +36,12 @@
  * Record 0 of a Doc file contains information about the document as a whole.
  */
 struct doc_record0 {                    // 16 bytes total
-  Word  version;                        // 1 = plain text, 2 = compressed
-  Word  reserved1;
-  DWord doc_size;                       // in bytes, when uncompressed
-  Word  num_records;                    // PDB header numRecords - 1
-  Word  rec_size;                       // usually RECORD_SIZE_MAX
-  DWord reserved2;
+  Word  version;                        ///< 1 = plain text, 2 = compressed.
+  Word  reserved1;                      ///< Not used.
+  DWord doc_size;                       ///< Size in bytes, when uncompressed.
+  Word  num_records;                    ///< PDB header numRecords - 1.
+  Word  rec_size;                       ///< Usually RECORD_SIZE_MAX.
+  DWord reserved2;                      ///< Not used.
 };
 typedef struct doc_record0 doc_record0_t;
 

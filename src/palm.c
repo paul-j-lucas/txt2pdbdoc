@@ -20,12 +20,11 @@
 */
 
 // local
-#include "config.h"
+#include "pjl_config.h"
 #define TXT2PDBDOC_UTF8_INLINE _GL_EXTERN_INLINE
 #include "palm.h"
 
 // standard
-#include <attribute.h>
 #include <ctype.h>
 
 ////////// extern variables ///////////////////////////////////////////////////

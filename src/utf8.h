@@ -23,7 +23,7 @@
 #define txt2pdbdoc_utf8_H
 
 // local
-#include "config.h"
+#include "pjl_config.h"
 
 // standard
 #include <stdbool.h>
@@ -59,7 +59,7 @@ typedef uint32_t char32_t;              /* C11's char32_t */
  * @param cp The Unicode code-point to check.
  * @return Returns \c true only if \a cp is valid.
  */
-TXT2PDBDOC_UTF8_INLINE
+NODISCARD TXT2PDBDOC_UTF8_INLINE
 bool codepoint_is_valid( uint64_t cp ) {
   return                            cp <= 0x00D7FF
       ||  (cp >= 0x00E000 && cp <= 0x00FFFD)
@@ -77,6 +77,7 @@ bool codepoint_is_valid( uint64_t cp ) {
  * @return Returns the Unicode code-point value
  * or prints an error message and exits if \a s is invalid.
  */
+NODISCARD
 char32_t parse_codepoint( char const *s );
 
 /**
@@ -85,6 +86,7 @@ char32_t parse_codepoint( char const *s );
  * @param utf8 The UTF-8 octet sequence to decode.
  * @return Returns said codepoint or 0 if the \a utf8 is invalid.
  */
+NODISCARD
 char32_t utf8_decode( char8_t const *utf8 );
 
 /**
@@ -96,6 +98,7 @@ char32_t utf8_decode( char8_t const *utf8 );
  * @return Returns the number of bytes comprising the codepoint encoded as
  * UTF-8.
  */
+NODISCARD
 size_t utf8_encode( char32_t cp, char8_t *utf8_buf );
 
 /**
@@ -105,7 +108,7 @@ size_t utf8_encode( char32_t cp, char8_t *utf8_buf );
  * @return Returns the number of bytes needed for the UTF-8 character in the
  * range [1,6] or 0 if \a start is not a valid start byte.
  */
-TXT2PDBDOC_UTF8_INLINE
+NODISCARD TXT2PDBDOC_UTF8_INLINE
 unsigned utf8_len( char8_t start ) {
   extern char8_t const UTF8_LEN_TABLE[];
   return UTF8_LEN_TABLE[ start ];

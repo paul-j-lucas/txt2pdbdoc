@@ -20,6 +20,7 @@
 */
 
 // local
+#include "pjl_config.h"
 #include "common.h"
 #include "doc.h"
 #include "options.h"
@@ -63,10 +64,11 @@ extern void uncompress( buffer_t* );
  * @return Returns said sequence or NULL if the PalmOS character can not be
  * mapped into Unicode.
  */
-static uint8_t const* palm_to_utf8( Byte c ) {
-  char32_t codepoint = palm_to_unicode( c );
+NODISCARD
+static char8_t const* palm_to_utf8( Byte c ) {
+  char32_t cp = palm_to_unicode( c );
 
-  if ( codepoint == 0 ) {
+  if ( cp == 0 ) {
     if ( !opt_no_warnings )
       PMESSAGE(
         "\"%s\" (%s): PalmOS character does not map to Unicode%s\n",
@@ -75,10 +77,10 @@ static uint8_t const* palm_to_utf8( Byte c ) {
       );
     if ( !opt_unmapped_codepoint )
       return NULL;
-    codepoint = opt_unmapped_codepoint;
+    cp = opt_unmapped_codepoint;
   }
 
-  switch ( codepoint ) {
+  switch ( cp ) {
     case 0x81:
     case 0x9B:
       //
@@ -93,11 +95,11 @@ static uint8_t const* palm_to_utf8( Byte c ) {
       return NULL;
   } // switch
 
-  static uint8_t utf8_char[ UTF8_LEN_MAX + 1 /*NULL*/ ];
+  static char8_t utf8_char[ UTF8_LEN_MAX + 1 /*NULL*/ ];
   size_t len;
 
-  if ( isascii( STATIC_CAST( int, codepoint ) ) ) {
-    if ( !(isspace( (int)codepoint ) || isprint( (int)codepoint )) ) {
+  if ( isascii( STATIC_CAST( int, cp ) ) ) {
+    if ( !(isspace( (int)cp ) || isprint( (int)cp )) ) {
       PMESSAGE(
         "\"%s\" (%s): non-printable character found: skipped\n",
         printable_char( STATIC_CAST( char, c ) ), palm_to_string( c )
@@ -107,7 +109,7 @@ static uint8_t const* palm_to_utf8( Byte c ) {
     utf8_char[0] = c;
     len = 1;
   } else {
-    len = utf8_encode( codepoint, utf8_char );
+    len = utf8_encode( cp, utf8_char );
   }
 
   utf8_char[ len ] = '\0';
@@ -190,7 +192,7 @@ void decode( void ) {
       uncompress( &buf );
 
     for ( size_t i = 0; i < buf.len; ++i ) {
-      uint8_t const *const utf8_char = palm_to_utf8( buf.data[i] );
+      char8_t const *const utf8_char = palm_to_utf8( buf.data[i] );
       if ( utf8_char )
         FPRINTF( fout, "%s", utf8_char );
     } // for

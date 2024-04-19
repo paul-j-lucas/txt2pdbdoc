@@ -20,7 +20,7 @@
 */
 
 // local
-#include "config.h"
+#include "pjl_config.h"
 #include "common.h"
 #include "utf8.h"
 #include "util.h"
@@ -57,6 +57,7 @@ static free_node_t *free_head;          // linked list of stuff to free
  * character or pointing to the NULL byte if either \a s was all whitespace or
  * empty.
  */
+NODISCARD
 static char const* skip_ws( char const *s ) {
   assert( s != NULL );
   while ( isspace( *s ) )

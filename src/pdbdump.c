@@ -20,6 +20,7 @@
 */
 
 // local
+#include "pjl_config.h"
 #include "common.h"
 #include "options.h"
 #include "palm.h"

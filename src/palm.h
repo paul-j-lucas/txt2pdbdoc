@@ -23,6 +23,7 @@
 #define txt2pdbdoc_palm_H
 
 // local
+#include "pjl_config.h"
 #include "utf8.h"
 #include "util.h"
 
@@ -122,7 +123,7 @@ typedef struct DatabaseHdrType DatabaseHdrType;
  * @param c The PalmOS character to get the name of.
  * @return Returns said name.
  */
-TXT2PDBDOC_PALM_INLINE
+NODISCARD TXT2PDBDOC_PALM_INLINE
 char const* palm_to_string( Byte c ) {
   extern char const *const PALM_TO_STRING_TABLE[];
   return PALM_TO_STRING_TABLE[ c ];
@@ -137,7 +138,7 @@ char const* palm_to_string( Byte c ) {
  *
  * @sa unicode_to_palm()
  */
-TXT2PDBDOC_PALM_INLINE
+NODISCARD TXT2PDBDOC_PALM_INLINE
 char32_t palm_to_unicode( Byte c ) {
   extern char32_t const PALM_TO_UNICODE_TABLE[];
   return PALM_TO_UNICODE_TABLE[ c ];
@@ -152,6 +153,7 @@ char32_t palm_to_unicode( Byte c ) {
  *
  * @sa palm_to_unicode()
  */
+NODISCARD
 Byte unicode_to_palm( char32_t codepoint );
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -23,17 +23,21 @@ bin_PROGRAMS =		txt2pdbdoc pdbdump
 AM_CFLAGS =		$(T2PD_CFLAGS)
 AM_CPPFLAGS =		-I$(top_srcdir)/lib -I$(top_builddir)/lib
 
-pdbdump_SOURCES =	pdbdump.c \
-			options.c \
-			util.c
+pdbdump_SOURCES =	common.h \
+			pdbdump.c \
+			pjl_config.h \
+			options.c options.h \
+			util.c util.h
 
-txt2pdbdoc_SOURCES =	compress.c \
+txt2pdbdoc_SOURCES =	common.h \
+			compress.c \
 			decode.c \
 			encode.c \
-			options.c \
-			palm.c \
+			options.c options.h \
+			palm.c palm.h \
+			pjl_config.h \
 			txt2pdbdoc.c \
-			utf8.c \
-			util.c
+			utf8.c utf8.h \
+			util.c util.h
 
 # vim:set noet sw=8 ts=8:

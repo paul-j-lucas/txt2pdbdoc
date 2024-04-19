@@ -20,6 +20,7 @@
 */
 
 // local
+#include "pjl_config.h"
 #include "common.h"
 #include "util.h"
 
@@ -112,7 +113,8 @@ void compress( buffer_t *b ) {
         put_byte( b, *head++, &space );
       } else {
         size_t const dist = STATIC_CAST( size_t, head - p_prev );
-        size_t const compound = (dist << COUNT_BITS) + STATIC_CAST( size_t, tail - head - 4 );
+        size_t const compound =
+          (dist << COUNT_BITS) + STATIC_CAST( size_t, tail - head - 4 );
 
         if ( dist >= ( 1 << DISP_BITS ) || tail - head - 4 > 7 )
           PRINT_ERR( "%s: error: dist overflow\n", me );
