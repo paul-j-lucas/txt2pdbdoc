@@ -54,13 +54,24 @@ typedef uint32_t char32_t;              /* C11's char32_t */
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
+ * Checks whether \a cp is an ASCII character.
+ *
+ * @param cp The Unicode code-point to check.
+ * @return Returns \c true only if \a cp is an ASCII character.
+ */
+NODISCARD TXT2PDBDOC_UTF8_INLINE
+bool cp_is_ascii( char32_t cp ) {
+  return cp <= 0x7F;
+}
+
+/**
  * Checks whether the given Unicode code-point is valid.
  *
  * @param cp The Unicode code-point to check.
  * @return Returns \c true only if \a cp is valid.
  */
 NODISCARD TXT2PDBDOC_UTF8_INLINE
-bool codepoint_is_valid( uint64_t cp ) {
+bool cp_is_valid( uint64_t cp ) {
   return                            cp <= 0x00D7FF
       ||  (cp >= 0x00E000 && cp <= 0x00FFFD)
       ||  (cp >= 0x010000 && cp <= 0x10FFFF);

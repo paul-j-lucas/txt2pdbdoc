@@ -98,7 +98,7 @@ static char8_t const* palm_to_utf8( Byte c ) {
   static char8_t utf8_char[ UTF8_LEN_MAX + 1 /*NULL*/ ];
   size_t len;
 
-  if ( isascii( STATIC_CAST( int, cp ) ) ) {
+  if ( cp_is_ascii( cp ) ) {
     if ( !(isspace( (int)cp ) || isprint( (int)cp )) ) {
       PMESSAGE(
         "\"%s\" (%s): non-printable character found: skipped\n",

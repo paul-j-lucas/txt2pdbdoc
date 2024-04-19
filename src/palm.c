@@ -581,8 +581,8 @@ char const *const PALM_TO_STRING_TABLE[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Byte unicode_to_palm( char32_t codepoint ) {
-  switch ( codepoint ) {
+Byte unicode_to_palm( char32_t cp ) {
+  switch ( cp ) {
     case 0x2026: return 0x18; // HORIZONTAL ELLIPSIS
     case 0x2007: return 0x19; // FIGURE SPACE
 
@@ -618,10 +618,8 @@ Byte unicode_to_palm( char32_t codepoint ) {
     case 0x0178: return 0x9F; // LATIN CAPITAL LETTER Y WITH DIAERESIS
 
     default:
-      if ( isascii( STATIC_CAST( int, codepoint ) ) ||
-           (codepoint >= 0xA0 && codepoint <= 0xFF) ) {
-        return STATIC_CAST( Byte, codepoint );
-      }
+      if ( cp_is_ascii( cp ) || (cp >= 0xA0 && cp <= 0xFF) )
+        return STATIC_CAST( Byte, cp );
       FALLTHROUGH;
 
     case 0x0014:              // PalmOS: OTA SECURE

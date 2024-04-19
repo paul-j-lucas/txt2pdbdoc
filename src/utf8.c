@@ -66,7 +66,7 @@ char32_t parse_codepoint( char const *s ) {
     s = memcpy( t, "0x", 2 );
   }
   uint64_t const cp = parse_ull( s );
-  if ( codepoint_is_valid( cp ) )
+  if ( cp_is_valid( cp ) )
     return STATIC_CAST( char32_t, cp );
   PMESSAGE_EXIT( EX_USAGE,
     "\"%s\": invalid Unicode code-point for -%c\n",
