@@ -1,3 +1,10 @@
+2024-04-19  Paul J. Lucas <paul@lucasmail.org>
+
+   * decode.c, palm.c, utf8.c, utf8.h: Added cp_is_ascii().
+   * src/Makefile.am, common.h, compress.c, decode.c, doc.h, encode.c,
+     options.c, options.h, palm.c, palm.h, pdbdump.c, pjl_config.h,
+     txt2pdbdoc.c, utf8.c, utf8.h, util.c, util.h: More clean-up.
+
 2024-04-18  Paul J. Lucas <paul@lucasmail.org>
 
    * configure.ac, lib/Makefile.am, attribute.h, ax_check_typedef.m4,
