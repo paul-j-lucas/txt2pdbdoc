@@ -1,6 +1,6 @@
 /*
 **      txt2pdbdoc -- Text to Doc converter for Palm Pilots
-**      utf8.h
+**      unicode.h
 **
 **      Copyright (C) 2015-2024  Paul J. Lucas
 **
@@ -40,9 +40,9 @@ typedef uint16_t char16_t;              /* C11's char16_t */
 typedef uint32_t char32_t;              /* C11's char32_t */
 #endif /* !HAVE_CHAR32_T */
 
-#ifndef TXT2PDBDOC_UTF8_INLINE
-# define TXT2PDBDOC_UTF8_INLINE _GL_INLINE
-#endif /* TXT2PDBDOC_UTF8_INLINE */
+#ifndef TXT2PDBDOC_UNICODE_INLINE
+# define TXT2PDBDOC_UNICODE_INLINE _GL_INLINE
+#endif /* TXT2PDBDOC_UNICODE_INLINE */
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +60,7 @@ typedef uint32_t char32_t;              /* C11's char32_t */
  * @param cp The Unicode code-point to check.
  * @return Returns `true` only if \a cp is an ASCII character.
  */
-NODISCARD TXT2PDBDOC_UTF8_INLINE
+NODISCARD TXT2PDBDOC_UNICODE_INLINE
 bool cp_is_ascii( char32_t cp ) {
   return cp <= 0x7F;
 }
@@ -71,7 +71,7 @@ bool cp_is_ascii( char32_t cp ) {
  * @param cp_candidate The Unicode code-point candidate value to check.
  * @return Returns `true` only if \a cp_candidate is a valid code-point.
  */
-NODISCARD TXT2PDBDOC_UTF8_INLINE
+NODISCARD TXT2PDBDOC_UNICODE_INLINE
 bool cp_is_valid( uint64_t cp_candidate ) {
   return   cp_candidate < CP_SURROGATE_HIGH_START
       ||  (cp_candidate > CP_SURROGATE_LOW_END && cp_candidate <= 0x00FFFD)
@@ -99,7 +99,7 @@ char32_t parse_codepoint( char const *s );
  * @return Returns the number of bytes needed for the UTF-8 character in the
  * range [1,6] or 0 if \a start is not a valid start byte.
  */
-NODISCARD TXT2PDBDOC_UTF8_INLINE
+NODISCARD TXT2PDBDOC_UNICODE_INLINE
 unsigned utf8_char_len( char8_t start ) {
   extern char8_t const UTF8_LEN_TABLE[];
   return UTF8_LEN_TABLE[ start ];
@@ -127,6 +127,8 @@ NODISCARD
 size_t utf8_encode( char32_t cp, char8_t *utf8_buf );
 
 ///////////////////////////////////////////////////////////////////////////////
+
+_GL_INLINE_HEADER_END
 
 #endif /* txt2pdbdoc_utf8_H */
 /* vim:set et sw=2 ts=2: */

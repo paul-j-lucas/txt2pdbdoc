@@ -1,6 +1,6 @@
 /*
 **      txt2pdbdoc -- Text to Doc converter for Palm Pilots
-**      utf8.c
+**      unicode.c
 **
 **      Copyright (C) 1998-2024  Paul J. Lucas
 **
@@ -21,7 +21,8 @@
 
 // local
 #include "pjl_config.h"
-#include "utf8.h"
+#define TXT2PDBDOC_UNICODE_INLINE _GL_EXTERN_INLINE
+#include "unicode.h"
 #include "util.h"
 
 // standard

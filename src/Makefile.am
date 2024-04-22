@@ -37,7 +37,7 @@ txt2pdbdoc_SOURCES =	common.h \
 			palm.c palm.h \
 			pjl_config.h \
 			txt2pdbdoc.c \
-			utf8.c utf8.h \
+			unicode.c unicode.h \
 			util.c util.h
 
 # vim:set noet sw=8 ts=8:

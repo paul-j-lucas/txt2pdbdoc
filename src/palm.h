@@ -24,7 +24,7 @@
 
 // local
 #include "pjl_config.h"
-#include "utf8.h"
+#include "unicode.h"
 #include "util.h"
 
 // standard

@@ -22,7 +22,7 @@
 // local
 #include "pjl_config.h"
 #include "common.h"
-#include "utf8.h"
+#include "unicode.h"
 #include "util.h"
 
 // standard

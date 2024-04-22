@@ -25,7 +25,7 @@
 #include "doc.h"
 #include "options.h"
 #include "palm.h"
-#include "utf8.h"
+#include "unicode.h"
 #include "util.h"
 
 // standard
