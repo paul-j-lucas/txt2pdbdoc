@@ -72,7 +72,7 @@ static void fill_buffer( buffer_t *buf ) {
 
   for ( int c; (c = getc( fin )) != EOF; ) {
     char8_t c8 = STATIC_CAST( char8_t, c );
-    size_t const len = utf8_len( c8 );
+    unsigned const len = utf8_char_len( c8 );
     if ( len == 0 ) {
       if ( !opt_no_warnings ) {
         PMESSAGE(
@@ -105,14 +105,14 @@ static void fill_buffer( buffer_t *buf ) {
     ////////// handle UTF-8 ///////////////////////////////////////////////////
 
     else {
-      char8_t utf8_char[ UTF8_LEN_MAX ];
+      char8_t utf8_char[ UTF8_CHAR_SIZE_MAX ];
       size_t u = 0;
       utf8_char[ u++ ] = c8;
       for ( size_t i = len; i > 1; --i ) {
         if ( (c = getc( fin )) == EOF )
           goto done;
         c8 = STATIC_CAST( char8_t, c );
-        if ( utf8_len( c8 ) ) {
+        if ( utf8_char_len( c8 ) > 0 ) {
           if ( !opt_no_warnings ) {
             PMESSAGE(
               "\"%s\": invalid UTF-8 continuation byte\n",

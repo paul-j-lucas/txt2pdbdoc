@@ -95,7 +95,7 @@ static char8_t const* palm_to_utf8( Byte c ) {
       return NULL;
   } // switch
 
-  static char8_t utf8_char[ UTF8_LEN_MAX + 1 /*NULL*/ ];
+  static char8_t utf8_char[ UTF8_CHAR_SIZE_MAX + 1 /*NULL*/ ];
   size_t len;
 
   if ( cp_is_ascii( cp ) ) {

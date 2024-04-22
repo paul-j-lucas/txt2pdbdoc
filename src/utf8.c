@@ -77,12 +77,13 @@ char32_t parse_codepoint( char const *s ) {
 char32_t utf8_decode( char8_t const *u ) {
   assert( u != NULL );
 
-  size_t const len = utf8_len( *u );
+  unsigned const len = utf8_char_len( *u );
   if ( len == 1 )                       // special-case ASCII
     return *u & 0xFFu;                  // prevents sign-extension
 
   char32_t cp = 0;
   unsigned m = (0x7F >> len) & 0x1F;    // mask
+
   switch ( len ) {
     case 6: cp |= ((*u & m   ) << 30); ++u; m = 0x3F; FALLTHROUGH;
     case 5: cp |= ((*u & m   ) << 24); ++u; m = 0x3F; FALLTHROUGH;

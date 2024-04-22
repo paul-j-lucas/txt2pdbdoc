@@ -46,10 +46,11 @@ typedef uint32_t char32_t;              /* C11's char32_t */
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * The maximum number of bytes needed by a Unicode code-point encoded in UTF-8.
- */
-#define UTF8_LEN_MAX  6
+#define CP_INVALID                0x01FFFFu /**< Invalid Unicode code-point. */
+#define CP_SURROGATE_HIGH_START   0x00D800u /**< Unicode surrogate high. */
+#define CP_SURROGATE_LOW_END      0x00DFFFu /**< Unicode surrogate low. */
+#define CP_VALID_MAX              0x10FFFFu /**< Maximum valid code-point. */
+#define UTF8_CHAR_SIZE_MAX        4     /**< Bytes needed for UTF-8 char. */
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -57,7 +58,7 @@ typedef uint32_t char32_t;              /* C11's char32_t */
  * Checks whether \a cp is an ASCII character.
  *
  * @param cp The Unicode code-point to check.
- * @return Returns \c true only if \a cp is an ASCII character.
+ * @return Returns `true` only if \a cp is an ASCII character.
  */
 NODISCARD TXT2PDBDOC_UTF8_INLINE
 bool cp_is_ascii( char32_t cp ) {
@@ -67,14 +68,14 @@ bool cp_is_ascii( char32_t cp ) {
 /**
  * Checks whether the given Unicode code-point is valid.
  *
- * @param cp The Unicode code-point to check.
- * @return Returns \c true only if \a cp is valid.
+ * @param cp_candidate The Unicode code-point candidate value to check.
+ * @return Returns `true` only if \a cp_candidate is a valid code-point.
  */
 NODISCARD TXT2PDBDOC_UTF8_INLINE
-bool cp_is_valid( uint64_t cp ) {
-  return                            cp <= 0x00D7FF
-      ||  (cp >= 0x00E000 && cp <= 0x00FFFD)
-      ||  (cp >= 0x010000 && cp <= 0x10FFFF);
+bool cp_is_valid( uint64_t cp_candidate ) {
+  return   cp_candidate < CP_SURROGATE_HIGH_START
+      ||  (cp_candidate > CP_SURROGATE_LOW_END && cp_candidate <= 0x00FFFD)
+      ||  (cp_candidate >= 0x010000 && cp_candidate <= CP_VALID_MAX);
 }
 
 /**
@@ -92,6 +93,19 @@ NODISCARD
 char32_t parse_codepoint( char const *s );
 
 /**
+ * Gets the length of a UTF-8 character.
+ *
+ * @param start The start byte of a UTF-8 byte sequence.
+ * @return Returns the number of bytes needed for the UTF-8 character in the
+ * range [1,6] or 0 if \a start is not a valid start byte.
+ */
+NODISCARD TXT2PDBDOC_UTF8_INLINE
+unsigned utf8_char_len( char8_t start ) {
+  extern char8_t const UTF8_LEN_TABLE[];
+  return UTF8_LEN_TABLE[ start ];
+}
+
+/**
  * Decodes a UTF-8 octet sequence into a Unicode codepoint.
  *
  * @param utf8 The UTF-8 octet sequence to decode.
@@ -105,25 +119,12 @@ char32_t utf8_decode( char8_t const *utf8 );
  *
  * @param cp The Unicode code-point to encode.
  * @param utf8_buf A pointer to the start of a buffer to receive the UTF-8
- * bytes; must be at least \c UTF8_LEN_MAX long.  No NULL byte is appended.
+ * bytes; must be at least #UTF8_CHAR_SIZE_MAX long.  No NULL byte is appended.
  * @return Returns the number of bytes comprising the codepoint encoded as
  * UTF-8.
  */
 NODISCARD
 size_t utf8_encode( char32_t cp, char8_t *utf8_buf );
-
-/**
- * Gets the length of a UTF-8 character.
- *
- * @param start The start byte of a UTF-8 byte sequence.
- * @return Returns the number of bytes needed for the UTF-8 character in the
- * range [1,6] or 0 if \a start is not a valid start byte.
- */
-NODISCARD TXT2PDBDOC_UTF8_INLINE
-unsigned utf8_len( char8_t start ) {
-  extern char8_t const UTF8_LEN_TABLE[];
-  return UTF8_LEN_TABLE[ start ];
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
