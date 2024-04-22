@@ -61,12 +61,16 @@ char32_t parse_codepoint( char const *s ) {
     return STATIC_CAST( char32_t, s[0] );
 
   char const *const s0 = s;
+  char *t = NULL;
+
   if ( (s[0] == 'U' || s[0] == 'u') && s[1] == '+' ) {
     // convert [uU]+NNNN to 0xNNNN so strtoull() will grok it
-    char *const t = free_later( check_strdup( s ) );
+    t = check_strdup( s );
     s = memcpy( t, "0x", 2 );
   }
   uint64_t const cp = parse_ull( s );
+  free( t );
+
   if ( cp_is_valid( cp ) )
     return STATIC_CAST( char32_t, cp );
   PMESSAGE_EXIT( EX_USAGE,

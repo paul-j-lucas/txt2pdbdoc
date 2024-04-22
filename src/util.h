@@ -142,20 +142,6 @@ NODISCARD
 void* check_realloc( void *p, size_t size );
 
 /**
- * Adds a pointer to the head of the free-list.
- *  
- * @param p The pointer to add.
- * @return Returns \a p.
- */
-PJL_DISCARD
-void* free_later( void *p );
-
-/**
- * Frees all the memory pointed to by all the nodes in the free-list.
- */
-void free_now( void );
-
-/**
  * Finds a byte sequence within memory.
  *
  * @param m The start of memory to search within.

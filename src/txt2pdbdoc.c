@@ -75,10 +75,9 @@ int main( int argc, char *argv[] ) {
 ////////// local functions ////////////////////////////////////////////////////
 
 static void clean_up( void ) {
-  free_now();
-  if ( fin )
+  if ( fin != NULL )
     fclose( fin );
-  if ( fout )
+  if ( fout != NULL )
     fclose( fout );
 }
 

@@ -31,22 +31,6 @@
 #include <string.h>
 #include <sysexits.h>
 
-///////////////////////////////////////////////////////////////////////////////
-  
-/** 
- * A node for a singly linked list of pointers to memory to be freed via
- * \c atexit().
- */
-struct free_node {
-  void *ptr;
-  struct free_node *next;
-};
-typedef struct free_node free_node_t;
-
-////////// local variables ////////////////////////////////////////////////////
-
-static free_node_t *free_head;          // linked list of stuff to free
-
 ////////// local functions ////////////////////////////////////////////////////
 
 /**
@@ -101,25 +85,6 @@ char* check_strdup( char const *s ) {
   if ( dup == NULL )
     PERROR_EXIT( EX_OSERR );
   return dup;
-}
-
-void* free_later( void *p ) {
-  assert( p != NULL );
-  free_node_t *const new_node = MALLOC( free_node_t, 1 );
-  new_node->ptr = p;
-  new_node->next = free_head ? free_head : NULL;
-  free_head = new_node;
-  return p;
-}
-
-void free_now( void ) {
-  for ( free_node_t *p = free_head; p; ) {
-    free_node_t *const next = p->next;
-    free( p->ptr );
-    free( p );
-    p = next;
-  } // for
-  free_head = NULL;
 }
 
 uint8_t* mem_find( uint8_t *m, size_t m_len, uint8_t *b, size_t b_len ) {
