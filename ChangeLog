@@ -1,3 +1,9 @@
+2024-04-22  Paul J. Lucas <paul@lucasmail.org>
+
+   * src/Makefile.am, decode.c, encode.c, palm.h, util.c: Renamed utf8.[ch] ->
+     unicode.[ch].
+   * decode.c, encode.c, utf8.c, utf8.h: Unicode clean-up.
+
 2024-04-19  Paul J. Lucas <paul@lucasmail.org>
 
    * decode.c, palm.c, utf8.c, utf8.h: Added cp_is_ascii().
