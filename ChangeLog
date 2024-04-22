@@ -1,5 +1,7 @@
 2024-04-22  Paul J. Lucas <paul@lucasmail.org>
 
+   * pdbdump.c, txt2pdbdoc.c, unicode.c, util.c, util.h: Eliminated
+     free_later(), free_now().
    * src/Makefile.am, decode.c, encode.c, palm.h, util.c: Renamed utf8.[ch] ->
      unicode.[ch].
    * decode.c, encode.c, utf8.c, utf8.h: Unicode clean-up.
