@@ -27,7 +27,6 @@
 
 // standard
 #include <stdbool.h>
-#include <stddef.h>                     /* for size_t */
 #include <stdint.h>                     /* for uint8_t, ... */
 
 #if !HAVE_CHAR8_T
@@ -124,7 +123,7 @@ char32_t utf8_decode( char8_t const *utf8 );
  * UTF-8.
  */
 NODISCARD
-size_t utf8_encode( char32_t cp, char8_t *utf8_buf );
+unsigned utf8_encode( char32_t cp, char8_t *utf8_buf );
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -101,7 +101,7 @@ char32_t utf8_decode( char8_t const *u ) {
   return cp;
 }
 
-size_t utf8_encode( char32_t cp, char8_t *u8 ) {
+unsigned utf8_encode( char32_t cp, char8_t *u8 ) {
   assert( u8 != NULL );
 
   static unsigned const Mask1 = 0x80;
@@ -133,10 +133,10 @@ size_t utf8_encode( char32_t cp, char8_t *u8 ) {
     *u8++ = STATIC_CAST( char8_t, Mask1 | ( cp        & 0x3F) );
   }
   else {
-    return STATIC_CAST( size_t, -1 );
+    return STATIC_CAST( unsigned, -1 );
   }
 
-  return STATIC_CAST( size_t, u8 - u8_orig );
+  return STATIC_CAST( unsigned, u8 - u8_orig );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
