@@ -139,7 +139,7 @@ char const* printable_char( char c ) {
     buf[1] = '\0';
   }
   else {
-    snprintf( buf, sizeof( buf ), "\\x%02X", STATIC_CAST( unsigned, c ) );
+    snprintf( buf, sizeof buf, "\\x%02X", STATIC_CAST( unsigned, c ) );
   }
   return buf;
 }
