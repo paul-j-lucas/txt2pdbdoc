@@ -29,7 +29,7 @@
 
 #ifdef tst2pdbdoc_config_H
 #error "Must #include pjl_config.h instead."
-#endif /* cdecl_config_H */
+#endif /* tst2pdbdoc_config_H */
 
 // local
 #include "config.h"                     /* must go first */
